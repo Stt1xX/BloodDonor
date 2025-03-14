@@ -1,7 +1,7 @@
 HELP.md
 .gradle
 build/
-!gradle/wrapper/gradle-wrapper.jar
+!backend/gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
@@ -126,3 +126,6 @@ yarn-error.log*
 ### Development ###
 reloadtrigger
 **/reloadtrigger
+
+### Backend static data ###
+backend/src/main/resources/static/

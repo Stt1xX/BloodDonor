@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    font-family: "Comfortaa", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: normal;
+    font-style: normal;
+    overflow-x: hidden;
+}
+
+input, select, .dp__input {
+    border: 1px solid rgb(209 213 219);
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 10px;
+    font-family: "Comfortaa", sans-serif;
+}
+
+input:hover, select:hover {
+    border-color: red;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border: 1px solid red;
+}

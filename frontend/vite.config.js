@@ -5,7 +5,7 @@ import { fileURLToPath, URL } from 'node:url'
 export default defineConfig({
   plugins: [vue()],
   build: {
-    outDir: '../src/main/resources/static',
+    outDir: '../backend/src/main/resources/static',
     emptyOutDir: true
   },
   resolve: {
