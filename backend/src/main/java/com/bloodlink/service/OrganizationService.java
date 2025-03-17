@@ -6,7 +6,6 @@ import com.bloodlink.entities.Organization;
 import com.bloodlink.exceptions.CustomDuplicateException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,13 +24,12 @@ public abstract class OrganizationService<EntityClass extends Organization> {
         this.specificationExecutor = specificationExecutor;
     }
 
-    public List<OrganizationDTOto> getAll(String pattern) {
-        Pageable pageable = PageRequest.of(0, 8);
+    public List<OrganizationDTOto> getAll(String pattern, Pageable p) {
         Specification<EntityClass> spec = (root, query, criteriaBuilder) -> criteriaBuilder.like(
                 criteriaBuilder.lower(root.get("name")), // Поле для поиска
                 "%" + pattern.toLowerCase() + "%" // Шаблон поиска
         );
-        Page<EntityClass> page = specificationExecutor.findAll(spec, pageable);
+        Page<EntityClass> page = specificationExecutor.findAll(spec, p);
         return OrganizationDTOto.convertList(page.getContent());
     }
 

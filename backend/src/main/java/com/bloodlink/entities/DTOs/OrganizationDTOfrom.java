@@ -40,15 +40,13 @@ public class OrganizationDTOfrom {
             e.setName(name);
             e.setAddress(address);
             e.setPhone(phone);
-            e.setWorkTime(getWorkTime());
+            e.setHoursFrom(hoursFrom);
+            e.setHoursTo(hoursTo);
+            e.setMinutesFrom(minutesFrom);
+            e.setMinutesTo(minutesTo);
             return (E) e;
         } catch (Exception ex) {
             return null;
         }
     }
-
-    public String getWorkTime() {
-        return hoursFrom + ":" + minutesFrom + " - " + hoursTo + ":" + minutesTo;
-    }
-
- }
+}

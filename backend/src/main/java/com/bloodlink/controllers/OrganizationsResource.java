@@ -10,6 +10,7 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +26,11 @@ public class OrganizationsResource {
     private final BloodBankService bloodBankService;
 
     @GetMapping
-    public ResponseEntity<?> getAllOrganizations(@RequestParam @NotBlank String type, @RequestParam @NotBlank String pattern) {
+    public ResponseEntity<?> getAllOrganizations(@RequestParam @NotBlank String type, @RequestParam @NotBlank String pattern, Pageable p) {
         if (Role.fromString(type) == Role.MEDICAL_EMPLOYEE) {
-            return ResponseEntity.ok(medicalInstitutionService.getAll(pattern));
+            return ResponseEntity.ok(medicalInstitutionService.getAll(pattern, p));
         } else if (Role.fromString(type) == Role.BLOOD_BANK_EMPLOYEE) {
-            return ResponseEntity.ok(bloodBankService.getAll(pattern));
+            return ResponseEntity.ok(bloodBankService.getAll(pattern, p));
         } else {
             return ResponseEntity.ok().body(new List[0]);
         }

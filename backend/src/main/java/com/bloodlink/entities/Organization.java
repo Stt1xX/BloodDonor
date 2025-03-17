@@ -1,6 +1,7 @@
 package com.bloodlink.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -15,5 +16,8 @@ public abstract class Organization {
     private String name;
     private String address;
     private String phone;
-    private String workTime;
+    private Integer hoursFrom;
+    private Integer hoursTo;
+    private Integer minutesFrom;
+    private Integer minutesTo;
 }
