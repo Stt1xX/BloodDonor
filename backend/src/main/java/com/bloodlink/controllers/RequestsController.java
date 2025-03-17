@@ -2,6 +2,7 @@ package com.bloodlink.controllers;
 
 import com.bloodlink.entities.DTOs.RegistrationRequestDTOto;
 import com.bloodlink.service.RegistrationRequestService;
+import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,18 +16,22 @@ public class RequestsController {
 
     private final RegistrationRequestService registrationRequestService;
 
+    @RolesAllowed(value = {"ADMIN"})
+    @GetMapping
     public Page<RegistrationRequestDTOto> getRequests(@RequestParam String name, @RequestParam String surname,
                                                       @RequestParam String email, @RequestParam String role,
                                                       Pageable p) {
         return registrationRequestService.getRequestsDto(name, surname, email, role, p);
     }
 
+    @RolesAllowed(value = {"ADMIN"})
     @PostMapping("/approve/{id}")
     public ResponseEntity<?> approveRequest(@PathVariable Long id) {
         registrationRequestService.approveRequest(id);
         return ResponseEntity.ok().body("Заявка успешно одобрена");
     }
 
+    @RolesAllowed(value = {"ADMIN"})
     @PostMapping("/requests/reject/{id}")
     public ResponseEntity<?> rejectRequest(@PathVariable Long id) {
         registrationRequestService.rejectRequest(id);
