@@ -1,5 +1,6 @@
 package com.bloodlink.controllers;
 
+import com.bloodlink.entities.DTOs.RegistrationRequestDTOfrom;
 import com.bloodlink.entities.DTOs.RegistrationRequestDTOto;
 import com.bloodlink.service.RegistrationRequestService;
 import jakarta.validation.Valid;
@@ -17,7 +18,7 @@ public class RegisterController {
     private final RegistrationRequestService registrationRequestService;
 
     @PostMapping("/requests")
-    public ResponseEntity<?> createUserRequest(@Valid @RequestBody RegistrationRequestDTOto request) {
+    public ResponseEntity<?> createUserRequest(@Valid @RequestBody RegistrationRequestDTOfrom request) {
         registrationRequestService.save(request);
         return ResponseEntity.ok().body("Заявка на создание пользователя успешно подана!");
     }

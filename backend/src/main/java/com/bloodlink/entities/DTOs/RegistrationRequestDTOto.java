@@ -1,43 +1,40 @@
 package com.bloodlink.entities.DTOs;
 
 import com.bloodlink.entities.RegistrationRequest;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
-
 import com.bloodlink.entities.enums.Role;
+import lombok.Data;
 
 @Data
 public class RegistrationRequestDTOto {
 
-    @NotBlank(message = "Поле не может быть пустым")
+    private Long id;
+
     private String name;
 
-    @NotBlank(message = "Поле не может быть пустым")
     private String surname;
 
-    @Email(message = "Некорректный email")
     private String email;
-
-    @NotBlank
-    @Size(min = 5, message = "Пароль должен содержать минимум 5 символов")
-    private String password;
 
     private Role role;
 
-    private Long organizationId;
+    private OrganizationDTOto organization;
 
-
-    // !!! WITHOUT ID of organization !!!
-    public RegistrationRequest convertToRegistrationRequest() {
-        RegistrationRequest registrationRequest = new RegistrationRequest();
-        registrationRequest.setName(this.name);
-        registrationRequest.setSurname(this.surname);
-        registrationRequest.setEmail(this.email);
-        registrationRequest.setPassword(this.password);
-        registrationRequest.setRole(this.role);
-        return registrationRequest;
+    public RegistrationRequestDTOto(Long id, String name, String surname, String email, Role role,
+                                    OrganizationDTOto organization) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.role = role;
+        this.organization = organization;
     }
+
+    public static RegistrationRequestDTOto convert(RegistrationRequest entity) {
+        return new RegistrationRequestDTOto(entity.getId(), entity.getName(), entity.getSurname(), entity.getEmail(),
+                entity.getRole(), OrganizationDTOto.convert(entity.getBloodBank() == null ?
+                entity.getInstitution() : entity.getBloodBank()));
+    }
+
+
 }
 

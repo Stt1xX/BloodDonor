@@ -1,6 +1,6 @@
 package com.bloodlink.controllers;
 
-import com.bloodlink.entities.DTOs.OrganizationDTOto;
+import com.bloodlink.entities.DTOs.OrganizationDTOfrom;
 import com.bloodlink.entities.enums.OrganizationType;
 import com.bloodlink.entities.enums.Role;
 import com.bloodlink.exceptions.CustomDuplicateException;
@@ -37,12 +37,12 @@ public class OrganizationsResource {
 
     @RolesAllowed(value = {"ADMIN"})
     @PostMapping
-    public ResponseEntity<?> addNewOrganization(@Valid @RequestBody OrganizationDTOto organizationDTOto) throws CustomDuplicateException {
-        if (organizationDTOto.getType() == OrganizationType.BLOOD_BANK) {
-            bloodBankService.save(organizationDTOto);
+    public ResponseEntity<?> addNewOrganization(@Valid @RequestBody OrganizationDTOfrom organizationDTOfrom) throws CustomDuplicateException {
+        if (organizationDTOfrom.getType() == OrganizationType.BLOOD_BANK) {
+            bloodBankService.save(organizationDTOfrom);
             return ResponseEntity.ok("Банк крови успешно добавлен!");
-        } else if (organizationDTOto.getType() == OrganizationType.MEDICAL_INSTITUTION) {
-            medicalInstitutionService.save(organizationDTOto);
+        } else if (organizationDTOfrom.getType() == OrganizationType.MEDICAL_INSTITUTION) {
+            medicalInstitutionService.save(organizationDTOfrom);
             return ResponseEntity.ok("Медицинское учреждение успешно добавлено!");
         } else {
             return ResponseEntity.ok().body("Некорректный тип организации");

@@ -1,7 +1,7 @@
 package com.bloodlink.service;
 
-import com.bloodlink.entities.DTOs.OrganizationDTOto;
 import com.bloodlink.entities.DTOs.OrganizationDTOfrom;
+import com.bloodlink.entities.DTOs.OrganizationDTOto;
 import com.bloodlink.entities.Organization;
 import com.bloodlink.exceptions.CustomDuplicateException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,20 +25,20 @@ public abstract class OrganizationService<EntityClass extends Organization> {
         this.specificationExecutor = specificationExecutor;
     }
 
-    public List<OrganizationDTOfrom> getAll(String pattern) {
+    public List<OrganizationDTOto> getAll(String pattern) {
         Pageable pageable = PageRequest.of(0, 8);
         Specification<EntityClass> spec = (root, query, criteriaBuilder) -> criteriaBuilder.like(
                 criteriaBuilder.lower(root.get("name")), // Поле для поиска
                 "%" + pattern.toLowerCase() + "%" // Шаблон поиска
         );
         Page<EntityClass> page = specificationExecutor.findAll(spec, pageable);
-        return OrganizationDTOfrom.convertList(page.getContent());
+        return OrganizationDTOto.convertList(page.getContent());
     }
 
     @Transactional
-    public void save(OrganizationDTOto organizationDTOto) throws CustomDuplicateException {
+    public void save(OrganizationDTOfrom organizationDTOfrom) throws CustomDuplicateException {
         try {
-            repository.save(organizationDTOto.getOrganization());
+            repository.save(organizationDTOfrom.getOrganization());
         } catch (DataIntegrityViolationException e) {
             throw new CustomDuplicateException("Такое заведение уже существует");
         }
