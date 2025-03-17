@@ -125,7 +125,7 @@
         </div>
 
         <!-- Institution Input -->
-        <div class="group col-span-3">
+        <div class="group col-span-3 relative">
           <label for="institution" class="block text-sm font-medium text-gray-700">
             Заведение
             <span v-if="errors.institution" class="text-red-500 text-xs ml-2">{{ errors.institution }}</span>
@@ -134,10 +134,25 @@
             <input
                 type="text"
                 id="institution"
-                v-model="institution"
-                class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-red-500 focus:border-red-500 hover:border-red-300 transition-all duration-200"
+                v-model="institution.name"
+                @input="fetchInstitutionsDebounced"
+                @focus="fetchInstitutions"
+                :disabled="!role || role === 'admin'"
+                class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-red-500 focus:border-red-500
+                hover:border-red-300 transition-all duration-200 disabled:bg-gray-300 disabled:text-gray-700
+                 disabled:border-0"
                 placeholder="Введите название заведения"
             />
+            <ul v-if="institutionSuggestions.length" class="absolute z-10 w-full bg-white border
+             border-gray-300 rounded-lg mt-1 shadow-lg">
+              <li v-for="suggestion in institutionSuggestions" :key="suggestion.id" @click="selectInstitution(suggestion)"
+                  class="px-4 py-2 cursor-pointer hover:bg-gray-100">
+                <div class="flex justify-around">
+                  <span class="font-bold text-gray-800">{{ suggestion.name }}</span>
+                  <span class="text-sm text-gray-600">{{ suggestion.address }}</span>
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -167,17 +182,19 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import CustomSelect from '@/components/shared/CustomSelect.vue'
+import axios from "axios";
+import debounce from 'lodash.debounce';
+import {showAlert} from "@/js/custom-alert.js";
 
-const router = useRouter()
 const name = ref('')
 const lastName = ref('')
 const email = ref('')
 const password = ref('')
 const role = ref('')
 const position = ref('')
-const institution = ref('')
+const institution = ref({name : '', id : null})
+const institutionSuggestions = ref([])
 const errors = ref({})
 
 const roleOptions = [
@@ -185,6 +202,11 @@ const roleOptions = [
   { value: 'bank_employee', text: 'Сотрудник банка' },
   { value: 'medical_worker', text: 'Медицинский работник' }
 ]
+
+const selectInstitution = (suggestion) => {
+  institution.value = suggestion
+  institutionSuggestions.value = []
+}
 
 const validateForm = () => {
   errors.value = {}
@@ -203,20 +225,52 @@ const validateForm = () => {
   }
   if (!role.value) errors.value.role = 'Роль обязательна'
   if (!position.value) errors.value.position = 'Должность обязательна'
-  if (!institution.value) errors.value.institution = 'Заведение обязательно'
+  if (!institution.value.id && role.value !== 'admin') errors.value.institution = 'Заведение обязательно'
   return Object.keys(errors.value).length === 0
 }
 
 const handleRegistration = async () => {
   if (validateForm()) {
     try {
-      console.log('Registration attempt:', { name: name.value, lastName: lastName.value, email: email.value, password: password.value, role: role.value, position: position.value, institution: institution.value })
-      router.push('/')
+      const response = await axios.post('/public/create_user_request', {
+        name : name.value,
+        surname : lastName.value,
+        email : email.value,
+        password : password.value,
+        role : role.value,
+        organizationId : institution.value.id
+      });
+      showAlert(response.data)
     } catch (error) {
-      console.error('Registration error:', error)
+      showAlert(error.response.data)
     }
   }
 }
+
+let abortController = null;
+
+const fetchInstitutions = async () => {
+  if (institution.value.name && role.value) {
+    if (abortController) {
+      abortController.abort();
+    }
+    abortController = new AbortController();
+
+    try {
+      const url = `/public/get_all_organization?type=${encodeURIComponent(role.value)}&pattern=${encodeURIComponent(institution.value.name)}`;
+      const response = await axios.get(url, { signal: abortController.signal });
+      institutionSuggestions.value = response.data;
+    } catch (error) {
+      if (error.name !== 'CanceledError') {
+        institutionSuggestions.value = [];
+      }
+    }
+  } else {
+    institutionSuggestions.value = [];
+  }
+};
+
+const fetchInstitutionsDebounced = debounce(fetchInstitutions, 300);
 
 const refreshPage = () => {
   window.location.reload()

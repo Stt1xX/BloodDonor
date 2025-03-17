@@ -53,8 +53,6 @@
           </div>
         </div>
 
-        <div v-if="errorMessage" class="text-red-500 text-center mb-4">{{ errorMessage }}</div>
-
         <!-- Submit Button -->
         <div class="col-span-1">
           <button
@@ -83,11 +81,11 @@ import { ref } from 'vue'
 import axios from 'axios'
 import {get_token, token} from "@/js/csrf-token.js"
 import router from "@/routes/routes.js"
+import {showAlert} from "@/js/custom-alert.js";
 
 const email = ref('')
 const password = ref('')
 const errors = ref({})
-const errorMessage = ref('')
 
 const validateForm = () => {
   errors.value = {}
@@ -119,12 +117,14 @@ const handleLogin = async () => {
       if (response.status === 200) {
         await get_token();
         redirect_user(response.data.role)
+      } else {
+        showAlert(response.responseText)
       }
     } catch (error) {
       if (error.response && error.response.data && error.response.data.responseText) {
-        errorMessage.value = error.response.data.responseText
+        showAlert(error.response.data.responseText)
       } else {
-        errorMessage.value = 'Login failed. Please try again.'
+        showAlert('Login failed. Please try again.')
       }
     }
   }

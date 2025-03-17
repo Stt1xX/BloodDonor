@@ -3,6 +3,7 @@ package com.bloodlink.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import com.bloodlink.entities.enums.Role;
+
 @Data
 @Entity
 @Table(name = "users")

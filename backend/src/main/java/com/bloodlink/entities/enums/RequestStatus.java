@@ -1,4 +1,4 @@
-package com.bloodlink.entities;
+package com.bloodlink.entities.enums;
 
 public enum RequestStatus {
     PENDING,

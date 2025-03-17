@@ -1,18 +1,15 @@
 package com.bloodlink.security;
 
-import com.bloodlink.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,7 +21,6 @@ public class SecurityConfig {
 
     private final CustomAuthenticationSuccessHandler successHandler;
     private final CustomAuthenticationFailureHandler failureHandler;
-    private final UserRepository userRepository;
 
     @PostConstruct
     public void init() {
@@ -36,8 +32,9 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/index.html", "/assets/**").permitAll()
-                        .requestMatchers("/login", "/registration", "/users/add_new_user", "/app/csrf-token", "/error/**").permitAll()
-                        .requestMatchers("/api/blood-banks/get_all").permitAll()
+                        .requestMatchers("/login", "/registration", "/users/add_new_user",
+                                "/app/csrf-token", "/error/**",
+                        "/public/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/medical_employee/**").hasRole("MEDICAL_EMPLOYEE")
                         .requestMatchers("/bank_employee/**").hasRole("BANK_EMPLOYEE")

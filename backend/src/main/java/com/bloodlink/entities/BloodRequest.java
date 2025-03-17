@@ -1,5 +1,8 @@
 package com.bloodlink.entities;
 
+import com.bloodlink.entities.enums.BloodType;
+import com.bloodlink.entities.enums.RequestStatus;
+import com.bloodlink.entities.enums.RhFactor;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;

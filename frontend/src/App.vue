@@ -1,6 +1,7 @@
 <template>
-  <div class="min-h-screen w-screen bg-gray-50">
+  <div class="min-h-screen w-screen bg-gradient-to-br from-gray-200 via-gray-100 to-gray-50">
     <router-view class="h-full w-full" />
+    <custom-alert/>
   </div>
 </template>
 
@@ -8,6 +9,7 @@
 
 import {onMounted} from "vue";
 import {get_token} from "@/js/csrf-token.js";
+import CustomAlert from "@/components/shared/CustomAlert.vue";
 
 onMounted( async () => {
   await get_token()

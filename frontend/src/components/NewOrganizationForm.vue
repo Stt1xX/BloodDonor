@@ -1,13 +1,7 @@
 <template>
-  <div class="mt-20 mb-52 w-full max-w-[850px] mx-8 p-8 bg-white rounded-2xl shadow-xl border border-red-100">
-    <div class="flex flex-col">
-      <!-- Logo and Title -->
-      <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-red-800 mb-2">Создание организации</h2>
-        <div class="mt-2 w-16 h-1 bg-gradient-to-r from-red-500 to-red-600 mx-auto rounded-full"></div>
-      </div>
-
-      <!-- New Organization Form -->
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-1/2 relative">
+      <h2 class="text-3xl font-bold text-red-800 mb-4">Создание организации</h2>
       <form @submit.prevent="handleCreateOrganization" class="grid grid-cols-1 gap-6">
         <!-- Organization Type Selector -->
         <div class="group col-span-1">
@@ -80,18 +74,17 @@
             </label>
             <div class="relative mt-1">
               <vue-date-picker v-model="work_time"
-                             time-picker
-                             :range="{ disableTimeRangeValidation: true }"
-                             placeholder="Select Time"
+                               time-picker
+                               :range="{ disableTimeRangeValidation: true }"
+                               placeholder="Select Time"
               />
             </div>
           </div>
         </div>
 
-        <div class="col-span-1">
-          <button type="submit"  class="w-full py-3 px-4 rounded-lg font-medium text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 shadow-md">
-            Создать
-          </button>
+        <div class="col-span-1 flex justify-end mt-4">
+          <button type="button" @click="$emit('close')" class="bg-gray-500 text-white px-4 py-2 rounded mr-2 hover:bg-gray-600 transition-colors">Отмена</button>
+          <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">Создать</button>
         </div>
       </form>
     </div>
@@ -105,6 +98,7 @@ import router from "@/routes/routes.js"
 
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
+import {showAlert} from "@/js/custom-alert.js";
 
 const organizationType = ref('')
 const name = ref('')
@@ -128,9 +122,9 @@ const validateForm = () => {
 
 const is_bad_time = (time) => {
   if (time !== undefined)
-  if (time[0].hours * 60 + time[0].minutes >= time[1].hours * 60 + time[1].minutes) {
-    return true
-  }
+    if (time[0].hours * 60 + time[0].minutes >= time[1].hours * 60 + time[1].minutes) {
+      return true
+    }
   return false
 }
 
@@ -148,24 +142,16 @@ const handleCreateOrganization = async () => {
         minutesFrom: work_time.value[0].minutes,
         minutesTo: work_time.value[1].minutes,
       });
-      if (response.status === 200) {
-        console.log('Organization created successfully')
-      }
+      showAlert(response.data)
+
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.responseText) {
-        console.log(error.response.data.responseText);
-      }
+      showAlert(error.response.data)
     }
   }
-}
-
-const refreshPage = () => {
-  window.location.reload()
 }
 </script>
 
 <style>
-
 /* Стили для выпадающего меню */
 .dp__menu {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Тень */
@@ -178,5 +164,4 @@ const refreshPage = () => {
 .dp__selection_preview {
   display: none;
 }
-
 </style>

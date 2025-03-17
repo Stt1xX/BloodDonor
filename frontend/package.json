@@ -12,6 +12,7 @@
     "@stomp/stompjs": "^7.0.0",
     "@vuepic/vue-datepicker": "^11.0.1",
     "axios": "^1.8.3",
+    "lodash.debounce": "^4.0.8",
     "sockjs-client": "^1.6.1",
     "vite-plugin-node-polyfills": "^0.23.0",
     "vue": "^3.5.13",
