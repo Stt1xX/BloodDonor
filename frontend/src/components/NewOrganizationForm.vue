@@ -1,7 +1,7 @@
 <template>
   <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-8 rounded-lg shadow-lg w-1/2 relative">
-      <h2 class="text-3xl font-bold text-red-800 mb-4">Создание организации</h2>
+      <h2 class="text-3xl font-bold text-red-800 mb-4">{{ props.title }}</h2>
       <form @submit.prevent="handleCreateOrganization" class="grid grid-cols-1 gap-6">
         <!-- Organization Type Selector -->
         <div class="group col-span-1">
@@ -9,7 +9,7 @@
             Тип организации
             <span v-if="errors.organizationType" class="text-red-500 text-xs ml-2">{{ errors.organizationType }}</span>
           </label>
-          <select id="organizationType" v-model="organizationType" class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-red-500 focus:border-red-500 hover:border-red-300 transition-all duration-200">
+          <select id="organizationType" v-model="organization.organizationType" class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-red-500 focus:border-red-500 hover:border-red-300 transition-all duration-200" :disabled="isEdit">
             <option value="">Выберите тип</option>
             <option value="BLOOD_BANK">Банк крови</option>
             <option value="MEDICAL_INSTITUTION">Медицинское учреждение</option>
@@ -26,7 +26,7 @@
             <input
                 type="text"
                 id="name"
-                v-model="name"
+                v-model="organization.name"
                 class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-red-500 focus:border-red-500 hover:border-red-300 transition-all duration-200"
                 placeholder="Введите название"
             />
@@ -43,7 +43,7 @@
             <input
                 type="text"
                 id="address"
-                v-model="address"
+                v-model="organization.address"
                 class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-red-500 focus:border-red-500 hover:border-red-300 transition-all duration-200"
                 placeholder="Введите адрес"
             />
@@ -61,19 +61,19 @@
               <input
                   type="text"
                   id="phone"
-                  v-model="phone"
+                  v-model="organization.phone"
                   class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-red-500 focus:border-red-500 hover:border-red-300 transition-all duration-200"
                   placeholder="Введите телефон"
               />
             </div>
           </div>
           <div>
-            <label for="work_time" class="block text-sm font-medium text-gray-700">
+            <label for="workingHours" class="block text-sm font-medium text-gray-700">
               Время работы
-              <span v-if="errors.work_time" class="text-red-500 text-xs ml-2">{{ errors.work_time }}</span>
+              <span v-if="errors.workingHours" class="text-red-500 text-xs ml-2">{{ errors.workingHours }}</span>
             </label>
             <div class="relative mt-1">
-              <vue-date-picker v-model="work_time"
+              <vue-date-picker v-model="organization.workingHours"
                                time-picker
                                :range="{ disableTimeRangeValidation: true }"
                                placeholder="Select Time"
@@ -92,30 +92,54 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import {ref} from 'vue'
 import axios from 'axios'
-import router from "@/routes/routes.js"
 
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 import {showAlert} from "@/js/custom-alert.js";
 
-const organizationType = ref('')
-const name = ref('')
-const address = ref('')
-const phone = ref('')
-const work_time = ref()
+const emit = defineEmits(['close'])
+
+const props = defineProps(
+    {
+      title : {
+        type : String,
+        required : true
+      },
+      organization : {
+        type : Object,
+        required : true,
+        default : (() => {
+          return {
+            organizationType : '',
+            name : '',
+            address : '',
+            phone : '',
+            workingHours : ''
+          }
+        })
+      },
+      isEdit : {
+        type : Boolean,
+        required : true
+      }
+    }
+)
+
+const organization = ref(props.organization)
+
 const errors = ref({})
 
 const validateForm = () => {
   errors.value = {}
-  if (!organizationType.value) errors.value.organizationType = 'Тип организации обязателен'
-  if (!name.value) errors.value.name = 'Название обязательно'
-  if (!address.value) errors.value.address = 'Адрес обязателен'
-  if (!phone.value) errors.value.phone = 'Телефон обязателен'
-  if (!work_time.value) errors.value.work_time = 'Время работы обязательно'
-  if (is_bad_time(work_time.value)) {
-    errors.value.work_time = 'Время окончания должно быть больше времени начала'
+  if (!organization.value.organizationType) errors.value.organizationType = 'Тип организации обязателен'
+  if (!organization.value.name) errors.value.name = 'Название обязательно'
+  if (!organization.value.address) errors.value.address = 'Адрес обязателен'
+  if (!organization.value.phone) errors.value.phone = 'Телефон обязателен'
+  if (!organization.value.workingHours) errors.value.workingHours = 'Время работы обязательно'
+  if (is_bad_time(organization.value.workingHours)) {
+    errors.value.workingHours = 'Время окончания должно быть больше времени начала'
   }
   return Object.keys(errors.value).length === 0
 }
@@ -129,24 +153,31 @@ const is_bad_time = (time) => {
 }
 
 
+const createOrganization = async () => {
+  try {
+    const response = await axios.post('/organizations', organization.value)
+    if (response.status === 201) {
+      showAlert('Организация успешно создана', 'success')
+    }
+    emit('close')
+  } catch (error) {
+    showAlert(error.response.data)
+  }
+}
+
+// DIMA
+const editOrganization = async () => {
+  // запрос на редактирование организации
+}
+
 const handleCreateOrganization = async () => {
   if (validateForm()) {
-    try {
-      const response = await axios.post('/admin/api/add_organization', {
-        type: organizationType.value,
-        name: name.value,
-        address: address.value,
-        phone: phone.value,
-        hoursFrom: work_time.value[0].hours,
-        hoursTo: work_time.value[1].hours,
-        minutesFrom: work_time.value[0].minutes,
-        minutesTo: work_time.value[1].minutes,
-      });
-      showAlert(response.data)
-
-    } catch (error) {
-      showAlert(error.response.data)
+    if (props.isEdit) {
+      await editOrganization()
+    } else {
+      await createOrganization()
     }
+
   }
 }
 </script>
