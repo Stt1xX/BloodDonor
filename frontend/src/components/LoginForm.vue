@@ -106,7 +106,7 @@ const validateForm = () => {
 const handleLogin = async () => {
   if (validateForm()) {
     try {
-      const response = await axios.post('/login', {
+      const response = await axios.post('/api/auth/login', {
         "username": email.value,
         "password": password.value,
       }, {

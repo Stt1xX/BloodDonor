@@ -5,7 +5,7 @@ import axios from "axios";
 export const token = ref();
 
 export const get_token = async () => {
-    const response = await axios.get('/app/csrf-token');
+    const response = await axios.get('/api/csrf');
     token.value = response.data.csrfToken;
 
     axios.interceptors.request.use((config) => {
