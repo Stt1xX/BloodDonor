@@ -37,7 +37,7 @@ public class SecurityConfig {
         http
                 .securityMatcher("/api/**")
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/csrf", "/api/register/").permitAll()
+                        .requestMatchers("/api/csrf", "/api/register/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()
                         .anyRequest().authenticated()
                 )
