@@ -1,4 +1,4 @@
-package com.bloodlink.entities.config;
+package com.bloodlink.configs;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;

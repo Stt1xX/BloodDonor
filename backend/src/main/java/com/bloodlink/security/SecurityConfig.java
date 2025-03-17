@@ -4,15 +4,20 @@ import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+
+import java.time.Duration;
 
 @Data
 @Configuration
@@ -30,24 +35,33 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .securityMatcher("/api/**")
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/index.html", "/assets/**").permitAll()
-                        .requestMatchers("/login", "/registration", "/users/add_new_user",
-                                "/app/csrf-token", "/error/**",
-                        "/public/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/medical_employee/**").hasRole("MEDICAL_EMPLOYEE")
-                        .requestMatchers("/bank_employee/**").hasRole("BANK_EMPLOYEE")
+                        .requestMatchers("/api/csrf", "/api/register/").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
-                        .successHandler(successHandler)
-                        .failureHandler(failureHandler)
-                )
-                .exceptionHandling(handler ->
-                        handler.accessDeniedHandler(new CustomAccessDeniedHandler()));
+                .exceptionHandling((handle) -> handle.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .formLogin((form) -> {
+                    form.loginPage("/login");
+                    form.loginProcessingUrl("/api/auth/login");
+                    form.usernameParameter("username");
+                    form.passwordParameter("password");
+                    form.successHandler(successHandler);
+                    form.failureHandler(failureHandler);
+                })
+                .rememberMe(rememberMe -> rememberMe
+                        .tokenValiditySeconds((int) Duration.ofHours(12).getSeconds())
+                        .rememberMeCookieName("REMEMBERME")
+                        .alwaysRemember(true)
+                );
+//                .formLogin(form -> form
+//                        .loginPage("/login")
+//                        .permitAll()
+
+//                )
+//                .exceptionHandling(handler ->
+//                        handler.accessDeniedHandler(new CustomAccessDeniedHandler()));
 
         return http.build();
     }

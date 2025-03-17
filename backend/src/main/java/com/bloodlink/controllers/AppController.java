@@ -10,10 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/app")
+@RequestMapping("/api")
 public class AppController {
 
-    @GetMapping("/csrf-token")
+    @GetMapping("/csrf")
     public Map<String, String> getCsrfToken(HttpServletRequest request) {
         CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
         Map<String, String> response = new HashMap<>();

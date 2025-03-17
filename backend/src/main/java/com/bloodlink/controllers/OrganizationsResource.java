@@ -1,10 +1,12 @@
 package com.bloodlink.controllers;
 
-import com.bloodlink.entities.DTOs.RegistrationRequestDTOto;
+import com.bloodlink.entities.DTOs.OrganizationDTOto;
+import com.bloodlink.entities.enums.OrganizationType;
 import com.bloodlink.entities.enums.Role;
+import com.bloodlink.exceptions.CustomDuplicateException;
 import com.bloodlink.service.BloodBankService;
 import com.bloodlink.service.MedicalInstitutionService;
-import com.bloodlink.service.RegistrationRequestService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -15,15 +17,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/public")
+@RequestMapping("/api/organizations")
 @RequiredArgsConstructor
-public class PublicController {
+public class OrganizationsResource {
 
     private final MedicalInstitutionService medicalInstitutionService;
     private final BloodBankService bloodBankService;
-    private final RegistrationRequestService registrationRequestService;
 
-    @GetMapping("/get_all_organization")
+    @GetMapping
     public ResponseEntity<?> getAllOrganizations(@RequestParam @NotBlank String type, @RequestParam @NotBlank String pattern) {
         if (Role.fromString(type) == Role.MEDICAL_EMPLOYEE) {
             return ResponseEntity.ok(medicalInstitutionService.getAll(pattern));
@@ -34,9 +35,18 @@ public class PublicController {
         }
     }
 
-    @PostMapping("/create_user_request")
-        public ResponseEntity<?> createUserRequest(@Valid @RequestBody RegistrationRequestDTOto request) {
-        registrationRequestService.save(request);
-        return ResponseEntity.ok().body("Заявка на создание пользователя успешно подана!");
+    @RolesAllowed(value = {"ADMIN"})
+    @PostMapping
+    public ResponseEntity<?> addNewOrganization(@Valid @RequestBody OrganizationDTOto organizationDTOto) throws CustomDuplicateException {
+        if (organizationDTOto.getType() == OrganizationType.BLOOD_BANK) {
+            bloodBankService.save(organizationDTOto);
+            return ResponseEntity.ok("Банк крови успешно добавлен!");
+        } else if (organizationDTOto.getType() == OrganizationType.MEDICAL_INSTITUTION) {
+            medicalInstitutionService.save(organizationDTOto);
+            return ResponseEntity.ok("Медицинское учреждение успешно добавлено!");
+        } else {
+            return ResponseEntity.ok().body("Некорректный тип организации");
+        }
     }
+
 }
