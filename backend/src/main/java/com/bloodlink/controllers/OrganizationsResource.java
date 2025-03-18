@@ -50,4 +50,19 @@ public class OrganizationsResource {
         }
     }
 
+    @RolesAllowed(value = {"ADMIN"})
+    @PostMapping
+    public ResponseEntity<?> updateOrganization(@Valid @RequestBody OrganizationDTOfrom organizationDTOfrom) throws CustomDuplicateException {
+        if (organizationDTOfrom.getType() == OrganizationType.BLOOD_BANK) {
+            bloodBankService.update(organizationDTOfrom);
+            return ResponseEntity.ok("Банк крови успешно обновлён!");
+        } else if (organizationDTOfrom.getType() == OrganizationType.MEDICAL_INSTITUTION) {
+            medicalInstitutionService.update(organizationDTOfrom);
+            return ResponseEntity.ok("Медицинское учреждение успешно обновлён!");
+        } else {
+            return ResponseEntity.ok().body("Некорректный тип организации");
+        }
+    }
+
+
 }

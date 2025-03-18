@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public abstract class OrganizationService<EntityClass extends Organization> {
 
@@ -25,8 +26,7 @@ public abstract class OrganizationService<EntityClass extends Organization> {
     }
 
     public List<OrganizationDTOto> getAll(String pattern, Pageable p) {
-        Specification<EntityClass> spec = (root, query, criteriaBuilder) -> criteriaBuilder.like(
-                criteriaBuilder.lower(root.get("name")), // Поле для поиска
+        Specification<EntityClass> spec = (root, query, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), // Поле для поиска
                 "%" + pattern.toLowerCase() + "%" // Шаблон поиска
         );
         Page<EntityClass> page = specificationExecutor.findAll(spec, p);
@@ -35,6 +35,22 @@ public abstract class OrganizationService<EntityClass extends Organization> {
 
     @Transactional
     public void save(OrganizationDTOfrom organizationDTOfrom) throws CustomDuplicateException {
+        try {
+            repository.save(organizationDTOfrom.getOrganization());
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomDuplicateException("Такое заведение уже существует");
+        }
+    }
+
+    @Transactional
+    public void update(OrganizationDTOfrom organizationDTOfrom) throws CustomDuplicateException {
+        if (organizationDTOfrom.getId() == null) {
+            throw new IllegalArgumentException("Для обновления организации не предоставлен id");
+        }
+        Optional<EntityClass> orgOpt = repository.findById(organizationDTOfrom.getId());
+        if (orgOpt.isEmpty()) {
+            throw new IllegalArgumentException("Организация с таким id не существует");
+        }
         try {
             repository.save(organizationDTOfrom.getOrganization());
         } catch (DataIntegrityViolationException e) {

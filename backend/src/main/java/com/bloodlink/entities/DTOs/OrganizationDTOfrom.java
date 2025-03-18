@@ -12,6 +12,7 @@ import lombok.Data;
 @Data
 @WorkTimeCheckAnnotation(hoursStart = "hoursFrom", hoursEnd = "hoursTo", minutesStart = "minutesFrom", minutesEnd = "minutesTo")
 public class OrganizationDTOfrom {
+    private Long id;
     private OrganizationType type;
     @NotNull(message = "Название не может быть пустым")
     private String name;
@@ -44,6 +45,7 @@ public class OrganizationDTOfrom {
             e.setHoursTo(hoursTo);
             e.setMinutesFrom(minutesFrom);
             e.setMinutesTo(minutesTo);
+            e.setId(id);
             return (E) e;
         } catch (Exception ex) {
             return null;
