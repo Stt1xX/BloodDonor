@@ -16,7 +16,7 @@ public class RegistrationRequestsSpecs {
     }
 
     public static Specification<RegistrationRequest> emailLike(final String email) {
-        return (root, query, builder) ->builder.like(root.get("surname"), "%" + email + "%");
+        return (root, query, builder) ->builder.like(root.get("email"), "%" + email + "%");
     }
 
     public static Specification<RegistrationRequest> roleLike(final String role) {

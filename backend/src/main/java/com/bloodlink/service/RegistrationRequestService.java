@@ -61,9 +61,9 @@ public class RegistrationRequestService {
     public Page<RegistrationRequestDTOto> getRequestsDto(String pattern, Pageable p) throws IllegalServiceArgumentException {
         //Cringe...
         Specification<RegistrationRequest> filters = Specification.where(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.nameLike(pattern))
-                .and(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.surnameLike(pattern))
-                .and(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.emailLike(pattern))
-                .and(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.roleLike(pattern));
+                .or(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.surnameLike(pattern))
+                .or(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.emailLike(pattern))
+                .or(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.roleLike(pattern));
 
         var requests = registrationRequestRepository.findAll(filters, p);
         return requests.map(RegistrationRequestDTOto::convert);

@@ -51,7 +51,7 @@ public class OrganizationsResource {
     }
 
     @RolesAllowed(value = {"ADMIN"})
-    @PostMapping
+    @PutMapping
     public ResponseEntity<?> updateOrganization(@Valid @RequestBody OrganizationDTOfrom organizationDTOfrom) throws CustomDuplicateException {
         if (organizationDTOfrom.getType() == OrganizationType.BLOOD_BANK) {
             bloodBankService.update(organizationDTOfrom);

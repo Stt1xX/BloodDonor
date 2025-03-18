@@ -4,6 +4,8 @@ import com.bloodlink.entities.enums.BloodType;
 import com.bloodlink.entities.enums.RhFactor;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -28,6 +30,7 @@ public class BloodUnit {
     @JoinColumn(name = "blood_bank_id")
     private BloodBank bloodBank;
 
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @PrePersist
