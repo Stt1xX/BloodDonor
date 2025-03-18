@@ -58,11 +58,12 @@ public class RegistrationRequestService {
         }
     }
 
-    public Page<RegistrationRequestDTOto> getRequestsDto(String name, String surname, String email, String role, Pageable p) throws IllegalServiceArgumentException {
-        Specification<RegistrationRequest> filters = Specification.where(!StringUtils.hasLength(name) ? null : RegistrationRequestsSpecs.nameLike(name))
-                .and(!StringUtils.hasLength(surname) ? null : RegistrationRequestsSpecs.surnameLike(surname))
-                .and(!StringUtils.hasLength(email) ? null : RegistrationRequestsSpecs.emailLike(email))
-                .and(!StringUtils.hasLength(role) ? null : RegistrationRequestsSpecs.roleLike(role));
+    public Page<RegistrationRequestDTOto> getRequestsDto(String pattern, Pageable p) throws IllegalServiceArgumentException {
+        //Cringe...
+        Specification<RegistrationRequest> filters = Specification.where(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.nameLike(pattern))
+                .and(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.surnameLike(pattern))
+                .and(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.emailLike(pattern))
+                .and(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.roleLike(pattern));
 
         var requests = registrationRequestRepository.findAll(filters, p);
         return requests.map(RegistrationRequestDTOto::convert);

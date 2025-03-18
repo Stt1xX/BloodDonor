@@ -18,10 +18,9 @@ public class RequestsController {
 
     @RolesAllowed(value = {"ADMIN"})
     @GetMapping
-    public Page<RegistrationRequestDTOto> getRequests(@RequestParam String name, @RequestParam String surname,
-                                                      @RequestParam String email, @RequestParam String role,
+    public Page<RegistrationRequestDTOto> getRequests(@RequestParam String pattern,
                                                       Pageable p) {
-        return registrationRequestService.getRequestsDto(name, surname, email, role, p);
+        return registrationRequestService.getRequestsDto(pattern, p);
     }
 
     @RolesAllowed(value = {"ADMIN"})
