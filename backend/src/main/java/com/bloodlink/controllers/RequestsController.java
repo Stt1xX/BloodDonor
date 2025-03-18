@@ -31,7 +31,7 @@ public class RequestsController {
     }
 
     @RolesAllowed(value = {"ADMIN"})
-    @PostMapping("/requests/reject/{id}")
+    @PostMapping("/reject/{id}")
     public ResponseEntity<?> rejectRequest(@PathVariable Long id) {
         registrationRequestService.rejectRequest(id);
         return ResponseEntity.ok().body("Заявка успешно отклонена");

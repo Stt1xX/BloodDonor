@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import java.time.LocalDateTime;
 
 @Data
+
 @Entity
 @Table(name = "blood_units")
 public class BloodUnit {
@@ -32,6 +33,14 @@ public class BloodUnit {
 
     @CreatedDate
     private LocalDateTime createdAt;
+
+    public BloodUnit(Long id, BloodType bloodType, RhFactor rhFactor, Double volume, LocalDateTime expirationDate) {
+        this.id = id;
+        this.bloodType = bloodType;
+        this.rhFactor = rhFactor;
+        this.volume = volume;
+        this.expirationDate = expirationDate;
+    }
 
     @PrePersist
     protected void onCreate() {

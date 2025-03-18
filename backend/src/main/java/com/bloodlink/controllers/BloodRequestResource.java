@@ -18,7 +18,7 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/api/blood_units")
 @RequiredArgsConstructor
-public class BloodUnitResource {
+public class BloodRequestResource {
 
     private final ResourceUtilsService resourceUtilsService;
     private final BankEmployeeRepository bankEmployeeRepository;
