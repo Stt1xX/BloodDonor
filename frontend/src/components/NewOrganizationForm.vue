@@ -155,19 +155,44 @@ const is_bad_time = (time) => {
 
 const createOrganization = async () => {
   try {
-    const response = await axios.post('/organizations', organization.value)
-    if (response.status === 201) {
-      showAlert('Организация успешно создана', 'success')
-    }
+    const response = await axios.post('/api/organizations',
+{
+      type : organization.value.organizationType,
+      name : organization.value.name,
+      address : organization.value.address,
+      phone : organization.value.phone,
+      hoursFrom : organization.value.workingHours[0].hours,
+      hoursTo : organization.value.workingHours[1].hours,
+      minutesFrom : organization.value.workingHours[0].minutes,
+      minutesTo : organization.value.workingHours[1].minutes
+    })
+    showAlert(response.data)
     emit('close')
   } catch (error) {
+    console.log(error)
     showAlert(error.response.data)
   }
 }
 
-// DIMA
 const editOrganization = async () => {
-  // запрос на редактирование организации
+  try {
+    const response = await axios.put('/api/organizations',
+        {
+          type : organization.value.organizationType,
+          name : organization.value.name,
+          address : organization.value.address,
+          phone : organization.value.phone,
+          hoursFrom : organization.value.workingHours[0].hours,
+          hoursTo : organization.value.workingHours[1].hours,
+          minutesFrom : organization.value.workingHours[0].minutes,
+          minutesTo : organization.value.workingHours[1].minutes
+        })
+    showAlert(response.data)
+    emit('close')
+  } catch (error) {
+    console.log(error)
+    showAlert(error.response.data)
+  }
 }
 
 const handleCreateOrganization = async () => {

@@ -1,5 +1,7 @@
 package com.bloodlink.security;
 
+import com.bloodlink.repositories.UserRepository;
+import com.bloodlink.service.UserService;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
@@ -26,6 +29,7 @@ public class SecurityConfig {
 
     private final CustomAuthenticationSuccessHandler successHandler;
     private final CustomAuthenticationFailureHandler failureHandler;
+    private final UserService userService;
 
     @PostConstruct
     public void init() {
@@ -54,43 +58,43 @@ public class SecurityConfig {
                         .tokenValiditySeconds((int) Duration.ofHours(12).getSeconds())
                         .rememberMeCookieName("REMEMBERME")
                         .alwaysRemember(true)
-                );
-//                .formLogin(form -> form
-//                        .loginPage("/login")
-//                        .permitAll()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll()
 
-//                )
-//                .exceptionHandling(handler ->
-//                        handler.accessDeniedHandler(new CustomAccessDeniedHandler()));
+                )
+                .exceptionHandling(handler ->
+                        handler.accessDeniedHandler(new CustomAccessDeniedHandler()));
 
         return http.build();
     }
 
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        return email -> {
-//            User user = userRepository.findByEmail(email);
-//            if (user == null) {
-//                throw new UsernameNotFoundException("User not found");
-//            }
-//            return org.springframework.security.core.userdetails.User
-//                    .withUsername(user.getEmail())
-//                    .password(user.getPassword())
-//                    .authorities(user.getRole().name())
-//                    .passwordEncoder(password -> password)
-//                    .build();
-//        };
-//    }
-
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails user = User.builder()
-                .username("ramtim1@mail.ru")
-                .password(passwordEncoder().encode("admin"))
-                .roles("ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(user);
+        return email -> {
+            com.bloodlink.entities.User user = userService.getByEmail(email);
+            if (user == null) {
+                throw new UsernameNotFoundException("User not found");
+            }
+            return org.springframework.security.core.userdetails.User
+                    .withUsername(user.getEmail())
+                    .password(user.getPassword())
+                    .authorities(user.getRole().toString())
+                    .passwordEncoder(password -> password)
+                    .build();
+        };
     }
+
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        UserDetails user = User.builder()
+//                .username("ramtim1@mail.ru")
+//                .password(passwordEncoder().encode("admin"))
+//                .roles("ADMIN")
+//                .build();
+//        return new InMemoryUserDetailsManager(user);
+//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

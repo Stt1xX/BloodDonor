@@ -132,11 +132,11 @@ const handleLogin = async () => {
 
 
 const redirect_user = (role) => {
-  if (role === 'ROLE_ADMIN') {
-    router.push('/admin/main')
-  } else if (role === 'ROLE_MEDICAL_EMPLOYEE') {
+  if (role === 'ADMIN') {
+    router.push('/admin/organization_settings')
+  } else if (role === 'MEDICAL_EMPLOYEE') {
     router.push('/medical_employee/main')
-  } else if (role === 'ROLE_BLOOD_BANK_EMPLOYEE') {
+  } else if (role === 'BLOOD_BANK_EMPLOYEE') {
     router.push('/bank_employee/main')
   } else {
     router.push('/login')

@@ -135,8 +135,8 @@
                 type="text"
                 id="institution"
                 v-model="institution.name"
-                @input="fetchInstitutionsDebounced"
-                @focus="fetchInstitutions"
+                @input="_fetchDebounced"
+                @focus="_fetch"
                 :disabled="!role || role === 'admin'"
                 class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-red-500 focus:border-red-500
                 hover:border-red-300 transition-all duration-200 disabled:bg-gray-300 disabled:text-gray-700
@@ -186,6 +186,7 @@ import CustomSelect from '@/components/shared/CustomSelect.vue'
 import axios from "axios";
 import debounce from 'lodash.debounce';
 import {showAlert} from "@/js/custom-alert.js";
+import {abstractFetching} from "@/js/uitls.js";
 
 const name = ref('')
 const lastName = ref('')
@@ -232,7 +233,7 @@ const validateForm = () => {
 const handleRegistration = async () => {
   if (validateForm()) {
     try {
-      const response = await axios.post('/public/create_user_request', {
+      const response = await axios.post('/api/register/requests', {
         name : name.value,
         surname : lastName.value,
         email : email.value,
@@ -247,30 +248,29 @@ const handleRegistration = async () => {
   }
 }
 
-let abortController = null;
 
-const fetchInstitutions = async () => {
+
+const getInstitutionSuggestions = async (abortController) => {
+  try {
+    const url = `/api/organizations/get_by_type?type=${encodeURIComponent(role.value)}&pattern=${encodeURIComponent(institution.value.name)}`;
+    const response = await axios.get(url, { signal: abortController.signal });
+    institutionSuggestions.value = response.data;
+  } catch (error) {
+    if (error.name !== 'CanceledError') {
+      institutionSuggestions.value = [];
+    }
+  }
+}
+
+const _fetch = async () => {
   if (institution.value.name && role.value) {
-    if (abortController) {
-      abortController.abort();
-    }
-    abortController = new AbortController();
-
-    try {
-      const url = `/public/get_all_organization?type=${encodeURIComponent(role.value)}&pattern=${encodeURIComponent(institution.value.name)}`;
-      const response = await axios.get(url, { signal: abortController.signal });
-      institutionSuggestions.value = response.data;
-    } catch (error) {
-      if (error.name !== 'CanceledError') {
-        institutionSuggestions.value = [];
-      }
-    }
+    await abstractFetching(getInstitutionSuggestions)
   } else {
     institutionSuggestions.value = [];
   }
 };
 
-const fetchInstitutionsDebounced = debounce(fetchInstitutions, 300);
+const _fetchDebounced = debounce(_fetch, 300);
 
 const refreshPage = () => {
   window.location.reload()

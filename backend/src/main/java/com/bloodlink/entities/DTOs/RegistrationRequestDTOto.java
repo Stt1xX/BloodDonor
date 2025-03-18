@@ -21,23 +21,23 @@ public class RegistrationRequestDTOto {
 
     private LocalDateTime createdAt;
 
-    private OrganizationDTOto organization;
+    private String organizationName;
 
     public RegistrationRequestDTOto(Long id, String name, String surname, String email, Role role,
-                                    OrganizationDTOto organization, LocalDateTime createdAt) {
+                                    String organizationName, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.email = email;
         this.role = role;
-        this.organization = organization;
+        this.organizationName = organizationName;
         this.createdAt = createdAt;
     }
 
     public static RegistrationRequestDTOto convert(RegistrationRequest entity) {
         return new RegistrationRequestDTOto(entity.getId(), entity.getName(), entity.getSurname(), entity.getEmail(),
-                entity.getRole(), (entity.getBloodBank() == null && entity.getInstitution() == null) ? null : OrganizationDTOto.convert(entity.getBloodBank() == null ?
-                entity.getInstitution() : entity.getBloodBank()), entity.getCreatedAt());
+                entity.getRole(), (entity.getBloodBank() == null && entity.getInstitution() == null) ? null : entity.getBloodBank() == null ?
+                entity.getInstitution().getName() : entity.getBloodBank().getName(), entity.getCreatedAt());
     }
 
 

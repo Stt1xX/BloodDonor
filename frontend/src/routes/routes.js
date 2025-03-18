@@ -5,9 +5,7 @@ import RegistrationView from '@/views/shared/RegistrationView.vue'
 import OrganizationSettingsView from '@/views/adminViews/OrganizationSettingsView.vue'
 import BloodBankMain from '@/views/BloodBankMain.vue'
 import MedicalInstitutionMain from '@/views/MedicalInstitutionMain.vue'
-import AdminRequestsView from "@/views/adminViews/AdminRequestsView.vue";
-import BankEmpRequestsView from "@/views/adminViews/BankEmpRequestsView.vue";
-import MedicalEmpRequetsView from "@/views/adminViews/MedicalEmpRequetsView.vue";
+import EmployeeRequestsView from "@/views/adminViews/EmployeeRequestsView.vue";
 
 const routes = [
     {
@@ -26,20 +24,13 @@ const routes = [
       meta: { requiresAuth: true }
     },
     {
-        path: '/admin/admin_requests',
-        component: AdminRequestsView,
+        path: '/admin/requests',
+        component: EmployeeRequestsView,
         meta: { requiresAuth: true }
     },
-    {
-        path: '/admin/bank_requests',
-        component: BankEmpRequestsView,
-        meta: { requiresAuth: true }
-    },
-    {
-        path: '/admin/medical_requests',
-        component: MedicalEmpRequetsView,
-        meta: { requiresAuth: true }
-    },
+
+
+
     {
       path: '/bank_employee/main',
       component: BloodBankMain,

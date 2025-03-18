@@ -4,6 +4,7 @@ import com.bloodlink.entities.DTOs.RegistrationRequestDTOfrom;
 import com.bloodlink.entities.DTOs.RegistrationRequestDTOto;
 import com.bloodlink.entities.RegistrationRequest;
 import com.bloodlink.entities.User;
+import com.bloodlink.entities.enums.Role;
 import com.bloodlink.entities.specifications.RegistrationRequestsSpecs;
 import com.bloodlink.exceptions.CustomDuplicateException;
 import com.bloodlink.exceptions.IllegalServiceArgumentException;
@@ -31,35 +32,38 @@ public class RegistrationRequestService {
     private final UserRepository userRepository;
 
     @Transactional
-    public void save(RegistrationRequestDTOfrom requestDTOfrom) {
-        try {
-            if (userService.getByEmail(requestDTOfrom.getEmail()) != null) {
-                throw new CustomDuplicateException("Пользователь с таким email уже существует");
-            }
-            RegistrationRequest request = requestDTOfrom.convertToRegistrationRequest();
-            switch (requestDTOfrom.getRole()) {
-                case MEDICAL_EMPLOYEE:
-                    if (requestDTOfrom.getOrganizationId() == null || medicalInstitutionService.get(requestDTOfrom.getOrganizationId()) == null) {
-                        throw new IllegalArgumentException("Не указан id медицинского учреждения");
-                    }
-                    request.setInstitution(medicalInstitutionService.get(requestDTOfrom.getOrganizationId()));
-                    break;
-                case BLOOD_BANK_EMPLOYEE:
-                    if (requestDTOfrom.getOrganizationId() == null || bloodBankService.get(requestDTOfrom.getOrganizationId()) == null) {
-                        throw new IllegalArgumentException("Не указан id банка крови");
-                    }
-                    request.setBloodBank(bloodBankService.get(requestDTOfrom.getOrganizationId()));
-                    break;
-            }
-            request.setPassword(encoder.encode(request.getPassword()));
+    public String save(RegistrationRequestDTOfrom requestDTOfrom) {
+        if (userService.getByEmail(requestDTOfrom.getEmail()) != null || registrationRequestRepository.findByEmail(requestDTOfrom.getEmail()).isPresent()) {
+            throw new CustomDuplicateException("Пользователь или запрос с таким email уже существует");
+        }
+        System.out.println(userService.getByEmail(requestDTOfrom.getEmail()));
+        System.out.println(registrationRequestRepository.findByEmail(requestDTOfrom.getEmail()).isPresent());
+        RegistrationRequest request = requestDTOfrom.convertToRegistrationRequest();
+        switch (requestDTOfrom.getRole()) {
+            case MEDICAL_EMPLOYEE:
+                if (requestDTOfrom.getOrganizationId() == null || medicalInstitutionService.get(requestDTOfrom.getOrganizationId()) == null) {
+                    throw new IllegalArgumentException("Не указан id медицинского учреждения");
+                }
+                request.setInstitution(medicalInstitutionService.get(requestDTOfrom.getOrganizationId()));
+                break;
+            case BLOOD_BANK_EMPLOYEE:
+                if (requestDTOfrom.getOrganizationId() == null || bloodBankService.get(requestDTOfrom.getOrganizationId()) == null) {
+                    throw new IllegalArgumentException("Не указан id банка крови");
+                }
+                request.setBloodBank(bloodBankService.get(requestDTOfrom.getOrganizationId()));
+                break;
+        }
+        request.setPassword(encoder.encode(request.getPassword()));
+        if (registrationRequestRepository.countByRole(Role.ADMIN) == 0 && request.getRole() == Role.ADMIN) {
+            registerUser(request);
+            return "Администратор успешно создан!";
+        } else {
             registrationRequestRepository.save(request);
-        } catch (DataIntegrityViolationException e) {
-            throw new CustomDuplicateException("Запрос с таким email уже создан");
+            return "Заявка на создание пользователя успешно подана!";
         }
     }
 
     public Page<RegistrationRequestDTOto> getRequestsDto(String pattern, Pageable p) throws IllegalServiceArgumentException {
-        //Cringe...
         Specification<RegistrationRequest> filters = Specification.where(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.nameLike(pattern))
                 .or(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.surnameLike(pattern))
                 .or(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.emailLike(pattern))

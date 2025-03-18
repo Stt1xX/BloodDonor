@@ -44,9 +44,7 @@ const logout = async () => {
 }
 
 const headerButtons = [
-  [{ text: 'Админы', action: () => router.push('/admin/admin_requests') },
-  { text: 'Работники банков', action: () => router.push('/admin/bank_requests') },
-  { text: 'Медицинские работники', action: () => router.push('/admin/medical_requests') },
+  [{ text: 'Работники', action: () => router.push('/admin/requests') },
   { text: 'Организации', action: () => router.push('/admin/organization_settings') },
   { text: 'Выйти', action: () => logout() }],
 ]

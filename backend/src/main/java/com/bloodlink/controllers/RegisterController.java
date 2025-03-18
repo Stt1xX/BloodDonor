@@ -19,7 +19,6 @@ public class RegisterController {
 
     @PostMapping("/requests")
     public ResponseEntity<?> createUserRequest(@Valid @RequestBody RegistrationRequestDTOfrom request) {
-        registrationRequestService.save(request);
-        return ResponseEntity.ok().body("Заявка на создание пользователя успешно подана!");
+        return ResponseEntity.ok().body(registrationRequestService.save(request));
     }
 }

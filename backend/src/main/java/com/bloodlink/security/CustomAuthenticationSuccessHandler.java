@@ -19,7 +19,7 @@ public class    CustomAuthenticationSuccessHandler implements AuthenticationSucc
         response.setContentType("application/json; charset=UTF-8");
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("responseText", "You have logged in successfully!");
+        responseBody.put("responseText", "Вы вошли в систему успешно!");
         responseBody.put("role", authentication.getAuthorities().toArray()[0].toString());
         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
     }

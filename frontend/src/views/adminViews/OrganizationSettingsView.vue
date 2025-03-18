@@ -3,23 +3,29 @@
     <Header :header-group="HeaderGroup.ADMIN"/>
     <main class="flex-grow container mx-auto py-20 px-20 flex flex-col items-center">
       <div class="w-full flex justify-between mb-4">
-        <input type="text" v-model="searchQuery" placeholder="Поиск организаций..." class="border p-2 rounded w-1/2"/>
+        <input type="text"
+               v-model="searchQuery"
+               placeholder="Поиск организаций..."
+               class="border p-2 rounded w-1/2"
+               @focus="search"
+               @input="searchDebounced"
+        />
         <button @click="showForm = true; formTitle = 'Создание организации';" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">Создать организацию</button>
       </div>
-      <div class="w-full rounded-lg border border-gray-500 overflow-hidden">
+        <div v-if="organizations.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
         <table class="w-full">
           <tbody>
-          <tr v-for="organization in filteredOrganizations" :key="organization.id" class="border-b border-gray-500 last:border-b-0">
+          <tr v-for="organization in organizations" :key="organization.id" class="border-b border-gray-500 last:border-b-0">
             <td class="p-4">
               <div>{{ organization.name }}</div>
               <div class="text-gray-500">{{ organization.address }}</div>
             </td>
             <td class="p-4">
-              <div>{{ organization.email }}</div>
               <div class="text-gray-500">{{ organization.phone }}</div>
             </td>
             <td class="p-4">{{convertOrganizationType(organization.organizationType) }}</td>
-            <td class="p-4">{{ formatWorkingHours(organization.workingHours) }}</td>
+            <td class="p-4">{{ formatWorkingHours(organization.hoursFrom, organization.hoursTo,
+                organization.minutesFrom, organization.minutesTo) }}</td>
             <td class="p-4 space-x-2">
               <button @click="editOrganization(organization)" class="text-blue-600 hover:text-blue-800">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -36,20 +42,22 @@
           </tbody>
         </table>
       </div>
+      <p v-else class="text-gray-500 text-center mt-20 mb-20">Тут пока тихо...</p>
 
       <div class="mt-4 flex items-center">
         <button
-            :disabled="currentPage === 1"
+            @click="prevPage"
+            :disabled="currentPage === 0"
             class="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2 hover:bg-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Предыдущая
         </button>
 
-        <span class="mx-2">{{ currentPage }}</span>
+        <span class="mx-2">{{ currentPage + 1 }}</span>
 
         <button
             @click="nextPage"
-            :disabled="currentPage === totalPages"
+            :disabled="currentPage === totalPages || currentPage === totalPages - 1"
             class="bg-gray-300 text-gray-700 px-4 py-2 rounded ml-2 hover:bg-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Следующая
@@ -66,25 +74,21 @@ import {onMounted, ref} from 'vue'
 import NewOrganizationForm from '@/components/NewOrganizationForm.vue'
 import Footer from "@/components/shared/Footer.vue";
 import Header from "@/components/shared/Header.vue";
-import {convertOrganizationType, formatWorkingHours, HeaderGroup} from "@/js/uitls.js";
+import {abstractFetching, convertOrganizationType, formatWorkingHours, HeaderGroup} from "@/js/uitls.js";
+import axios from "axios";
+import {showAlert} from "@/js/custom-alert.js";
+import debounce from "lodash.debounce";
 
 const showForm = ref(false)
 const formTitle = ref('Создание организации')
 const formOrganization = ref({})
 const isEdit = ref(false)
 
-// DIMA
 const searchQuery = ref('')
-const currentPage = ref(1)
+const currentPage = ref(0)
 const totalPages = ref(1)
 
-const organizations = ref([
-    // DIMA // Пример данных
-  { id: 1, name: 'Organization 1', address: 'Address 1', email: 'email1@example.com', organizationType: 'BLOOD_BANK', workingHours: [{hours : 12, minutes : 0}, {hours : 20, minutes: 0}], phone : '123456789'},
-  { id: 2, name: 'Organization 2', address: 'Address 2', email: 'email2@example.com', organizationType: 'MEDICAL_INSTITUTION', workingHours: [{hours : 8, minutes : 0}, {hours : 18, minutes: 0}], phone : '123456789' },
-])
-
-const filteredOrganizations = organizations.value
+const organizations = ref([])
 
 const editOrganization = (organization) => {
   formTitle.value = 'Редактирование организации'
@@ -101,16 +105,14 @@ const deleteOrganization = (id) => {
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--;
-    // DIMA
-    getOrganizations()
+    getManagedEntities()
   }
 };
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
-    // DIMA
-    getOrganizations()
+    getManagedEntities()
   }
 };
 
@@ -126,15 +128,31 @@ const closeForm = () => {
   }
 }
 
-// DIMA
-const getOrganizations = async () => {
-  // Запрос на получение организаций // searhQuery.value,
+onMounted(() => {
+  updateManagedEntities()
+})
+
+const getManagedEntities = async (abortController) => {
+  try {
+    const url = `/api/organizations?pattern=${searchQuery.value}&page=${currentPage.value}&size=8&sort=id`
+    const response = await axios.get(url,{ signal: abortController.signal })
+    totalPages.value = response.data.totalPages;
+    organizations.value = response.data.content;
+    console.log("get req", organizations.value)
+  } catch (error) {
+    showAlert(error);
+  }
 }
 
+const updateManagedEntities = () => {
+  getManagedEntities(new AbortController())
+}
 
-onMounted(() => {
-  getOrganizations()
-})
+const search = async () => {
+  await abstractFetching(getManagedEntities)
+}
+
+const searchDebounced = debounce(search, 300);
 
 </script>
 
