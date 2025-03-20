@@ -34,7 +34,7 @@ defineProps({
 
 const logout = async () => {
   try {
-    const response = await axios.post('/logout')
+    const response = await axios.post('/api/logout')
     if (response.status === 200) {
       await router.push('/login')
     }

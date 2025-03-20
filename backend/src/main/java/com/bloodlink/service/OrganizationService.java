@@ -4,6 +4,7 @@ import com.bloodlink.entities.DTOs.OrganizationDTOfrom;
 import com.bloodlink.entities.DTOs.OrganizationDTOto;
 import com.bloodlink.entities.Organization;
 import com.bloodlink.entities.enums.OrganizationType;
+import com.bloodlink.entities.enums.Role;
 import com.bloodlink.entities.specifications.OrganizationSpecs;
 import com.bloodlink.exceptions.CustomDuplicateException;
 import com.bloodlink.repositories.BloodBankRepository;
@@ -34,8 +35,13 @@ public class OrganizationService {
                 .or(OrganizationSpecs.addressLike(pattern))
                 .or(OrganizationSpecs.phoneLike(pattern));
         Page<Organization> p;
-        if (OrganizationType.fromString(type) != null) {
-            p = organizationRepository.findAllByType(OrganizationType.fromString(type), filters, page);
+        var role = Role.fromString(type);
+        if (role != null) {
+            p = switch (role) {
+                case ADMIN -> organizationRepository.findAll(filters, page);
+                case MEDICAL_EMPLOYEE -> organizationRepository.findAllByType(OrganizationType.MEDICAL_INSTITUTION, filters, page);
+                case BLOOD_BANK_EMPLOYEE -> organizationRepository.findAllByType(OrganizationType.BLOOD_BANK, filters, page);
+            };
         } else {
             p = organizationRepository.findAll(filters, page);
         }

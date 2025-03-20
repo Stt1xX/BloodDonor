@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue'
+import {onBeforeUnmount, onMounted, ref} from 'vue'
 import Footer from "@/components/shared/Footer.vue";
 import Header from "@/components/shared/Header.vue";
 import {abstractFetching, convertUserRole, HeaderGroup} from "@/js/uitls.js";
@@ -98,9 +98,14 @@ const nextPage = () => {
   }
 };
 
+let polling;
 onMounted(() => {
   updateManagedEntities()
-  setInterval(updateManagedEntities, 7000);
+  polling = setInterval(updateManagedEntities, 7000);
+})
+
+onBeforeUnmount(() => {
+  clearInterval(polling)
 })
 
 const getManagedEntities = async (abortController) => {
