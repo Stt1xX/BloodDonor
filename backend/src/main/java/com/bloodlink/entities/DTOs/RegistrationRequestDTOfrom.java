@@ -28,8 +28,6 @@ public class RegistrationRequestDTOfrom {
 
     private Long organizationId;
 
-
-    // !!! WITHOUT ID of organization !!!
     public RegistrationRequest convertToRegistrationRequest() {
         RegistrationRequest registrationRequest = new RegistrationRequest();
         registrationRequest.setName(this.name);

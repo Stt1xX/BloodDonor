@@ -9,5 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface BloodBankRepository extends JpaRepository<BloodBank, Long>, JpaSpecificationExecutor<BloodBank>{
-} 
+public interface BloodBankRepository extends JpaRepository<BloodBank, Long>,
+        JpaSpecificationExecutor<BloodBank>{
+}

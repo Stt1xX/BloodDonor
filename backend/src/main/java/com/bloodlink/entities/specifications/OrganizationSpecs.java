@@ -4,7 +4,7 @@ import com.bloodlink.entities.Organization;
 
 import org.springframework.data.jpa.domain.Specification;
 
-public class OrganizationRequestsSpecs {
+public class OrganizationSpecs {
 
     public static Specification<Organization> nameLike(final String name) {
         return (root, query, builder) ->builder.like(root.get("name"), "%" + name + "%");
@@ -15,7 +15,7 @@ public class OrganizationRequestsSpecs {
     }
 
     public static Specification<Organization> phoneLike(final String phone) {
-        return (root, query, builder) ->builder.like(root.get("email"), "%" + phone + "%");
+        return (root, query, builder) ->builder.like(root.get("phone"), "%" + phone + "%");
     }
 
 }

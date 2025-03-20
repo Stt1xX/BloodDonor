@@ -92,7 +92,7 @@
 </template>
 
 <script setup>
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
 import axios from 'axios'
 
 import VueDatePicker from '@vuepic/vue-datepicker';
@@ -152,7 +152,6 @@ const is_bad_time = (time) => {
   return false
 }
 
-
 const createOrganization = async () => {
   try {
     const response = await axios.post('/api/organizations',
@@ -174,10 +173,11 @@ const createOrganization = async () => {
   }
 }
 
-const editOrganization = async () => {
+const editOrganization = async (id) => {
   try {
     const response = await axios.put('/api/organizations',
         {
+          id : organization.value.id,
           type : organization.value.organizationType,
           name : organization.value.name,
           address : organization.value.address,
@@ -198,7 +198,7 @@ const editOrganization = async () => {
 const handleCreateOrganization = async () => {
   if (validateForm()) {
     if (props.isEdit) {
-      await editOrganization()
+      await editOrganization(props.organization.id)
     } else {
       await createOrganization()
     }

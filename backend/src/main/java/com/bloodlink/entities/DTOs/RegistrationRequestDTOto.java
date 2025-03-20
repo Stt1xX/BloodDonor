@@ -36,8 +36,7 @@ public class RegistrationRequestDTOto {
 
     public static RegistrationRequestDTOto convert(RegistrationRequest entity) {
         return new RegistrationRequestDTOto(entity.getId(), entity.getName(), entity.getSurname(), entity.getEmail(),
-                entity.getRole(), (entity.getBloodBank() == null && entity.getInstitution() == null) ? null : entity.getBloodBank() == null ?
-                entity.getInstitution().getName() : entity.getBloodBank().getName(), entity.getCreatedAt());
+                entity.getRole(), entity.getOrganization().getName(), entity.getCreatedAt());
     }
 
 

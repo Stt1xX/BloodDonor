@@ -39,6 +39,17 @@ export function formatWorkingHours(hoursFrom, hoursTo, minutesFrom, minutesTo) {
     return `${formatTime(hoursFrom, minutesFrom)} - ${formatTime(hoursTo, minutesTo)}`;
 }
 
+export function formatWorkingHoursArray(hoursFrom, hoursTo, minutesFrom, minutesTo) {
+    if (hoursFrom == null || hoursTo == null || minutesFrom == null || minutesTo == null) {
+        return null;
+    }
+    return [
+        { hours: hoursFrom, minutes: minutesFrom },
+        { hours: hoursTo, minutes: minutesTo }
+    ];
+}
+
+
 let abortController = null;
 
 export const abstractFetching = async (fetchFunc) => {

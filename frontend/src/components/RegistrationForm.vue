@@ -128,7 +128,7 @@
         <div class="group col-span-3 relative">
           <label for="institution" class="block text-sm font-medium text-gray-700">
             Заведение
-            <span v-if="errors.institution" class="text-red-500 text-xs ml-2">{{ errors.institution }}</span>
+            <span v-if="errors.institution && (role || role !== 'admin')" class="text-red-500 text-xs ml-2">{{ errors.institution }}</span>
           </label>
           <div class="relative mt-1">
             <input
@@ -252,9 +252,9 @@ const handleRegistration = async () => {
 
 const getInstitutionSuggestions = async (abortController) => {
   try {
-    const url = `/api/organizations/get_by_type?type=${encodeURIComponent(role.value)}&pattern=${encodeURIComponent(institution.value.name)}`;
+    const url = `/api/organizations?type=${encodeURIComponent(role.value)}&pattern=${encodeURIComponent(institution.value.name)}&page=0&size=8&sort=id`;
     const response = await axios.get(url, { signal: abortController.signal });
-    institutionSuggestions.value = response.data;
+    institutionSuggestions.value = response.data.content;
   } catch (error) {
     if (error.name !== 'CanceledError') {
       institutionSuggestions.value = [];

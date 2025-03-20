@@ -1,6 +1,5 @@
 package com.bloodlink.security;
 
-import com.bloodlink.repositories.UserRepository;
 import com.bloodlink.service.UserService;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
@@ -11,12 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
@@ -42,7 +38,7 @@ public class SecurityConfig {
                 .securityMatcher("/api/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/csrf", "/api/register/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/orders/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/organizations/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling((handle) -> handle.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
@@ -56,7 +52,7 @@ public class SecurityConfig {
                 })
                 .rememberMe(rememberMe -> rememberMe
                         .tokenValiditySeconds((int) Duration.ofHours(12).getSeconds())
-                        .rememberMeCookieName("REMEMBERME")
+                        .rememberMeCookieName("REMEMBER_ME")
                         .alwaysRemember(true)
                 )
                 .formLogin(form -> form

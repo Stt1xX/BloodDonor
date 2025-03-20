@@ -74,7 +74,13 @@ import {onMounted, ref} from 'vue'
 import NewOrganizationForm from '@/components/NewOrganizationForm.vue'
 import Footer from "@/components/shared/Footer.vue";
 import Header from "@/components/shared/Header.vue";
-import {abstractFetching, convertOrganizationType, formatWorkingHours, HeaderGroup} from "@/js/uitls.js";
+import {
+  abstractFetching,
+  convertOrganizationType,
+  formatWorkingHours,
+  formatWorkingHoursArray,
+  HeaderGroup
+} from "@/js/uitls.js";
 import axios from "axios";
 import {showAlert} from "@/js/custom-alert.js";
 import debounce from "lodash.debounce";
@@ -93,13 +99,21 @@ const organizations = ref([])
 const editOrganization = (organization) => {
   formTitle.value = 'Редактирование организации'
   formOrganization.value = organization
+  formOrganization.value.workingHours = formatWorkingHoursArray(organization.hoursFrom, organization.hoursTo,
+      organization.minutesFrom, organization.minutesTo)
   isEdit.value = true
   showForm.value = true
 }
 
-// DIMA
-const deleteOrganization = (id) => {
-  // Логика удаления организации
+const deleteOrganization = async (id) => {
+  try {
+    const url = `/api/organizations?id=${id}`
+    const response = await axios.delete(url)
+    showAlert(response.data)
+  } catch (error) {
+    showAlert(error);
+  }
+  updateManagedEntities()
 }
 
 const prevPage = () => {
@@ -126,19 +140,20 @@ const closeForm = () => {
     phone: '',
     work_time: '',
   }
+  updateManagedEntities()
 }
 
 onMounted(() => {
   updateManagedEntities()
+  setInterval(updateManagedEntities, 7000);
 })
 
 const getManagedEntities = async (abortController) => {
   try {
-    const url = `/api/organizations?pattern=${searchQuery.value}&page=${currentPage.value}&size=8&sort=id`
+    const url = `/api/organizations?type=&pattern=${searchQuery.value}&page=${currentPage.value}&size=8&sort=id`
     const response = await axios.get(url,{ signal: abortController.signal })
     totalPages.value = response.data.totalPages;
     organizations.value = response.data.content;
-    console.log("get req", organizations.value)
   } catch (error) {
     showAlert(error);
   }

@@ -37,9 +37,9 @@ public class OrganizationDTOto {
         this.organizationType = organizationType;
     }
 
-    public static OrganizationDTOto convert(Organization organization, OrganizationType organizationType) {
+    public static OrganizationDTOto convert(Organization organization) {
         return new OrganizationDTOto(organization.getId(), organization.getAddress(), organization.getName(),
                 organization.getPhone(), organization.getHoursFrom(), organization.getHoursTo(),
-                organization.getMinutesFrom(), organization.getMinutesTo(), organizationType);
+                organization.getMinutesFrom(), organization.getMinutesTo(), organization.getType());
     }
 }

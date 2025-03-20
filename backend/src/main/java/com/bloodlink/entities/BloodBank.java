@@ -12,10 +12,10 @@ import java.util.List;
 @Table(name = "blood_banks")
 public class BloodBank extends Organization{
 
-    @OneToMany(mappedBy = "bloodBank", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "bloodBank", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<BloodUnit> bloodUnits;
 
-    @OneToMany(mappedBy = "bloodBank", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "bloodBank", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<BloodRequest> requests;
 
     public BloodBank() {

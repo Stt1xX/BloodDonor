@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import com.bloodlink.entities.enums.Role;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
@@ -29,12 +31,9 @@ public class RegistrationRequest {
     private Role role;
 
     @OneToOne
-    @JoinColumn(name = "institution_id")
-    private MedicalInstitution institution;
-
-    @OneToOne
-    @JoinColumn(name = "blood_bank_id")
-    private BloodBank bloodBank;
+    @JoinColumn(name = "organization_d")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Organization organization;
 
     @CreatedDate
     private LocalDateTime createdAt;

@@ -100,6 +100,7 @@ const nextPage = () => {
 
 onMounted(() => {
   updateManagedEntities()
+  setInterval(updateManagedEntities, 7000);
 })
 
 const getManagedEntities = async (abortController) => {
@@ -120,13 +121,15 @@ const updateManagedEntities = () => {
 const accept = async (id) => {
   const url = `/api/requests/approve/${id}`
   const response = await axios.post(url)
-  console.log(response.data)
+  showAlert(response.data)
+  updateManagedEntities()
 }
 
 const reject = async (id) => {
   const url = `/api/requests/reject/${id}`
   const response = await axios.post(url)
-  console.log(response.data)
+  showAlert(response.data)
+  updateManagedEntities()
 }
 
 const search = async () => {

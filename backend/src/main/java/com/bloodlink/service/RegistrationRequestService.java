@@ -8,10 +8,10 @@ import com.bloodlink.entities.enums.Role;
 import com.bloodlink.entities.specifications.RegistrationRequestsSpecs;
 import com.bloodlink.exceptions.CustomDuplicateException;
 import com.bloodlink.exceptions.IllegalServiceArgumentException;
+import com.bloodlink.repositories.OrganizationRepository;
 import com.bloodlink.repositories.RegistrationRequestRepository;
 import com.bloodlink.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,11 +25,10 @@ import org.springframework.util.StringUtils;
 public class RegistrationRequestService {
 
     private final PasswordEncoder encoder;
-    private final BloodBankService bloodBankService;
-    private final MedicalInstitutionService medicalInstitutionService;
     private final RegistrationRequestRepository registrationRequestRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final OrganizationService organizationService;
 
     @Transactional
     public String save(RegistrationRequestDTOfrom requestDTOfrom) {
@@ -39,20 +38,10 @@ public class RegistrationRequestService {
         System.out.println(userService.getByEmail(requestDTOfrom.getEmail()));
         System.out.println(registrationRequestRepository.findByEmail(requestDTOfrom.getEmail()).isPresent());
         RegistrationRequest request = requestDTOfrom.convertToRegistrationRequest();
-        switch (requestDTOfrom.getRole()) {
-            case MEDICAL_EMPLOYEE:
-                if (requestDTOfrom.getOrganizationId() == null || medicalInstitutionService.get(requestDTOfrom.getOrganizationId()) == null) {
-                    throw new IllegalArgumentException("Не указан id медицинского учреждения");
-                }
-                request.setInstitution(medicalInstitutionService.get(requestDTOfrom.getOrganizationId()));
-                break;
-            case BLOOD_BANK_EMPLOYEE:
-                if (requestDTOfrom.getOrganizationId() == null || bloodBankService.get(requestDTOfrom.getOrganizationId()) == null) {
-                    throw new IllegalArgumentException("Не указан id банка крови");
-                }
-                request.setBloodBank(bloodBankService.get(requestDTOfrom.getOrganizationId()));
-                break;
+        if (requestDTOfrom.getRole() != Role.ADMIN &&  organizationService.get(requestDTOfrom.getOrganizationId()) == null) {
+            throw new IllegalServiceArgumentException("Не указан id организации");
         }
+        request.setOrganization(organizationService.get(requestDTOfrom.getOrganizationId()));
         request.setPassword(encoder.encode(request.getPassword()));
         if (registrationRequestRepository.countByRole(Role.ADMIN) == 0 && request.getRole() == Role.ADMIN) {
             registerUser(request);
@@ -63,11 +52,12 @@ public class RegistrationRequestService {
         }
     }
 
-    public Page<RegistrationRequestDTOto> getRequestsDto(String pattern, Pageable p) throws IllegalServiceArgumentException {
-        Specification<RegistrationRequest> filters = Specification.where(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.nameLike(pattern))
-                .or(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.surnameLike(pattern))
-                .or(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.emailLike(pattern))
-                .or(!StringUtils.hasLength(pattern) ? null : RegistrationRequestsSpecs.roleLike(pattern));
+    public Page<RegistrationRequestDTOto> getRequestsDto(String pattern, Pageable p) {
+        Specification<RegistrationRequest> filters = Specification.where(!StringUtils.hasLength(pattern) ? null :
+                    RegistrationRequestsSpecs.nameLike(pattern))
+                .or(RegistrationRequestsSpecs.surnameLike(pattern))
+                .or(RegistrationRequestsSpecs.emailLike(pattern))
+                .or(RegistrationRequestsSpecs.roleLike(pattern));
 
         var requests = registrationRequestRepository.findAll(filters, p);
         return requests.map(RegistrationRequestDTOto::convert);

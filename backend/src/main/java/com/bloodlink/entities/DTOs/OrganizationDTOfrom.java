@@ -38,6 +38,10 @@ public class OrganizationDTOfrom {
                 case BLOOD_BANK -> new BloodBank();
                 case MEDICAL_INSTITUTION -> new MedicalInstitution();
             };
+            e.setType(switch (type) {
+                case BLOOD_BANK -> OrganizationType.BLOOD_BANK;
+                case MEDICAL_INSTITUTION -> OrganizationType.MEDICAL_INSTITUTION;
+            });
             e.setName(name);
             e.setAddress(address);
             e.setPhone(phone);

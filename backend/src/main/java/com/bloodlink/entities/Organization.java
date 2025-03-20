@@ -1,11 +1,14 @@
 package com.bloodlink.entities;
 
+import com.bloodlink.entities.enums.OrganizationType;
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
-@MappedSuperclass
-public abstract class Organization {
+@Entity
+@Table(name = "organizations")
+@Inheritance(strategy = InheritanceType.JOINED)
+public class Organization {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,4 +22,6 @@ public abstract class Organization {
     private Integer hoursTo;
     private Integer minutesFrom;
     private Integer minutesTo;
+    @Enumerated(EnumType.STRING)
+    private OrganizationType type;
 }
