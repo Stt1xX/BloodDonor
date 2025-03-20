@@ -82,16 +82,6 @@ public class SecurityConfig {
         };
     }
 
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user = User.builder()
-//                .username("ramtim1@mail.ru")
-//                .password(passwordEncoder().encode("admin"))
-//                .roles("ADMIN")
-//                .build();
-//        return new InMemoryUserDetailsManager(user);
-//    }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new Sha256PasswordEncoder();

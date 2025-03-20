@@ -74,6 +74,7 @@ replay_pid*
 .env.local
 application-*.properties
 !application.properties
+!application-dev.properties
 
 # OS specific files
 .DS_Store
