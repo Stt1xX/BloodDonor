@@ -24,6 +24,7 @@ import {defineProps, ref} from 'vue'
 import axios from "axios";
 import router from "@/routes/routes.js";
 import {showAlert} from "@/js/custom-alert.js";
+import {get_token} from "@/js/csrf-token.js";
 
 defineProps({
   headerGroup: {
@@ -36,8 +37,11 @@ const logout = async () => {
   try {
     const response = await axios.post('/api/logout')
     if (response.status === 200) {
+      showAlert(response.data)
       await router.push('/login')
+      await get_token()
     }
+
   } catch (error) {
     showAlert(error.response.data)
   }

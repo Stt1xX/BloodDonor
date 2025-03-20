@@ -117,6 +117,7 @@ const handleLogin = async () => {
       if (response.status === 200) {
         await get_token();
         redirect_user(response.data.role)
+        showAlert(response.data.responseText)
       } else {
         showAlert(response.responseText)
       }
