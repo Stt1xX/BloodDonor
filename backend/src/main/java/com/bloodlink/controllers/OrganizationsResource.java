@@ -1,20 +1,15 @@
 package com.bloodlink.controllers;
 
 import com.bloodlink.entities.DTOs.OrganizationDTOfrom;
-import com.bloodlink.entities.enums.OrganizationType;
-import com.bloodlink.entities.enums.Role;
 import com.bloodlink.exceptions.CustomDuplicateException;
 import com.bloodlink.service.OrganizationService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/api/organizations")

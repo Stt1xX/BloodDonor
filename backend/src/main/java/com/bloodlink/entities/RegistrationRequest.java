@@ -31,10 +31,12 @@ public class RegistrationRequest {
     private Role role;
 
     @OneToOne
-    @JoinColumn(name = "organization_d")
+    @JoinColumn(name = "organization_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Organization organization;
 
     @CreatedDate
     private LocalDateTime createdAt;
+
+    private String post;
 }

@@ -168,12 +168,11 @@ const createOrganization = async () => {
     showAlert(response.data)
     emit('close')
   } catch (error) {
-    console.log(error)
     showAlert(error.response.data)
   }
 }
 
-const editOrganization = async (id) => {
+const editOrganization = async () => {
   try {
     const response = await axios.put('/api/organizations',
         {
@@ -190,7 +189,6 @@ const editOrganization = async (id) => {
     showAlert(response.data)
     emit('close')
   } catch (error) {
-    console.log(error)
     showAlert(error.response.data)
   }
 }
@@ -198,7 +196,7 @@ const editOrganization = async (id) => {
 const handleCreateOrganization = async () => {
   if (validateForm()) {
     if (props.isEdit) {
-      await editOrganization(props.organization.id)
+      await editOrganization()
     } else {
       await createOrganization()
     }

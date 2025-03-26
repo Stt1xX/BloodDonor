@@ -109,15 +109,15 @@
 
         <!-- Position Input -->
         <div class="group col-span-1">
-          <label for="position" class="block text-sm font-medium text-gray-700">
+          <label for="post" class="block text-sm font-medium text-gray-700">
             Должность
-            <span v-if="errors.position" class="text-red-500 text-xs ml-2">{{ errors.position }}</span>
+            <span v-if="errors.post" class="text-red-500 text-xs ml-2">{{ errors.post }}</span>
           </label>
           <div class="relative mt-1">
             <input
                 type="text"
-                id="position"
-                v-model="position"
+                id="post"
+                v-model="post"
                 class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-red-500 focus:border-red-500 hover:border-red-300 transition-all duration-200"
                 placeholder="Введите вашу должность"
             />
@@ -193,7 +193,7 @@ const lastName = ref('')
 const email = ref('')
 const password = ref('')
 const role = ref('')
-const position = ref('')
+const post = ref('')
 const institution = ref({name : '', id : null})
 const institutionSuggestions = ref([])
 const errors = ref({})
@@ -225,7 +225,7 @@ const validateForm = () => {
     errors.value.password = 'Должен быть более 4 символов'
   }
   if (!role.value) errors.value.role = 'Роль обязательна'
-  if (!position.value) errors.value.position = 'Должность обязательна'
+  if (!post.value) errors.value.post = 'Должность обязательна'
   if (!institution.value.id && role.value !== 'admin') errors.value.institution = 'Заведение обязательно'
   return Object.keys(errors.value).length === 0
 }
@@ -239,6 +239,7 @@ const handleRegistration = async () => {
         email : email.value,
         password : password.value,
         role : role.value,
+        post : post.value,
         organizationId : institution.value.id
       });
       showAlert(response.data)

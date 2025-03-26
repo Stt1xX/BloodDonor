@@ -36,14 +36,14 @@ public class OrganizationService {
             typeEnum = switch (role) {
                 case ADMIN -> null;
                 case MEDICAL_EMPLOYEE -> OrganizationType.MEDICAL_INSTITUTION;
-                case BLOOD_BANK_EMPLOYEE ->OrganizationType.BLOOD_BANK;
+                case BANK_EMPLOYEE ->OrganizationType.BLOOD_BANK;
             };
         }
         Specification<Organization> filters = Specification.where(!StringUtils.hasLength(pattern) ? null :
                     OrganizationSpecs.nameLike(pattern))
                 .or(OrganizationSpecs.addressLike(pattern))
                 .or(OrganizationSpecs.phoneLike(pattern))
-                .or(OrganizationSpecs.hasType(typeEnum));
+                .and(OrganizationSpecs.hasType(typeEnum));
 
         var p = organizationRepository.findAll(filters, page);
         return p.map(OrganizationDTOto::convert);

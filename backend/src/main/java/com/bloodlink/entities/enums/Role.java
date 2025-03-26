@@ -7,7 +7,7 @@ import lombok.Getter;
 public enum Role {
     ADMIN("admin"),
     MEDICAL_EMPLOYEE("medical_worker"),
-    BLOOD_BANK_EMPLOYEE("bank_employee");
+    BANK_EMPLOYEE("bank_employee");
 
     private final String name;
 

@@ -26,6 +26,9 @@ public class RegistrationRequestDTOfrom {
 
     private Role role;
 
+    @NotBlank(message = "Поле не может быть пустым")
+    private String post;
+
     private Long organizationId;
 
     public RegistrationRequest convertToRegistrationRequest() {
@@ -35,6 +38,7 @@ public class RegistrationRequestDTOfrom {
         registrationRequest.setEmail(this.email);
         registrationRequest.setPassword(this.password);
         registrationRequest.setRole(this.role);
+        registrationRequest.setPost(this.post);
         return registrationRequest;
     }
 }

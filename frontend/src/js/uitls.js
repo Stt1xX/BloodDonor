@@ -25,6 +25,8 @@ export const convertUserRole = (role) => {
             return 'Сотрудник банка крови';
         case 'MEDICAL_EMPLOYEE':
             return 'Сотрудник медицинского учреждения';
+        default:
+            return 'Unknown'
     }
 }
 

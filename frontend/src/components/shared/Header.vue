@@ -1,10 +1,16 @@
 <template>
-  <header class="bg-red-600 text-white py-4 shadow-md">
+  <header class="bg-red-600 text-white py-4 px-10 shadow-md">
     <div class="container mx-auto flex justify-between items-center">
       <div class="flex items-center">
         <img src="@/assets/logo.png" alt="Logo" class="w-10 h-10 mr-3" />
         <h1 class="text-2xl font-bold">Blood Link</h1>
       </div>
+
+      <div v-if="user.name && user.surname" class="flex flex-col items-end text-right ml-6">
+        <span class="text-lg font-semibold">Добро пожаловать, {{ user.name }} {{ user.surname }}!</span>
+        <span class="text-sm text-gray-200">{{ convertUserRole(user.role) }}</span>
+      </div>
+
       <nav class="flex space-x-4">
         <button
             v-for="button in headerButtons[headerGroup]"
@@ -20,11 +26,13 @@
 </template>
 
 <script setup>
-import {defineProps, ref} from 'vue'
+import {defineProps} from 'vue'
+import {user} from "@/js/user-info.js"
 import axios from "axios";
 import router from "@/routes/routes.js";
 import {showAlert} from "@/js/custom-alert.js";
 import {get_token} from "@/js/csrf-token.js";
+import {convertOrganizationType, convertUserRole} from "@/js/uitls.js";
 
 defineProps({
   headerGroup: {
@@ -59,14 +67,7 @@ const headerButtons = [
 header {
   background-color: #e3342f;
   color: white;
-  padding: 1rem 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
 }
 
 nav button {

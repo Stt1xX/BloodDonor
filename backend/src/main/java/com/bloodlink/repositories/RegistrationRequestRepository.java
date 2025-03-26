@@ -9,5 +9,4 @@ import java.util.Optional;
 
 public interface RegistrationRequestRepository extends JpaRepository<RegistrationRequest, Long>, JpaSpecificationExecutor<RegistrationRequest> {
     Optional<RegistrationRequest> findByEmail(String email);
-    Long countByRole(Role role);
 }

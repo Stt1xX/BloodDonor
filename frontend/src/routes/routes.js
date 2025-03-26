@@ -6,6 +6,7 @@ import OrganizationSettingsView from '@/views/adminViews/OrganizationSettingsVie
 import BloodBankMain from '@/views/BloodBankMain.vue'
 import MedicalInstitutionMain from '@/views/MedicalInstitutionMain.vue'
 import EmployeeRequestsView from "@/views/adminViews/EmployeeRequestsView.vue";
+import {getUserInfo} from "@/js/user-info.js";
 
 const routes = [
     {
@@ -28,9 +29,6 @@ const routes = [
         component: EmployeeRequestsView,
         meta: { requiresAuth: true }
     },
-
-
-
     {
       path: '/bank_employee/main',
       component: BloodBankMain,
@@ -51,5 +49,13 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+
+router.beforeEach(async (to, from, next) => {
+    if (to.path !== "/login" && to.path !== "/registration") {
+        await getUserInfo()
+    }
+    next();
+});
 
 export default router;

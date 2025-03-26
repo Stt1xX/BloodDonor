@@ -79,7 +79,7 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
-import {get_token, token} from "@/js/csrf-token.js"
+import {get_token} from "@/js/csrf-token.js"
 import router from "@/routes/routes.js"
 import {showAlert} from "@/js/custom-alert.js";
 
