@@ -30,21 +30,22 @@ public class OrganizationService {
     private final BloodBankRepository bloodBankRepository;
 
     public Page<OrganizationDTOto> getAll(String type, String pattern, Pageable page) {
+        OrganizationType typeEnum = null;
+        var role = Role.fromString(type);
+        if (role != null) {
+            typeEnum = switch (role) {
+                case ADMIN -> null;
+                case MEDICAL_EMPLOYEE -> OrganizationType.MEDICAL_INSTITUTION;
+                case BLOOD_BANK_EMPLOYEE ->OrganizationType.BLOOD_BANK;
+            };
+        }
         Specification<Organization> filters = Specification.where(!StringUtils.hasLength(pattern) ? null :
                     OrganizationSpecs.nameLike(pattern))
                 .or(OrganizationSpecs.addressLike(pattern))
-                .or(OrganizationSpecs.phoneLike(pattern));
-        Page<Organization> p;
-        var role = Role.fromString(type);
-        if (role != null) {
-            p = switch (role) {
-                case ADMIN -> organizationRepository.findAll(filters, page);
-                case MEDICAL_EMPLOYEE -> organizationRepository.findAllByType(OrganizationType.MEDICAL_INSTITUTION, filters, page);
-                case BLOOD_BANK_EMPLOYEE -> organizationRepository.findAllByType(OrganizationType.BLOOD_BANK, filters, page);
-            };
-        } else {
-            p = organizationRepository.findAll(filters, page);
-        }
+                .or(OrganizationSpecs.phoneLike(pattern))
+                .or(OrganizationSpecs.hasType(typeEnum));
+
+        var p = organizationRepository.findAll(filters, page);
         return p.map(OrganizationDTOto::convert);
     }
 

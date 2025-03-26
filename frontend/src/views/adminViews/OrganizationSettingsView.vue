@@ -155,7 +155,7 @@ onBeforeUnmount(() => {
 
 const getManagedEntities = async (abortController) => {
   try {
-    const url = `/api/organizations?type=&pattern=${searchQuery.value}&page=${currentPage.value}&size=8&sort=id`
+    const url = `/api/organizations?type=&pattern=${encodeURIComponent(searchQuery.value)}&page=${currentPage.value}&size=8&sort=id`
     const response = await axios.get(url,{ signal: abortController.signal })
     totalPages.value = response.data.totalPages;
     organizations.value = response.data.content;
