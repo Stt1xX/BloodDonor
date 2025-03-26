@@ -7,7 +7,6 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "organizations")
-@Inheritance(strategy = InheritanceType.JOINED)
 public class Organization {
 
     @Id
@@ -22,6 +21,7 @@ public class Organization {
     private Integer hoursTo;
     private Integer minutesFrom;
     private Integer minutesTo;
+
     @Enumerated(EnumType.STRING)
     private OrganizationType type;
 }

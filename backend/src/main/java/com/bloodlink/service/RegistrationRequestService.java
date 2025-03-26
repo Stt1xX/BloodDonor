@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -31,12 +32,13 @@ public class RegistrationRequestService {
     private final UserRepository userRepository;
     private final OrganizationService organizationService;
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public String save(RegistrationRequestDTOfrom requestDTOfrom) {
-        if (userService.getByEmail(requestDTOfrom.getEmail()) != null || registrationRequestRepository.findByEmail(requestDTOfrom.getEmail()).isPresent()) {
+        if (userService.getByEmail(requestDTOfrom.getEmail()) != null ||
+                registrationRequestRepository.findByEmail(requestDTOfrom.getEmail()).isPresent()) {
             throw new CustomDuplicateException("Пользователь или запрос с таким email уже существует");
         }
-        RegistrationRequest request = requestDTOfrom.convertToRegistrationRequest();
+        RegistrationRequest request = requestDTOfrom.convert();
         if (requestDTOfrom.getRole() != Role.ADMIN &&  organizationService.get(requestDTOfrom.getOrganizationId()) == null) {
             throw new IllegalServiceArgumentException("Не указан id организации");
         }
@@ -97,6 +99,7 @@ public class RegistrationRequestService {
         user.setPassword(req.getPassword());
         user.setRole(req.getRole());
         user.setPost(req.getPost());
+        user.setIsDeleted(false);
         userRepository.save(user);
     }
 }

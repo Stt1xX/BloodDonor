@@ -168,7 +168,7 @@ const createOrganization = async () => {
     showAlert(response.data)
     emit('close')
   } catch (error) {
-    showAlert(error.response.data)
+    showAlert(error.response.data);
   }
 }
 
@@ -189,7 +189,7 @@ const editOrganization = async () => {
     showAlert(response.data)
     emit('close')
   } catch (error) {
-    showAlert(error.response.data)
+    showAlert(error.response.data);
   }
 }
 

@@ -119,14 +119,10 @@ const handleLogin = async () => {
         redirect_user(response.data.role)
         showAlert(response.data.responseText)
       } else {
-        showAlert(response.responseText)
+        showAlert(response)
       }
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.responseText) {
-        showAlert(error.response.data.responseText)
-      } else {
-        showAlert('Login failed. Please try again.')
-      }
+        showAlert(error.response.data)
     }
   }
 }

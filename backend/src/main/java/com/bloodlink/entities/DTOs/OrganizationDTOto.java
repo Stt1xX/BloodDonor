@@ -1,17 +1,13 @@
 package com.bloodlink.entities.DTOs;
 
-import com.bloodlink.entities.BloodBank;
-import com.bloodlink.entities.MedicalInstitution;
 import com.bloodlink.entities.Organization;
 import com.bloodlink.entities.enums.OrganizationType;
-import jakarta.persistence.Column;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Data
+@AllArgsConstructor
 public class OrganizationDTOto {
 
     private Long id;
@@ -24,21 +20,8 @@ public class OrganizationDTOto {
     private Integer minutesTo;
     private OrganizationType organizationType;
 
-    public OrganizationDTOto(Long id, String address, String name, String phone, Integer hoursFrom,
-                             Integer hoursTo, Integer minutesFrom, Integer minutesTo, OrganizationType organizationType) {
-        this.id = id;
-        this.address = address;
-        this.name = name;
-        this.hoursFrom = hoursFrom;
-        this.phone = phone;
-        this.hoursTo = hoursTo;
-        this.minutesFrom = minutesFrom;
-        this.minutesTo = minutesTo;
-        this.organizationType = organizationType;
-    }
-
     public static OrganizationDTOto convert(Organization organization) {
-        return new OrganizationDTOto(organization.getId(), organization.getAddress(), organization.getName(),
+        return new OrganizationDTOto(organization.getId(), organization.getName(), organization.getAddress(),
                 organization.getPhone(), organization.getHoursFrom(), organization.getHoursTo(),
                 organization.getMinutesFrom(), organization.getMinutesTo(), organization.getType());
     }

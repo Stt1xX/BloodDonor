@@ -32,7 +32,7 @@ import axios from "axios";
 import router from "@/routes/routes.js";
 import {showAlert} from "@/js/custom-alert.js";
 import {get_token} from "@/js/csrf-token.js";
-import {convertOrganizationType, convertUserRole} from "@/js/uitls.js";
+import {convertUserRole} from "@/js/uitls.js";
 
 defineProps({
   headerGroup: {
@@ -47,18 +47,19 @@ const logout = async () => {
     if (response.status === 200) {
       showAlert(response.data)
       await router.push('/login')
-      await get_token()
     }
 
   } catch (error) {
-    showAlert(error.response.data)
+    showAlert(error.response.data);
   }
 }
 
 const headerButtons = [
-  [{ text: 'Работники', action: () => router.push('/admin/requests') },
+  [{ text: 'Запросы', action: () => router.push('/admin/requests') },
   { text: 'Организации', action: () => router.push('/admin/organization_settings') },
-  { text: 'Выйти', action: () => logout() }],
+  { text: 'Работники',  action: () => router.push('/admin/all_users') },
+  { text: 'Выйти', action: () => logout() },
+  ],
 ]
 
 </script>

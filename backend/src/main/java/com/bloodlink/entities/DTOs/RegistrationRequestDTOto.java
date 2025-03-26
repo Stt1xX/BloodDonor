@@ -2,11 +2,13 @@ package com.bloodlink.entities.DTOs;
 
 import com.bloodlink.entities.RegistrationRequest;
 import com.bloodlink.entities.enums.Role;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@AllArgsConstructor
 public class RegistrationRequestDTOto {
 
     private Long id;
@@ -23,20 +25,10 @@ public class RegistrationRequestDTOto {
 
     private String organizationName;
 
-    public RegistrationRequestDTOto(Long id, String name, String surname, String email, Role role,
-                                    String organizationName, LocalDateTime createdAt) {
-        this.id = id;
-        this.name = name;
-        this.surname = surname;
-        this.email = email;
-        this.role = role;
-        this.organizationName = organizationName;
-        this.createdAt = createdAt;
-    }
-
     public static RegistrationRequestDTOto convert(RegistrationRequest entity) {
-        return new RegistrationRequestDTOto(entity.getId(), entity.getName(), entity.getSurname(), entity.getEmail(),
-                entity.getRole(), entity.getOrganization() == null ? null : entity.getOrganization().getName(), entity.getCreatedAt());
+        return new RegistrationRequestDTOto(entity.getId(), entity.getName(), entity.getSurname(),
+                entity.getEmail(), entity.getRole(), entity.getCreatedAt(),
+                entity.getOrganization() == null ? null : entity.getOrganization().getName());
     }
 
 

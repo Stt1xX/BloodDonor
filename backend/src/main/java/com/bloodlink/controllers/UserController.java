@@ -1,9 +1,11 @@
 package com.bloodlink.controllers;
 
+import com.bloodlink.exceptions.CustomDuplicateException;
 import com.bloodlink.service.UserService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.annotation.security.RolesAllowed;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,5 +31,19 @@ public class UserController {
             response.put("role", currentUser.getRole().toString());
         }
         return response;
+    }
+
+
+    @RolesAllowed(value = {"ADMIN"})
+    @GetMapping
+    public ResponseEntity<?> getUsers( @RequestParam String pattern,
+                                      Pageable page) {
+        return ResponseEntity.ok(userService.getAll(pattern, page));
+    }
+
+    @RolesAllowed(value = {"ADMIN"})
+    @DeleteMapping
+    public ResponseEntity<?> deleteUser(@RequestParam Long id) throws CustomDuplicateException {
+        return ResponseEntity.ok(userService.delete(id));
     }
 }

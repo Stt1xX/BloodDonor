@@ -7,11 +7,13 @@ import com.bloodlink.entities.enums.Role;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Data
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class RegistrationRequest {
 
     @Id
@@ -21,8 +23,6 @@ public class RegistrationRequest {
     private String name;
 
     private String surname;
-
-    @Column(unique = true)
     private String email;
 
     private String password;

@@ -13,7 +13,3 @@ export const get_token = async () => {
         return config;
     });
 }
-
-
-
-

@@ -2,6 +2,7 @@ package com.bloodlink.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -54,6 +55,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityConstraintViolationException.class)
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     public @ResponseBody String handleEntityConstraintViolation(EntityConstraintViolationException e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(InternalAuthenticationServiceException.class)
+    @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
+    public @ResponseBody String handleInternalAuthenticationServiceException(InternalAuthenticationServiceException e) {
+        System.out.println("ДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРжДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРжДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРжДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРжДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРжДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРжДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРж");
         return e.getMessage();
     }
 

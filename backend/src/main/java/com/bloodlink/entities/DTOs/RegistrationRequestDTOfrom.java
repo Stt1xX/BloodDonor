@@ -31,7 +31,7 @@ public class RegistrationRequestDTOfrom {
 
     private Long organizationId;
 
-    public RegistrationRequest convertToRegistrationRequest() {
+    public RegistrationRequest convert() {
         RegistrationRequest registrationRequest = new RegistrationRequest();
         registrationRequest.setName(this.name);
         registrationRequest.setSurname(this.surname);

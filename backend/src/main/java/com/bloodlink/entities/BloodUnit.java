@@ -9,10 +9,14 @@ import org.springframework.data.annotation.CreatedDate;
 import java.time.LocalDateTime;
 
 @Data
-
 @Entity
 @Table(name = "blood_units")
 public class BloodUnit {
+
+    public BloodUnit() {
+
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,7 +33,7 @@ public class BloodUnit {
 
     @ManyToOne
     @JoinColumn(name = "blood_bank_id")
-    private BloodBank bloodBank;
+    private Organization bloodBank;
 
     @CreatedDate
     private LocalDateTime createdAt;

@@ -7,22 +7,23 @@ import BloodBankMain from '@/views/BloodBankMain.vue'
 import MedicalInstitutionMain from '@/views/MedicalInstitutionMain.vue'
 import EmployeeRequestsView from "@/views/adminViews/EmployeeRequestsView.vue";
 import {getUserInfo} from "@/js/user-info.js";
-
+import AllUsersView from "@/views/adminViews/AllUsersView.vue";
+import NotFoundView from '@/views/shared/NotFoundView.vue'
 const routes = [
     {
-      path: '/login',
-      component: LoginView,
-      meta: { requiresAuth: false }
+        path: '/login',
+        component: LoginView,
+        meta: { requiresAuth: false }
     },
     {
-      path: '/registration',
-      component: RegistrationView,
-      meta: { requiresAuth: false }
+        path: '/registration',
+        component: RegistrationView,
+        meta: { requiresAuth: false }
     },
     {
-      path: '/admin/organization_settings',
-      component: OrganizationSettingsView,
-      meta: { requiresAuth: true }
+        path: '/admin/organization_settings',
+        component: OrganizationSettingsView,
+        meta: { requiresAuth: true }
     },
     {
         path: '/admin/requests',
@@ -30,26 +31,34 @@ const routes = [
         meta: { requiresAuth: true }
     },
     {
-      path: '/bank_employee/main',
-      component: BloodBankMain,
-      meta: { requiresAuth: true }
+        path: '/admin/all_users',
+        component: AllUsersView,
+        meta: {requiresAuth: true }
     },
     {
-      path: '/medical_employee/main',
-      component: MedicalInstitutionMain,
-      meta: { requiresAuth: true }
+        path: '/bank_employee/main',
+        component: BloodBankMain,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/medical_employee/main',
+        component: MedicalInstitutionMain,
+        meta: { requiresAuth: true }
     },
     {
         path: '/',
         redirect: '/login'
     },
+    {
+        path: '/:pathMatch(.*)*',
+        component: NotFoundView
+    }
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes
+    history: createWebHistory(),
+    routes
 })
-
 
 router.beforeEach(async (to, from, next) => {
     if (to.path !== "/login" && to.path !== "/registration") {

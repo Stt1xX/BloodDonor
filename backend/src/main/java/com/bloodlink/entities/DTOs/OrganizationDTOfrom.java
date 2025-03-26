@@ -1,7 +1,5 @@
 package com.bloodlink.entities.DTOs;
 
-import com.bloodlink.entities.BloodBank;
-import com.bloodlink.entities.MedicalInstitution;
 import com.bloodlink.entities.Organization;
 import com.bloodlink.entities.enums.OrganizationType;
 import com.bloodlink.validators.annotaions.WorkTimeCheckAnnotation;
@@ -19,9 +17,8 @@ public class OrganizationDTOfrom {
     @NotNull(message = "Адрес не может быть пустым")
     private String address;
     @NotNull(message = "Телефон не может быть пустым")
-    @Pattern(regexp = "^(\\+7|8)\\d{10}$|^(\\(?\\d{3,5}\\)?[\\s-]?\\d{1,3}[\\s-]?\\d{2}[\\s-]?\\d{2})$",
-            message = "Некорректный номер телефона. Ожидается мобильный (+7XXXXXXXXXX или 8XXXXXXXXXX) " +
-                    "или домашний (XXX-XX-XX или (XXX) XXX-XX-XX)")
+    @Pattern(regexp = "^(\\+7|8)\\d{10}$",
+            message = "Некорректный номер телефона. Ожидается мобильный (+7XXXXXXXXXX или 8XXXXXXXXXX)")
     private String phone;
     @NotNull(message = "Время работы не может быть пустым")
     private Integer hoursFrom;
@@ -32,16 +29,9 @@ public class OrganizationDTOfrom {
     @NotNull(message = "Время работы не может быть пустым")
     private Integer minutesTo;
 
-    public <E extends Organization> E getOrganization() {
+    public Organization convert() {
         try {
-            Organization e = switch (type) {
-                case BLOOD_BANK -> new BloodBank();
-                case MEDICAL_INSTITUTION -> new MedicalInstitution();
-            };
-            e.setType(switch (type) {
-                case BLOOD_BANK -> OrganizationType.BLOOD_BANK;
-                case MEDICAL_INSTITUTION -> OrganizationType.MEDICAL_INSTITUTION;
-            });
+            Organization e = new Organization();
             e.setName(name);
             e.setAddress(address);
             e.setPhone(phone);
@@ -50,7 +40,8 @@ public class OrganizationDTOfrom {
             e.setMinutesFrom(minutesFrom);
             e.setMinutesTo(minutesTo);
             e.setId(id);
-            return (E) e;
+            e.setType(type);
+            return e;
         } catch (Exception ex) {
             return null;
         }

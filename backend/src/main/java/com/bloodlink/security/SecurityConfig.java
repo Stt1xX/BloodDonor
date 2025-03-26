@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,12 +37,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/api/**")
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/auth/login", "/api/register/**", "/api/organizations/**")
+                )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/csrf", "/api/register/**").permitAll()
+                        .requestMatchers("/api/register/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/organizations/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .exceptionHandling((handle) -> handle.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .exceptionHandling(handle -> handle
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                )
                 .formLogin((form) -> {
                     form.loginPage("/login");
                     form.loginProcessingUrl("/api/auth/login");
@@ -59,19 +65,21 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .permitAll()
 
-                )
-                .exceptionHandling(handler ->
-                        handler.accessDeniedHandler(new CustomAccessDeniedHandler()));
+                );
 
         return http.build();
     }
+
 
     @Bean
     public UserDetailsService userDetailsService() {
         return email -> {
             com.bloodlink.entities.User user = userService.getByEmail(email);
             if (user == null) {
-                throw new UsernameNotFoundException("User not found");
+                throw new UsernameNotFoundException("Пользователь не найден");
+            }
+            if (user.getIsDeleted()) {
+                throw new DisabledException("Пользователь удален");
             }
             return org.springframework.security.core.userdetails.User
                     .withUsername(user.getEmail())

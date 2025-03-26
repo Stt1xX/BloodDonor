@@ -30,11 +30,11 @@ public class BloodRequest {
 
     @ManyToOne
     @JoinColumn(name = "blood_bank_id")
-    private BloodBank bloodBank;
+    private Organization bloodBank;
 
     @ManyToOne
     @JoinColumn(name = "medical_institution_id")
-    private MedicalInstitution medicalInstitution;
+    private Organization medicalInstitution;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

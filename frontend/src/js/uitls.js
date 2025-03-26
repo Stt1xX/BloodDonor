@@ -1,5 +1,3 @@
-import debounce from "lodash.debounce";
-
 export const HeaderGroup = {
     ADMIN : 0,
     BANK_EMPLOYEE : 1,
@@ -49,6 +47,22 @@ export function formatWorkingHoursArray(hoursFrom, hoursTo, minutesFrom, minutes
         { hours: hoursFrom, minutes: minutesFrom },
         { hours: hoursTo, minutes: minutesTo }
     ];
+}
+
+export function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    };
+
+    return date.toLocaleString('ru-RU', options);
 }
 
 

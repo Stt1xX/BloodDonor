@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col">
     <Header :header-group="HeaderGroup.ADMIN"/>
-    <main class="flex-grow container mx-auto py-20 px-20 flex flex-col items-center">
+    <main class="flex-grow container mx-auto py-32 px-20 flex flex-col items-center">
       <div class="w-full flex justify-between mb-4">
         <input type="text"
                v-model="searchQuery"
@@ -12,7 +12,7 @@
         />
         <button @click="showForm = true; formTitle = 'Создание организации';" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">Создать организацию</button>
       </div>
-        <div v-if="organizations.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
+        <div v-if="organizations.length > 0" class="w-full  rounded-lg border border-gray-500 overflow-hidden">
         <table class="w-full">
           <tbody>
           <tr v-for="organization in organizations" :key="organization.id" class="border-b border-gray-500 last:border-b-0">
@@ -84,6 +84,7 @@ import {
 import axios from "axios";
 import {showAlert} from "@/js/custom-alert.js";
 import debounce from "lodash.debounce";
+import {get_token} from "@/js/csrf-token.js";
 
 const showForm = ref(false)
 const formTitle = ref('Создание организации')
@@ -111,7 +112,7 @@ const deleteOrganization = async (id) => {
     const response = await axios.delete(url)
     showAlert(response.data)
   } catch (error) {
-    showAlert(error);
+    showAlert(error.response.data);
   }
   updateManagedEntities()
 }
@@ -148,7 +149,9 @@ let polling
 onMounted(() => {
   updateManagedEntities()
   polling = setInterval(updateManagedEntities, 7000);
+  get_token()
 })
+
 onBeforeUnmount(() => {
   clearInterval(polling)
 })
@@ -160,7 +163,7 @@ const getManagedEntities = async (abortController) => {
     totalPages.value = response.data.totalPages;
     organizations.value = response.data.content;
   } catch (error) {
-    showAlert(error);
+    showAlert(error.response.data);
   }
 }
 

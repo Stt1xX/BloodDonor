@@ -244,7 +244,7 @@ const handleRegistration = async () => {
       });
       showAlert(response.data)
     } catch (error) {
-      showAlert(error.response.data)
+      showAlert(error.response.data);
     }
   }
 }

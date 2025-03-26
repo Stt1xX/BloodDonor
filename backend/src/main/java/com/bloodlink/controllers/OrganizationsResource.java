@@ -19,7 +19,7 @@ public class OrganizationsResource {
     private final OrganizationService organizationService;
 
     @GetMapping
-    public ResponseEntity<?> getOrganization(@RequestParam String type,
+    public ResponseEntity<?> getOrganizations(@RequestParam String type,
                                             @RequestParam String pattern,
                                             Pageable page) {
         return ResponseEntity.ok(organizationService.getAll(type, pattern, page));

@@ -8,41 +8,36 @@
             v-model="searchQuery"
             @input="searchDebounced"
             @focus="search"
-            placeholder="Поиск заявок..."
+            placeholder="Поиск работников..."
             class="border p-2 rounded w-1/2"/>
       </div>
-          <div v-if="managedEntities.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
-            <table class="w-full">
-              <tbody>
-              <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
-                <td class="p-4">
-                  <div>{{ managedEntity.name }} {{ managedEntity.surname }}</div>
-                  <div class="text-gray-500">{{ convertUserRole(managedEntity.role) }}</div>
-                </td>
-                <td class="p-4">
-                  <div>{{ managedEntity.email }}</div>
-                  <div class="text-gray-500">{{ managedEntity.organizationName || 'Без организации' }}</div>
-                </td>
-                <td class="p-4 space-x-2">
-                  {{ formatTimestamp(managedEntity.createdAt) }}
-                </td>
-                <td class="p-4 space-x-2">
-                    <button @click="accept(managedEntity.id)" class="text-green-600 hover:text-green-800">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </button>
-                    <button @click="reject(managedEntity.id)" class="text-red-600 hover:text-red-800">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-        </div>
-        <p v-else class="text-gray-500 text-center mt-20 mb-20">Тут пока тихо...</p>
+      <div v-if="managedEntities.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
+        <table class="w-full">
+          <tbody>
+          <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
+            <td class="p-4">
+              <div>{{ managedEntity.name }} {{ managedEntity.surname }}</div>
+              <div class="text-gray-500">{{ convertUserRole(managedEntity.role) }}</div>
+            </td>
+            <td class="p-4">
+              <div>{{ managedEntity.email }}</div>
+              <div class="text-gray-500">{{ managedEntity.organizationName || 'Без организации' }}</div>
+            </td>
+            <td class="p-4 space-x-2">
+              {{ managedEntity.post }}
+            </td>
+            <td class="p-4 space-x-2">
+              <button @click="remove(managedEntity.id)" class="text-red-600 hover:text-red-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p v-else class="text-gray-500 text-center mt-20 mb-20">Тут пока тихо...</p>
 
       <div class="mt-4 flex items-center">
         <button
@@ -112,7 +107,7 @@ onBeforeUnmount(() => {
 
 const getManagedEntities = async (abortController) => {
   try {
-    const url = `/api/requests?pattern=${searchQuery.value}&page=${currentPage.value}&size=8&sort=id`
+    const url = `/api/user?pattern=${searchQuery.value}&page=${currentPage.value}&size=8&sort=id`
     const response = await axios.get(url,{ signal: abortController.signal })
     totalPages.value = response.data.totalPages;
     managedEntities.value = response.data.content;
@@ -125,16 +120,9 @@ const updateManagedEntities = () => {
   getManagedEntities(new AbortController())
 }
 
-const accept = async (id) => {
-  const url = `/api/requests/approve/${id}`
-  const response = await axios.post(url)
-  showAlert(response.data)
-  updateManagedEntities()
-}
-
-const reject = async (id) => {
-  const url = `/api/requests/reject/${id}`
-  const response = await axios.post(url)
+const remove = async (id) => {
+  const url = `/api/user?id=${id}`
+  const response = await axios.delete(url)
   showAlert(response.data)
   updateManagedEntities()
 }

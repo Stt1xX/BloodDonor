@@ -13,6 +13,6 @@ export const getUserInfo = async () => {
         const response = await axios.get("/api/user/info")
         user.value = response.data
     } catch (error) {
-        showAlert(error.response.data)
+        showAlert(error.response.data);
     }
 }

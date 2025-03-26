@@ -7,8 +7,6 @@ import com.bloodlink.entities.enums.OrganizationType;
 import com.bloodlink.entities.enums.Role;
 import com.bloodlink.entities.specifications.OrganizationSpecs;
 import com.bloodlink.exceptions.CustomDuplicateException;
-import com.bloodlink.repositories.BloodBankRepository;
-import com.bloodlink.repositories.MedicalInstitutionRepository;
 import com.bloodlink.repositories.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,8 +24,6 @@ import java.util.Optional;
 public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
-    private final MedicalInstitutionRepository medicalInstitutionRepository;
-    private final BloodBankRepository bloodBankRepository;
 
     public Page<OrganizationDTOto> getAll(String type, String pattern, Pageable page) {
         OrganizationType typeEnum = null;
@@ -52,13 +48,11 @@ public class OrganizationService {
     @Transactional
     public String save(OrganizationDTOfrom organizationDTOfrom) throws CustomDuplicateException {
         try {
-            if (organizationDTOfrom.getType() == OrganizationType.BLOOD_BANK) {
-                bloodBankRepository.save(organizationDTOfrom.getOrganization());
-                return "Банк крови успешно добавлен";
-            } else if  (organizationDTOfrom.getType() == OrganizationType.MEDICAL_INSTITUTION) {
-                medicalInstitutionRepository.save(organizationDTOfrom.getOrganization());
-                return "Медицинское учрежедние успешно добавлено";
-            } else  {
+            if (organizationDTOfrom.getType() == OrganizationType.BLOOD_BANK ||
+                organizationDTOfrom.getType() == OrganizationType.MEDICAL_INSTITUTION) {
+                organizationRepository.save(organizationDTOfrom.convert());
+                return "Организация успешно добавлена";
+            } else {
                 return "Некорректный тип организации";
             }
         } catch (DataIntegrityViolationException e) {

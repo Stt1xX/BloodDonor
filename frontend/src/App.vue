@@ -7,13 +7,20 @@
 
 <script setup>
 
-import {onMounted} from "vue";
-import {get_token} from "@/js/csrf-token.js";
 import CustomAlert from "@/components/shared/CustomAlert.vue";
+import axios from "axios";
+import router from "@/routes/routes.js";
 
-onMounted( async () => {
-  await get_token()
-})
+axios.interceptors.response.use(
+    response => response,
+    async error => {
+      if (error.response && error.response.status === 401) {
+        await router.push("/login");
+      }
+      return Promise.reject(error);
+    }
+);
+
 
 </script>
 
@@ -23,11 +30,5 @@ html, body, #app {
   padding: 0;
   height: 100%;
   width: 100%;
-}
-
-.app {
-  height: 100%;
-  width: 100%;
-  font-family: Arial, sans-serif;
 }
 </style>
