@@ -21,10 +21,10 @@
             </td>
             <td class="p-4">
               <div>{{ managedEntity.email }}</div>
-              <div class="text-gray-500">{{ managedEntity.organizationName || 'Без организации' }}</div>
+              <div class="text-gray-500">{{ managedEntity.post }}</div>
             </td>
             <td class="p-4 space-x-2">
-              {{ managedEntity.post }}
+              {{ managedEntity.organizationName || 'Без организации' }}
             </td>
             <td class="p-4 space-x-2">
               <button @click="remove(managedEntity.id)" class="text-red-600 hover:text-red-800">

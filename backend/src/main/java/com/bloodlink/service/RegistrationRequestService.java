@@ -100,6 +100,7 @@ public class RegistrationRequestService {
         user.setRole(req.getRole());
         user.setPost(req.getPost());
         user.setIsDeleted(false);
+        user.setOrganization(req.getOrganization());
         userRepository.save(user);
     }
 }

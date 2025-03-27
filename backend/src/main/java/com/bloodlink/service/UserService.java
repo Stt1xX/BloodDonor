@@ -51,6 +51,7 @@ public class UserService {
                 .or(UserSpecs.emailLike(pattern))
                 .and(UserSpecs.notDeleted());
         var p = userRepository.findAll(filters, page);
+
         return p.map(UserDTOto::convert);
     }
 

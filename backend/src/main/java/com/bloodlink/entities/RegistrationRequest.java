@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Table(name = "registration_requests")
 @EntityListeners(AuditingEntityListener.class)
 public class RegistrationRequest {
 
