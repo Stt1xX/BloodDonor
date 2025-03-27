@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '@/views/shared/LoginView.vue'
 import RegistrationView from '@/views/shared/RegistrationView.vue'
 import OrganizationSettingsView from '@/views/adminViews/OrganizationSettingsView.vue'
-import BloodBankMain from '@/views/BloodBankMain.vue'
+import BankReserve from '@/views/bankViews/BankReserve.vue'
 import MedicalInstitutionMain from '@/views/MedicalInstitutionMain.vue'
 import EmployeeRequestsView from "@/views/adminViews/EmployeeRequestsView.vue";
 import {getUserInfo} from "@/js/user-info.js";
@@ -36,8 +36,8 @@ const routes = [
         meta: {requiresAuth: true }
     },
     {
-        path: '/bank_employee/main',
-        component: BloodBankMain,
+        path: '/bank_employee/reserves',
+        component: BankReserve,
         meta: { requiresAuth: true }
     },
     {

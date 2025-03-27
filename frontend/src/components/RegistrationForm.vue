@@ -186,7 +186,7 @@ import CustomSelect from '@/components/shared/CustomSelect.vue'
 import axios from "axios";
 import debounce from 'lodash.debounce';
 import {showAlert} from "@/js/custom-alert.js";
-import {abstractFetching} from "@/js/uitls.js";
+import {abstractFetching} from "@/js/utils.js";
 
 const name = ref('')
 const lastName = ref('')

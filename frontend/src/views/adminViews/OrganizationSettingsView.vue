@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen flex flex-col">
-    <Header :header-group="HeaderGroup.ADMIN"/>
+    <Header :header-group="HeaderGroups.ADMIN"/>
     <main class="flex-grow container mx-auto py-32 px-20 flex flex-col items-center">
       <div class="w-full flex justify-between mb-4">
         <input type="text"
@@ -79,8 +79,8 @@ import {
   convertOrganizationType,
   formatWorkingHours,
   formatWorkingHoursArray,
-  HeaderGroup
-} from "@/js/uitls.js";
+  HeaderGroups
+} from "@/js/utils.js";
 import axios from "axios";
 import {showAlert} from "@/js/custom-alert.js";
 import debounce from "lodash.debounce";

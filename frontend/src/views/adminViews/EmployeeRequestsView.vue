@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen flex flex-col">
-    <Header :header-group="HeaderGroup.ADMIN"/>
+    <Header :header-group="HeaderGroups.ADMIN"/>
     <main class="flex-grow container mx-auto py-32 px-20 flex flex-col items-center">
       <div class="w-full flex justify-between mb-4">
         <input
@@ -72,7 +72,7 @@
 import {onBeforeUnmount, onMounted, ref} from 'vue'
 import Footer from "@/components/shared/Footer.vue";
 import Header from "@/components/shared/Header.vue";
-import {abstractFetching, convertUserRole, formatTimestamp, HeaderGroup} from "@/js/uitls.js";
+import {abstractFetching, convertUserRole, formatTimestamp, HeaderGroups} from "@/js/utils.js";
 import debounce from "lodash.debounce";
 import axios from "axios";
 import {showAlert} from "@/js/custom-alert.js";

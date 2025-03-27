@@ -1,4 +1,4 @@
-export const HeaderGroup = {
+export const HeaderGroups = {
     ADMIN : 0,
     BANK_EMPLOYEE : 1,
     MEDICAL_EMPLOYEE : 2

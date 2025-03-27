@@ -133,8 +133,8 @@ const redirect_user = (role) => {
     router.push('/admin/organization_settings')
   } else if (role === 'MEDICAL_EMPLOYEE') {
     router.push('/medical_employee/main')
-  } else if (role === 'BLOOD_BANK_EMPLOYEE') {
-    router.push('/bank_employee/main')
+  } else if (role === 'BANK_EMPLOYEE') {
+    router.push('/bank_employee/reserves')
   } else {
     router.push('/login')
   }

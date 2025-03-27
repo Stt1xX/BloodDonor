@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen flex flex-col">
-    <Header :header-group="HeaderGroup.ADMIN"/>
+    <Header :header-group="HeaderGroups.ADMIN"/>
     <div class="blood-requests-view">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Заявки на кровь</h1>
@@ -18,7 +18,7 @@
 
 <script setup>
 import BloodRequestList from '@/components/BloodRequestList.vue'
-import {HeaderGroup} from "@/js/uitls.js";
+import {HeaderGroups} from "@/js/utils.js";
 import Header from "@/components/shared/Header.vue";
 </script>
 
