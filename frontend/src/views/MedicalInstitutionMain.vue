@@ -11,13 +11,11 @@
           Создать заявку
         </button>
       </div>
-      <BloodRequestList />
     </div>
   </div>
 </template>
 
 <script setup>
-import BloodRequestList from '@/components/BloodRequestList.vue'
 import {HeaderGroups} from "@/js/utils.js";
 import Header from "@/components/shared/Header.vue";
 </script>

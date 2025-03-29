@@ -12,7 +12,7 @@ body {
     overflow-x: hidden;
 }
 
-input, select, .dp__input {
+textarea, input, select, .dp__input {
     border: 1px solid rgb(209 213 219);
     padding-top: 8px;
     padding-bottom: 8px;
@@ -20,11 +20,19 @@ input, select, .dp__input {
     font-family: "Comfortaa", sans-serif;
 }
 
-input:hover, select:hover {
+textarea:hover, input:hover, select:hover {
     border-color: red;
 }
 
-input:focus, select:focus {
+textarea:focus, input:focus, select:focus {
     outline: none;
     border: 1px solid red;
+}
+
+input:disabled {
+    pointer-events: none;
+    opacity: 1;
+    border-color: rgb(209 213 219);
+    background-color: inherit;
+    color: inherit;
 }

@@ -38,15 +38,16 @@
             <select v-model="sortBy" class="px-4 py-2 border rounded-md bg-white shadow-sm">
               <option value="volume">По объему</option>
               <option value="date">По дате поставки</option>
+              <option value="priority">По приоритету</option>
             </select>
           </div>
         </div>
         <p>
-          Всего запросов: {{ bloodVolumeByGroupAndRhesus }}
+          Всего запросов: {{ RequestNumberByGroupAndRhesus }}
         </p>
         <button
             @click="showForm = true; formTitle = 'Добавление партии крови';"
-            class="bg-red-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-700 transition-colors"
+            class="invisible bg-red-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-700 transition-colors"
         >
           Добавить кровь
         </button>
@@ -56,6 +57,9 @@
         <table class="w-full">
           <tbody>
           <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
+            <td class="p-4 text-center">
+              <div>{{ managedEntity.medicalInstitutionName }}</div>
+            </td>
             <td class="p-4 text-center">
               <div>{{ managedEntity.group }}</div>
             </td>
@@ -69,12 +73,12 @@
               {{ managedEntity.date }}
             </td>
             <td class="p-4 text-center space-x-2">
-              <button @click="editManagedEntity(managedEntity)" class="text-blue-600 hover:text-blue-800">
+              <button @click="accept(managedEntity.id)" class="text-green-600 hover:text-green-800">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 3.5l4 4-12 12-4 1 1-4 12-12z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
               </button>
-              <button @click="deleteManagedEntity(managedEntity.id)" class="text-red-600 hover:text-red-800">
+              <button @click="reject(managedEntity)" class="text-red-600 hover:text-red-800">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -106,27 +110,26 @@
           Следующая
         </button>
       </div>
-      <NewBloodItemForm v-if="showForm" @close="closeForm" :title="formTitle" :bloodReserve="isEdit ? formManagedEntity : undefined" :is-edit="isEdit"/>
+      <RejectBloodReqWindow v-if="showForm" @close="closeForm" @confirm="handleRejectSubmit" :request-data="formManagedEntity"/>
     </main>
     <Footer />
   </div>
 </template>
 
-
 <script setup>
 import {onBeforeUnmount, onMounted, ref} from "vue";
 import { HeaderGroups } from "@/js/utils.js";
 import Header from "@/components/shared/Header.vue";
-import NewBloodItemForm from "@/components/NewBloodItemForm.vue";
 import {showAlert} from "@/js/custom-alert.js";
 import axios from "axios";
 import {get_token} from "@/js/csrf-token.js";
 import Footer from "@/components/shared/Footer.vue";
+import RejectBloodReqWindow from "@/components/RejectBloodReqWindow.vue";
 
 const managedEntities = ref([
-  { id: 1, group: 1, rhesus: "+", volume: 5, date: "2025-03-25" },
-  { id: 2, group: 3, rhesus: "+", volume: 4, date: "2025-03-27" },
-  { id: 3, group: 2, rhesus: "-", volume: 3, date: "2025-03-26" }
+  { id: 1, group: 1, rhesus: "+", volume: 5, date: "2025-03-25", medicalInstitutionName : "Главная поклиника ИТМО"},
+  { id: 2, group: 3, rhesus: "+", volume: 4, date: "2025-03-27", medicalInstitutionName : "Главная поклиника ИТМО" },
+  { id: 3, group: 2, rhesus: "-", volume: 3, date: "2025-03-26", medicalInstitutionName : "Главная поклиника ИТМО" }
 ]);
 
 
@@ -146,7 +149,7 @@ const toggleRhesus = (rhesus) => {
 const bloodGroup = ref(null);
 const rhesusFactor = ref(null);
 const formManagedEntity = ref({})
-const bloodVolumeByGroupAndRhesus = ref(0);
+const RequestNumberByGroupAndRhesus = ref(0);
 const sortBy = ref("volume");
 
 const currentPage = ref(0)
@@ -162,28 +165,8 @@ const closeForm = () => {
     phone: '',
     work_time: '',
   }
-  updateManagedEntities()
+  // updateManagedEntities()
 }
-
-
-const editManagedEntity = (managedEntity) => {
-  formTitle.value = 'Редактирование партии крови'
-  formManagedEntity.value = managedEntity
-  isEdit.value = true
-  showForm.value = true
-}
-
-const deleteManagedEntity = async (id) => {
-  try {
-    const url = `/api/blood-reserve?id=${id}`
-    const response = await axios.delete(url)
-    showAlert(response.data)
-  } catch (error) {
-    showAlert(error.response.data);
-  }
-  updateManagedEntities()
-}
-
 
 const prevPage = () => {
   if (currentPage.value > 1) {
@@ -214,11 +197,11 @@ onBeforeUnmount(() => {
 
 const getManagedEntities = async (abortController) => {
   try {
-    const url = `/api/blood-reserve?rhesus=${rhesusFactor.value}&group=${bloodGroup.value}&page=${currentPage.value}&size=8&sort=id`
+    const url = `/api/blood-requests?rhesus=${rhesusFactor.value}&group=${bloodGroup.value}&page=${currentPage.value}&size=8&sort=id`
     const response = await axios.get(url,{ signal: abortController.signal })
     totalPages.value = response.data.totalPages;
     managedEntities.value = response.data.content.main;
-    bloodVolumeByGroupAndRhesus.value =  response.data.content.summary;
+    RequestNumberByGroupAndRhesus.value =  response.data.content.summary;
   } catch (error) {
     showAlert(error.response.data);
   }
@@ -227,5 +210,19 @@ const getManagedEntities = async (abortController) => {
 const updateManagedEntities = () => {
   getManagedEntities(new AbortController())
 }
+
+const reject = (managedEntity) => {
+  formManagedEntity.value = { ...managedEntity };
+  showForm.value = true;
+};
+
+const accept = (managedEntity) => {
+  console.log("Accept: " + managedEntity)
+}
+
+const handleRejectSubmit = (data) => {
+  console.log("Отказ оформлен:", data);
+  closeForm();
+};
 
 </script>
