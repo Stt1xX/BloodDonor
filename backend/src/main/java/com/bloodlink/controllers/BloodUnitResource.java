@@ -47,7 +47,7 @@ public class BloodUnitResource {
 
     @PreAuthorize("hasAnyAuthority('BANK_EMPLOYEE')")
     @PutMapping
-    public ResponseEntity<?> updateOrganization(@Valid @RequestParam BloodUnitDTOfrom dto) {
+    public ResponseEntity<?> updateOrganization(@Valid @RequestBody BloodUnitDTOfrom dto) {
         return ResponseEntity.ok(bloodUnitsService.update(dto));
     }
 

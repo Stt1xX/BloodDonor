@@ -90,15 +90,20 @@ public class BloodUnitsService {
         }).orElse("Не могу распознать вас");
     }
 
-    // TODO
+
     @Transactional
     public String update(BloodUnitDTOfrom dto) {
         BloodUnit unit = dto.convert();
-        return userService.getCurrentUser().map(user -> {
-            unit.setBloodBank(user.getOrganization());
-            bloodUnitRepository.save(unit);
-            return "Партия крови успешно добавлена!";
-        }).orElse("Не могу распознать вас");
+        if (unit.getId() == null){
+            throw new IllegalArgumentException("Для обновления организации не предоставлен id");
+        }
+        return bloodUnitRepository.findById(unit.getId()).map(un -> {
+            return userService.getCurrentUser().map(user -> {
+                unit.setBloodBank(user.getOrganization());
+                bloodUnitRepository.save(unit);
+                return "Партия крови успешно изменена!";
+            }).orElse("Не могу распознать вас");
+        }).orElse("Не могу найти данную партию крови");
     }
 
 
