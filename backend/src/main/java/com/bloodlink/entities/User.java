@@ -1,8 +1,8 @@
 package com.bloodlink.entities;
 
+import com.bloodlink.entities.enums.Role;
 import jakarta.persistence.*;
 import lombok.Data;
-import com.bloodlink.entities.enums.Role;
 
 @Data
 @Entity
@@ -24,4 +24,13 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "organization_id")
     private Organization organization;
+
+    public boolean isBankEmployee() {
+        return role.equals(Role.BANK_EMPLOYEE);
+    }
+    public boolean isMedicalEmployee() {
+        return role.equals(Role.MEDICAL_EMPLOYEE);
+    }
+
+
 } 
