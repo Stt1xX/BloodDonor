@@ -3,6 +3,8 @@ package com.bloodlink.entities;
 import com.bloodlink.entities.enums.Role;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Data
 @Entity
@@ -22,15 +24,9 @@ public class User {
     private Role role;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "organization_id")
     private Organization organization;
-
-    public boolean isBankEmployee() {
-        return role.equals(Role.BANK_EMPLOYEE);
-    }
-    public boolean isMedicalEmployee() {
-        return role.equals(Role.MEDICAL_EMPLOYEE);
-    }
 
 
 } 

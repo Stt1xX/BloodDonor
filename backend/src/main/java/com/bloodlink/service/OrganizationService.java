@@ -46,7 +46,7 @@ public class OrganizationService {
     }
 
     @Transactional
-    public String save(OrganizationDTOfrom organizationDTOfrom) throws CustomDuplicateException {
+    public String save(OrganizationDTOfrom organizationDTOfrom) {
         try {
             if (organizationDTOfrom.getType() == OrganizationType.BLOOD_BANK ||
                 organizationDTOfrom.getType() == OrganizationType.MEDICAL_INSTITUTION) {
@@ -61,7 +61,7 @@ public class OrganizationService {
     }
 
     @Transactional
-    public String update(OrganizationDTOfrom organizationDTOfrom) throws CustomDuplicateException {
+    public String update(OrganizationDTOfrom organizationDTOfrom) {
         if (organizationDTOfrom.getId() == null) {
             throw new IllegalArgumentException("Для обновления организации не предоставлен id");
         }
@@ -74,7 +74,7 @@ public class OrganizationService {
     }
 
     @Transactional
-    public String delete(Long id) throws CustomDuplicateException {
+    public String delete(Long id) {
         Optional<Organization> orgOpt = organizationRepository.findById(id);
         if (orgOpt.isEmpty()) {
             throw new IllegalArgumentException("Организация с таким id уже существует");

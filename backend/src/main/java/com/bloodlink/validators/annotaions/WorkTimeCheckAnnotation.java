@@ -8,9 +8,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.TYPE) // Аннотация применяется к классу
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = WorkTimeCheckValidator.class) // Указываем валидатор
+@Constraint(validatedBy = WorkTimeCheckValidator.class)
 public @interface WorkTimeCheckAnnotation {
     String message() default "Организация должна открыться раньше, чем закрыться";
 

@@ -3,13 +3,15 @@ package com.bloodlink.entities.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum RhFactor {
-    POSITIVE("+"),
-    NEGATIVE("-");
+public enum BloodGroup {
+    A("1"),
+    B("2"),
+    AB("3"),
+    O("4");
 
     private final String symbol;
 
-    RhFactor(String symbol) {
+    BloodGroup(String symbol) {
         this.symbol = symbol;
     }
 
@@ -19,12 +21,12 @@ public enum RhFactor {
     }
 
     @JsonCreator
-    public static RhFactor fromSymbol(String symbol) {
-        for (RhFactor factor : values()) {
-            if (factor.symbol.equals(symbol)) {
-                return factor;
+    public static BloodGroup fromSymbol(String symbol) {
+        for (BloodGroup type : values()) {
+            if (type.symbol.equals(symbol)) {
+                return type;
             }
         }
         return null;
     }
-}
+} 

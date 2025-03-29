@@ -12,7 +12,7 @@
                 :key="group"
                 @click="toggleBloodGroup(group)"
                 :class="[
-                bloodGroup === group ? 'bg-red-500 text-white' : 'bg-white',
+                group === bloodGroup ? 'bg-red-500 text-white' : 'bg-white',
                 'hover:bg-red-500 hover:text-white transition-colors border px-4 py-2 rounded-md shadow-sm'
                 ]"
             >
@@ -26,7 +26,7 @@
                 :key="rhesus"
                 @click="toggleRhesus(rhesus)"
                 :class="[
-                rhesusFactor === rhesus ? 'bg-red-500 text-white' : 'bg-white',
+                rhesus === rhesusFactor ? 'bg-red-500 text-white' : 'bg-white',
                 'hover:bg-red-500 hover:text-white transition-colors border px-4 py-2 rounded-md shadow-sm'
                 ]"
                 class="px-4 py-2 border rounded-md shadow-sm"
@@ -35,10 +35,15 @@
             </button>
           </div>
           <div>
-            <select v-model="sortBy" class="px-4 py-2 border rounded-md bg-white shadow-sm">
+            <select @change="updateManagedEntities()" v-model="sortBy" class="px-4 py-2 border rounded-md bg-white shadow-sm">
               <option value="volume">По объему</option>
-              <option value="date">По дате поставки</option>
+              <option value="createdAt">По дате поставки</option>
+              <option value="expirationDate">По дате просрочки</option>
             </select>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-gray-700 font-medium">Инвертировать поиск:</span>
+            <input @change="updateManagedEntities()" type="checkbox" v-model="reverseSearch" class="form-checkbox h-5 w-5 text-red-600" />
           </div>
         </div>
         <p>
@@ -57,16 +62,16 @@
           <tbody>
           <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
             <td class="p-4 text-center">
-              <div>{{ managedEntity.group }}</div>
+              <div>гр. {{ managedEntity.bloodGroup }}</div>
             </td>
             <td class="p-4 text-center">
-              <div>{{ managedEntity.rhesus }}</div>
+              <div>rh{{ managedEntity.rhesusFactor }}</div>
             </td>
             <td class="p-4 text-center">
               <div>{{ managedEntity.volume }} л.</div>
             </td>
             <td class="p-4 text-center">
-              {{ managedEntity.date }}
+              от {{ managedEntity.createdAt }} до {{ managedEntity.expirationDate }}
             </td>
             <td class="p-4 text-center space-x-2">
               <button @click="editManagedEntity(managedEntity)" class="text-blue-600 hover:text-blue-800">
@@ -123,11 +128,7 @@ import axios from "axios";
 import {get_token} from "@/js/csrf-token.js";
 import Footer from "@/components/shared/Footer.vue";
 
-const managedEntities = ref([
-  { id: 1, group: 1, rhesus: "+", volume: 5, date: "2025-03-25" },
-  { id: 2, group: 3, rhesus: "+", volume: 4, date: "2025-03-27" },
-  { id: 3, group: 2, rhesus: "-", volume: 3, date: "2025-03-26" }
-]);
+const managedEntities = ref([]);
 
 
 const showForm = ref(false)
@@ -136,10 +137,12 @@ const isEdit = ref(false)
 
 const toggleBloodGroup = (group) => {
   bloodGroup.value = bloodGroup.value === group ? null : group;
+  updateManagedEntities()
 };
 
 const toggleRhesus = (rhesus) => {
   rhesusFactor.value = rhesusFactor.value === rhesus ? null : rhesus;
+  updateManagedEntities()
 };
 
 
@@ -148,6 +151,7 @@ const rhesusFactor = ref(null);
 const formManagedEntity = ref({})
 const bloodVolumeByGroupAndRhesus = ref(0);
 const sortBy = ref("volume");
+const reverseSearch = ref(false);
 
 const currentPage = ref(0)
 const totalPages = ref(1)
@@ -155,13 +159,13 @@ const totalPages = ref(1)
 const closeForm = () => {
   isEdit.value = false
   showForm.value = false
-  formManagedEntity.value = {
-    organizationType: '',
-    name: '',
-    address: '',
-    phone: '',
-    work_time: '',
-  }
+  // formManagedEntity.value = {
+  //   organizationType: '',
+  //   name: '',
+  //   address: '',
+  //   phone: '',
+  //   work_time: '',
+  // }
   updateManagedEntities()
 }
 
@@ -169,13 +173,16 @@ const closeForm = () => {
 const editManagedEntity = (managedEntity) => {
   formTitle.value = 'Редактирование партии крови'
   formManagedEntity.value = managedEntity
+  formManagedEntity.value.expirationDate = new Date(formManagedEntity.value.expirationDate)
+  formManagedEntity.value.createdAt = new Date(formManagedEntity.value.createdAt)
+  formManagedEntity.value.bloodGroup = Number(formManagedEntity.value.bloodGroup)
   isEdit.value = true
   showForm.value = true
 }
 
 const deleteManagedEntity = async (id) => {
   try {
-    const url = `/api/blood-reserve?id=${id}`
+    const url = `/api/blood_units?id=${id}`
     const response = await axios.delete(url)
     showAlert(response.data)
   } catch (error) {
@@ -186,16 +193,16 @@ const deleteManagedEntity = async (id) => {
 
 
 const prevPage = () => {
-  if (currentPage.value > 1) {
+  if (currentPage.value >= 1) {
     currentPage.value--;
-    getManagedEntities()
+    updateManagedEntities()
   }
 };
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
-    getManagedEntities()
+    updateManagedEntities()
   }
 };
 
@@ -203,8 +210,8 @@ const nextPage = () => {
 
 let polling
 onMounted(() => {
-  // updateManagedEntities()
-  // polling = setInterval(updateManagedEntities, 7000);
+  updateManagedEntities()
+  polling = setInterval(updateManagedEntities, 7000);
   get_token()
 })
 
@@ -214,11 +221,11 @@ onBeforeUnmount(() => {
 
 const getManagedEntities = async (abortController) => {
   try {
-    const url = `/api/blood-reserve?rhesus=${rhesusFactor.value}&group=${bloodGroup.value}&page=${currentPage.value}&size=8&sort=id`
+    const url = `/api/blood_units?rhesusFactor=${encodeURIComponent(rhesusFactor.value)}&bloodGroup=${bloodGroup.value}&reverse=${reverseSearch.value}&page=${currentPage.value}&size=8&sort=${sortBy.value}`
     const response = await axios.get(url,{ signal: abortController.signal })
-    totalPages.value = response.data.totalPages;
-    managedEntities.value = response.data.content.main;
-    bloodVolumeByGroupAndRhesus.value =  response.data.content.summary;
+    totalPages.value = response.data.page.totalPages;
+    managedEntities.value = response.data.page.content;
+    bloodVolumeByGroupAndRhesus.value =  response.data.summaryVolume;
   } catch (error) {
     showAlert(error.response.data);
   }

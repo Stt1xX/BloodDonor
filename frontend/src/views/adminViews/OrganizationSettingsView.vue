@@ -118,16 +118,16 @@ const deleteOrganization = async (id) => {
 }
 
 const prevPage = () => {
-  if (currentPage.value > 1) {
+  if (currentPage.value >= 1) {
     currentPage.value--;
-    getManagedEntities()
+    updateManagedEntities()
   }
 };
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
-    getManagedEntities()
+    updateManagedEntities()
   }
 };
 

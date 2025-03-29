@@ -27,19 +27,19 @@ public class OrganizationsResource {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public ResponseEntity<?> addNewOrganization(@Valid @RequestBody OrganizationDTOfrom organizationDTOfrom) throws CustomDuplicateException {
+    public ResponseEntity<?> addNewOrganization(@Valid @RequestBody OrganizationDTOfrom organizationDTOfrom) {
         return ResponseEntity.ok(organizationService.save(organizationDTOfrom));
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping
-    public ResponseEntity<?> updateOrganization(@Valid @RequestBody OrganizationDTOfrom organizationDTOfrom) throws CustomDuplicateException {
+    public ResponseEntity<?> updateOrganization(@Valid @RequestBody OrganizationDTOfrom organizationDTOfrom) {
         return ResponseEntity.ok(organizationService.update(organizationDTOfrom));
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping
-    public ResponseEntity<?> deleteOrganization(@RequestParam Long id) throws CustomDuplicateException {
+    public ResponseEntity<?> deleteOrganization(@RequestParam Long id){
         return ResponseEntity.ok(organizationService.delete(id));
     }
 }

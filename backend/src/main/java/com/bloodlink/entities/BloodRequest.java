@@ -1,10 +1,13 @@
 package com.bloodlink.entities;
 
-import com.bloodlink.entities.enums.BloodType;
+import com.bloodlink.entities.enums.BloodGroup;
 import com.bloodlink.entities.enums.RequestStatus;
 import com.bloodlink.entities.enums.RhFactor;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -16,7 +19,7 @@ public class BloodRequest {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private BloodType bloodType;
+    private BloodGroup bloodGroup;
 
     @Enumerated(EnumType.STRING)
     private RhFactor rhFactor;
@@ -29,10 +32,12 @@ public class BloodRequest {
     private Boolean urgent;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "blood_bank_id")
     private Organization bloodBank;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "medical_institution_id")
     private Organization medicalInstitution;
 

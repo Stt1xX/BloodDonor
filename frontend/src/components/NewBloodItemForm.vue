@@ -17,10 +17,10 @@
               <div class="flex space-x-2 mt-2">
                 <button v-for="group in [1, 2, 3, 4]" :key="group"
                         type="button"
-                        @click="bloodReserve.group = group"
+                        @click="bloodReserve.bloodGroup = group"
                         :class="{
-                          'bg-red-500 text-white':  bloodReserve.group === group,
-                          'bg-white text-gray-700': bloodReserve.group !== group,
+                          'bg-red-500 text-white':  bloodReserve.bloodGroup === group,
+                          'bg-white text-gray-700': bloodReserve.bloodGroup !== group,
                           'hover:bg-red-500 hover:text-white transition-colors': true
                         }"
                         class="px-4 py-2 border rounded-md">
@@ -38,10 +38,10 @@
               <div class="flex space-x-2 mt-2 justify-end">
                 <button v-for="rhesus in ['+', '-']" :key="rhesus"
                         type="button"
-                        @click="bloodReserve.rhesus = rhesus"
+                        @click="bloodReserve.rhesusFactor = rhesus"
                         :class="{
-                          'bg-red-500 text-white': bloodReserve.rhesus === rhesus,
-                          'bg-white text-gray-700': bloodReserve.rhesus !== rhesus,
+                          'bg-red-500 text-white': bloodReserve.rhesusFactor === rhesus,
+                          'bg-white text-gray-700': bloodReserve.rhesusFactor !== rhesus,
                           'hover:bg-red-500 hover:text-white transition-colors': true
                         }"
                         class="px-4 py-2 border rounded-md">
@@ -55,15 +55,21 @@
 
         <div class="col-span-1">
           <label class="block text-sm font-medium text-gray-700">
-            Дата просрочки
-            <span v-if="errors.expiryDate" class="text-red-500 text-xs ml-2">{{ errors.expiryDate }}</span>
+            Срок годности
+            <span v-if="errors.createdAt" class="text-red-500 text-xs ml-2">{{ errors.createdAt }}</span>
+            <span v-if="errors.expirationDate" class="text-red-500 text-xs ml-2">{{ errors.expirationDate }}</span>
           </label>
-          <vue-date-picker v-model="bloodReserve.expiryDate"
-                           :enable-time-picker="false"
-                           placeholder="Выберите дату"
-                           class="mt-2 w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"/>
+          <div class="mt-2 flex space-x-2">
+            <vue-date-picker v-model="bloodReserve.createdAt"
+                             :enable-time-picker="false"
+                             placeholder="Дата поставки"
+                             class="w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"/>
+            <vue-date-picker v-model="bloodReserve.expirationDate"
+                             :enable-time-picker="false"
+                             placeholder="Дата просрочки"
+                             class="w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"/>
+          </div>
         </div>
-
         <div class="col-span-1">
           <label for="volume" class="block text-sm font-medium text-gray-700">
             Объём (л.)
@@ -92,7 +98,7 @@
 
 
 <script setup>
-import {ref} from 'vue';
+import {onMounted, ref} from 'vue';
 import axios from 'axios';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
@@ -112,7 +118,8 @@ const props = defineProps(
           default: () => ({
             bloodGroup: '',
             rhesusFactor: '',
-            expiryDate: '',
+            createdAt: '',
+            expirationDate: '',
             volume: ''
           })
         },
@@ -128,37 +135,58 @@ const errors = ref({});
 const isSubmitted = ref(false);
 
 const isValidNumber = (value) => {
-  return /^[0-9]+([.,][0-9]+)?$/.test(value);
+  return /^[0-9]+([.,][0-9]{1,2})?$/.test(value);
 };
 
 const validateForm = () => {
   errors.value = {};
+  const today = new Date();
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
+  today.setHours(0, 0, 0, 0);
+  tomorrow.setHours(0, 0, 0, 0);
 
-  if (!bloodReserve.value.group) {
+  if (!bloodReserve.value.bloodGroup) {
     errors.value.bloodGroup = 'Выберите группу крови';
   }
-  if (!bloodReserve.value.rhesus) {
+  if (!bloodReserve.value.rhesusFactor) {
     errors.value.rhesusFactor = 'Выберите резус-фактор';
   }
-  if (!bloodReserve.value.expiryDate) {
-    errors.value.expiryDate = 'Выберите дату просрочки';
+  if (!bloodReserve.value.createdAt) {
+    errors.value.createdAt = 'Выберите дату поставки';
+  } else if (new Date(bloodReserve.value.createdAt).setHours(0, 0, 0, 0) > today) {
+    errors.value.createdAt = 'Дата поставки не может быть в будущем';
+  }
+  if (!bloodReserve.value.expirationDate) {
+    errors.value.expirationDate = 'Выберите дату просрочки';
+  }
+  if (bloodReserve.value.createdAt && bloodReserve.value.expirationDate) {
+    const createdAt = new Date(bloodReserve.value.createdAt).setHours(0, 0, 0, 0);
+    const expirationDate = new Date(bloodReserve.value.expirationDate).setHours(0, 0, 0, 0);
+
+    if (createdAt >= expirationDate) {
+      errors.value.expirationDate = 'Дата просрочки должна быть позже даты поставки';
+    }
+    if (expirationDate < tomorrow) {
+      errors.value.expirationDate = 'Дата просрочки не может быть раньше завтрашнего дня';
+    }
   }
   if (!bloodReserve.value.volume) {
     errors.value.volume = 'Введите объём';
   } else if (!isValidNumber(bloodReserve.value.volume)) {
-    errors.value.volume = 'Введите корректный объём (например: 0.5, 1,2)';
+    errors.value.volume = 'Введите корректный объём (например: 0.5, 1.2)';
   }
 
   return Object.keys(errors.value).length === 0;
 };
 
-// Функция создания записи
 const createBloodReserve = async () => {
   try {
-    const response = await axios.post('/api/blood-reserve', {
+    const response = await axios.post('/api/blood_units', {
       bloodGroup: bloodReserve.value.bloodGroup,
       rhesusFactor: bloodReserve.value.rhesusFactor,
-      expiryDate: bloodReserve.value.expiryDate.toISOString().split('T')[0],
+      expirationDate: bloodReserve.value.expirationDate.toISOString().split('T')[0],
+      createdAt: bloodReserve.value.createdAt.toISOString().split('T')[0],
       volume: parseFloat(bloodReserve.value.volume.toString().replace(',', '.'))
     });
     showAlert(response.data);
@@ -168,19 +196,20 @@ const createBloodReserve = async () => {
   }
 };
 
-// Функция редактирования записи
 const editBloodReserve = async () => {
   try {
-    const response = await axios.put('/api/blood-reserve', {
+    const response = await axios.put('/api/blood_units', {
       id: bloodReserve.value.id,
       bloodGroup: bloodReserve.value.bloodGroup,
       rhesusFactor: bloodReserve.value.rhesusFactor,
-      expiryDate: bloodReserve.value.expiryDate.toISOString().split('T')[0],
+      expirationDate: bloodReserve.value.expirationDate.toISOString().split('T')[0],
+      createdAt: bloodReserve.value.createdAt.toISOString().split('T')[0],
       volume: parseFloat(bloodReserve.value.volume.toString().replace(',', '.'))
     });
     showAlert(response.data);
     emit('close');
   } catch (error) {
+    console.log(error)
     showAlert(error.response.data);
   }
 };
