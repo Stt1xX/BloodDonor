@@ -56,7 +56,6 @@ const logout = async () => {
   }
 }
 
-// Функция для проверки, активна ли кнопка
 const isActive = (routePath) => {
   return route.path === routePath;
 }
@@ -66,12 +65,11 @@ const headerButtons = {
           { text: 'Запросы', action: () => router.push('/admin/requests'), route: '/admin/requests' },
           { text: 'Организации', action: () => router.push('/admin/organization_settings'), route: '/admin/organization_settings' },
           { text: 'Работники', action: () => router.push('/admin/all_users'), route: '/admin/all_users' },
-          { text: 'Запасы', action: () => router.push('/bank_employee/reserves'), route: '/bank_employee/reserves' },
           { text: 'Выйти', action: () => logout() },
         ],
       [HeaderGroups.BANK_EMPLOYEE] : [
-          { text: 'Организации', action: () => router.push('/admin/organization_settings'), route: '/admin/organization_settings' },
           { text: 'Запасы', action: () => router.push('/bank_employee/reserves'), route: '/bank_employee/reserves' },
+          { text: 'Запросы', action: () => router.push('/bank_employee/requests'), route: '/bank_employee/requests'},
           { text: 'Выйти', action: () => logout() },
       ]
 }

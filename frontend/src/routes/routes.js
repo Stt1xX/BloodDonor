@@ -3,12 +3,13 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '@/views/shared/LoginView.vue'
 import RegistrationView from '@/views/shared/RegistrationView.vue'
 import OrganizationSettingsView from '@/views/adminViews/OrganizationSettingsView.vue'
-import BankReserve from '@/views/bankViews/BankReserve.vue'
+import BankReserveView from '@/views/bankViews/BankReserveView.vue'
 import MedicalInstitutionMain from '@/views/MedicalInstitutionMain.vue'
 import EmployeeRequestsView from "@/views/adminViews/EmployeeRequestsView.vue";
 import {getUserInfo} from "@/js/user-info.js";
 import AllUsersView from "@/views/adminViews/AllUsersView.vue";
 import NotFoundView from '@/views/shared/NotFoundView.vue'
+import BankRequestsView from "@/views/bankViews/BankRequestsView.vue";
 const routes = [
     {
         path: '/login',
@@ -37,7 +38,12 @@ const routes = [
     },
     {
         path: '/bank_employee/reserves',
-        component: BankReserve,
+        component: BankReserveView,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: "/bank_employee/requests",
+        component: BankRequestsView,
         meta: { requiresAuth: true }
     },
     {

@@ -41,6 +41,9 @@
             </select>
           </div>
         </div>
+        <p>
+          Всего запросов: {{ bloodVolumeByGroupAndRhesus }}
+        </p>
         <button
             @click="showForm = true; formTitle = 'Добавление партии крови';"
             class="bg-red-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-700 transition-colors"
@@ -66,7 +69,12 @@
               {{ managedEntity.date }}
             </td>
             <td class="p-4 text-center space-x-2">
-              <button @click="reject(managedEntity.id)" class="text-red-600 hover:text-red-800">
+              <button @click="editManagedEntity(managedEntity)" class="text-blue-600 hover:text-blue-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 3.5l4 4-12 12-4 1 1-4 12-12z" />
+                </svg>
+              </button>
+              <button @click="deleteManagedEntity(managedEntity.id)" class="text-red-600 hover:text-red-800">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -78,20 +86,42 @@
       </div>
 
       <p v-else class="text-gray-500 text-center mt-20 mb-20">Тут пока тихо...</p>
+
+      <div class="mt-4 flex items-center">
+        <button
+            @click="prevPage"
+            :disabled="currentPage === 0"
+            class="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2 hover:bg-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Предыдущая
+        </button>
+
+        <span class="mx-2">{{ currentPage + 1 }}</span>
+
+        <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages || currentPage === totalPages - 1"
+            class="bg-gray-300 text-gray-700 px-4 py-2 rounded ml-2 hover:bg-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Следующая
+        </button>
+      </div>
+      <NewBloodItemForm v-if="showForm" @close="closeForm" :title="formTitle" :bloodReserve="isEdit ? formManagedEntity : undefined" :is-edit="isEdit"/>
     </main>
-    <NewBloodItemForm v-if="showForm" @close="closeForm" :title="formTitle" v-bind:organization="isEdit ? {...formManagedEntity} : undefined" :is-edit="isEdit"/>
+    <Footer />
   </div>
 </template>
 
 
 <script setup>
-import { ref } from "vue";
-import {
-  formatTimestamp, formatWorkingHoursArray,
-  HeaderGroups
-} from "@/js/utils.js";
+import {onBeforeUnmount, onMounted, ref} from "vue";
+import { HeaderGroups } from "@/js/utils.js";
 import Header from "@/components/shared/Header.vue";
 import NewBloodItemForm from "@/components/NewBloodItemForm.vue";
+import {showAlert} from "@/js/custom-alert.js";
+import axios from "axios";
+import {get_token} from "@/js/csrf-token.js";
+import Footer from "@/components/shared/Footer.vue";
 
 const managedEntities = ref([
   { id: 1, group: 1, rhesus: "+", volume: 5, date: "2025-03-25" },
@@ -116,7 +146,11 @@ const toggleRhesus = (rhesus) => {
 const bloodGroup = ref(null);
 const rhesusFactor = ref(null);
 const formManagedEntity = ref({})
+const bloodVolumeByGroupAndRhesus = ref(0);
 const sortBy = ref("volume");
+
+const currentPage = ref(0)
+const totalPages = ref(1)
 
 const closeForm = () => {
   isEdit.value = false
@@ -128,18 +162,70 @@ const closeForm = () => {
     phone: '',
     work_time: '',
   }
-  // updateManagedEntities()
+  updateManagedEntities()
 }
 
 
-const editManagedEntity = (organization) => {
+const editManagedEntity = (managedEntity) => {
   formTitle.value = 'Редактирование партии крови'
-  formManagedEntity.value = organization
-  formManagedEntity.value.workingHours = formatWorkingHoursArray(organization.hoursFrom, organization.hoursTo,
-      organization.minutesFrom, organization.minutesTo)
+  formManagedEntity.value = managedEntity
   isEdit.value = true
   showForm.value = true
 }
 
+const deleteManagedEntity = async (id) => {
+  try {
+    const url = `/api/blood-reserve?id=${id}`
+    const response = await axios.delete(url)
+    showAlert(response.data)
+  } catch (error) {
+    showAlert(error.response.data);
+  }
+  updateManagedEntities()
+}
+
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+    getManagedEntities()
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+    getManagedEntities()
+  }
+};
+
+
+
+let polling
+onMounted(() => {
+  // updateManagedEntities()
+  // polling = setInterval(updateManagedEntities, 7000);
+  get_token()
+})
+
+onBeforeUnmount(() => {
+  clearInterval(polling)
+})
+
+const getManagedEntities = async (abortController) => {
+  try {
+    const url = `/api/blood-reserve?rhesus=${rhesusFactor.value}&group=${bloodGroup.value}&page=${currentPage.value}&size=8&sort=id`
+    const response = await axios.get(url,{ signal: abortController.signal })
+    totalPages.value = response.data.totalPages;
+    managedEntities.value = response.data.content.main;
+    bloodVolumeByGroupAndRhesus.value =  response.data.content.summary;
+  } catch (error) {
+    showAlert(error.response.data);
+  }
+}
+
+const updateManagedEntities = () => {
+  getManagedEntities(new AbortController())
+}
 
 </script>
