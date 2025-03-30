@@ -44,7 +44,7 @@ public class BloodUnitsService {
         User user;
         if (opt.isPresent()) {
             user = opt.get();
-            filters.and(BloodUnitsSpecs.hasOrganization(user.getOrganization()));
+            filters = filters.and(BloodUnitsSpecs.hasOrganization(user.getOrganization()));
             Sort sort = reverse != null && reverse ? page.getSort().descending() : page.getSort();
             var units = bloodUnitRepository.findAll(filters,
                     PageRequest.of(page.getPageNumber(), page.getPageSize(), sort));
@@ -63,7 +63,7 @@ public class BloodUnitsService {
         User user;
         if (opt.isPresent()) {
             user = opt.get();
-            filters.and(BloodReserveSpecs.hasBank(user.getOrganization()));
+            filters = filters.and(BloodReserveSpecs.hasBank(user.getOrganization()));
             return bloodReserveRepository.findAll(filters)
                     .stream().map(BloodReserve::getTotalQuantity).reduce(0.0, Double::sum);
         }

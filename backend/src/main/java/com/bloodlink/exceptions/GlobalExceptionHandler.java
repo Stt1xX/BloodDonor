@@ -61,7 +61,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InternalAuthenticationServiceException.class)
     @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
     public @ResponseBody String handleInternalAuthenticationServiceException(InternalAuthenticationServiceException e) {
-        System.out.println("ДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРжДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРжДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРжДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРжДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРжДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРжДАОФЫЖАВДФЫВЖРФЫВРЖДФЫВРЖДФЫРВЖЛФЫВЛЖФЫЛВЖРФЫЛВРЖФЫРВФЫРж");
         return e.getMessage();
     }
 

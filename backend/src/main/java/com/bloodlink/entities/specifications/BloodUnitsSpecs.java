@@ -17,6 +17,7 @@ public class BloodUnitsSpecs {
     }
 
     public static Specification<BloodUnit> hasOrganization(final Organization organization) {
-        return (root, query, builder) -> builder.equal(root.get("organization"), organization);
+        return (root, query, builder) -> builder.equal(root.get("bloodBank"), organization);
     }
+
 }
