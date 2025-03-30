@@ -3,8 +3,8 @@ package com.bloodlink.controllers;
 import com.bloodlink.entities.DTOs.BloodRequestDTOfrom;
 import com.bloodlink.entities.DTOs.BloodRequestDTOtoBank;
 import com.bloodlink.entities.DTOs.BloodRequestDTOtoMed;
-import com.bloodlink.entities.DTOs.BloodUnitDTOfrom;
 import com.bloodlink.entities.enums.BloodGroup;
+import com.bloodlink.entities.enums.RequestStatus;
 import com.bloodlink.entities.enums.RhFactor;
 import com.bloodlink.service.BloodRequestsService;
 import jakarta.validation.Valid;
@@ -29,21 +29,14 @@ public class BloodRequestResource {
                                                             @RequestParam Boolean reverse, @RequestParam Boolean isEmergency, Pageable page) {
         var group = BloodGroup.fromSymbol(bloodGroup);
         var factor = RhFactor.fromSymbol(rhesusFactor);
-        return bloodRequestsService.getRequests(group, factor, reverse, isEmergency, page)
+        return bloodRequestsService.getRequestsForBanker(group, factor, reverse, isEmergency, page)
                 .map(BloodRequestDTOtoBank::convert);
     }
 
-    // TODO для медиков есть только возможность выбрать статус заявки
-    //  (можно просматривать успешные, отклоненные, ожидающие подтверждения)
-    //  либо просто смотреть все. Сортировка всегда должна быть по дате отправки заявки
     @PreAuthorize("hasAnyAuthority('MEDICAL_EMPLOYEE')")
     @GetMapping("/medical")
-    public Page<BloodRequestDTOtoMed> getMedBloodRequests(@RequestParam String bloodGroup,
-                                                          @RequestParam String rhesusFactor,
-                                                          @RequestParam Boolean reverse, @RequestParam Boolean isEmergency, Pageable page) {
-        var group = BloodGroup.fromSymbol(bloodGroup);
-        var factor = RhFactor.fromSymbol(rhesusFactor);
-        return bloodRequestsService.getRequests(group, factor, reverse, isEmergency, page)
+    public Page<BloodRequestDTOtoMed> getMedBloodRequests(@RequestParam RequestStatus status, Pageable page) {
+        return bloodRequestsService.getRequestsForMed(status, page)
                 .map(BloodRequestDTOtoMed::convert);
     }
 
@@ -52,7 +45,7 @@ public class BloodRequestResource {
     public ResponseEntity<?> addBloodRequest(@RequestBody @Valid BloodRequestDTOfrom dto) {
         try {
             return ResponseEntity.ok(bloodRequestsService.save(dto));
-        } catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.ok(e.getMessage());
         }
     }

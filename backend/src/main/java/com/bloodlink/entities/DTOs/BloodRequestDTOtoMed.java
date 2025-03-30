@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class BloodRequestDTOtoMed {
 
     private Long id;
+    private Long requestId;
     private BloodGroup bloodGroup;
     private RhFactor rhesusFactor;
     private String description;
@@ -32,7 +33,7 @@ public class BloodRequestDTOtoMed {
 
     public static BloodRequestDTOtoMed convert(RequestToBank request) {
         var bloodRequest = request.getRequest();
-        return new BloodRequestDTOtoMed(bloodRequest.getId(), bloodRequest.getBloodGroup(),
+        return new BloodRequestDTOtoMed(request.getId(), bloodRequest.getId(),  bloodRequest.getBloodGroup(),
                 bloodRequest.getRhFactor(), bloodRequest.getDescription(), bloodRequest.getVolumeNeeded(),
                 bloodRequest.getIsEmergency(), request.getStatus(), request.getRejectionReason(),
                 OrganizationDTOto.convert(request.getBloodBank()), request.getCreatedAt(),
