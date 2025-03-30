@@ -36,9 +36,9 @@
           </div>
           <div>
             <select v-model="sortBy" class="px-4 py-2 border rounded-md bg-white shadow-sm">
-              <option value="volume">По объему</option>
-              <option value="date">По дате поставки</option>
-              <option value="priority">По приоритету</option>
+              <option value="request.volume">По объему</option>
+              <option value="request.createdAt">По дате поставки</option>
+              <option value="request.isEmergency">По приоритету</option>
             </select>
           </div>
         </div>
@@ -150,7 +150,7 @@ const bloodGroup = ref(null);
 const rhesusFactor = ref(null);
 const formManagedEntity = ref({})
 const RequestNumberByGroupAndRhesus = ref(0);
-const sortBy = ref("volume");
+const sortBy = ref("request.volumeNeeded");
 
 const currentPage = ref(0)
 const totalPages = ref(1)
