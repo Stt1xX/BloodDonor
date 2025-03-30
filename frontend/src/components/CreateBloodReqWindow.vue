@@ -76,8 +76,8 @@
         </div>
 
         <div v-if="step === 2">
-          <input type="text" v-model="search" placeholder="Поиск по организациям..."
-                 @focus="searchFunc"
+          <input type="text" v-model="searchQuery" placeholder="Поиск по организациям..."
+                 @focus="search"
                  @input="searchDebounced"
                  class="mb-4 w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 px-2 py-1"/>
 
@@ -143,7 +143,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue';
+import {ref} from 'vue';
 import {abstractFetching, formatWorkingHours} from "@/js/utils.js";
 import axios from "axios";
 import {showAlert} from "@/js/custom-alert.js";
@@ -159,11 +159,11 @@ const banks = ref([]);
 
 const getBanksWithResources = async (abortController) => {
   try{
-    const url = `/api/organizations/banks_with_resources?pattern=${search.value}`
+    const url = `/api/organizations/banks_with_resources?pattern=${searchQuery.value}`
     const response = await axios.post(url, {
-      bloodGroup : bloodReserve.value.bloodGroup,
-      rhesusFactor : bloodReserve.value.rhesusFactor,
-      volumeNeeded : bloodReserve.value.volumeNeeded
+      bloodGroup : bloodRequest.value.bloodGroup,
+      rhesusFactor : bloodRequest.value.rhesusFactor,
+      volumeNeeded : bloodRequest.value.volumeNeeded
     }, { signal: abortController.signal });
     banks.value = response.data
   } catch (error){
@@ -171,26 +171,11 @@ const getBanksWithResources = async (abortController) => {
   }
 }
 
-const searchFunc = async () => {
+const search = async () => {
   await abstractFetching(getBanksWithResources)
 }
 
-const updateManagedEntities = () => {
-  getManagedEntities(new AbortController())
-}
-
-const getManagedEntities = async (abortController) => {
-  try {
-    const url = `/api/organizations?type=&pattern=${encodeURIComponent(searchQuery.value)}&page=0&size=8&sort=id`
-    const response = await axios.get(url,{ signal: abortController.signal })
-    banks.value = response.data.content;
-  } catch (error) {
-    showAlert(error.response.data);
-  }
-}
-const searchDebounced = debounce(searchFunc, 500);
-
-
+const searchDebounced = debounce(search, 500);
 
 const isSelected = (bank) => {
   return selectedBanks.value.some(b => b.id === bank.id);
@@ -213,7 +198,7 @@ const nextStep = async () => {
     errors.value.description = 'Укажите причину запроса';
   }
   if (Object.keys(errors.value).length === 0){
-    await searchFunc()
+    await search()
     step.value = 2;
   }
 
