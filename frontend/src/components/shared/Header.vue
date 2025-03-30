@@ -66,11 +66,15 @@ const headerButtons = {
           { text: 'Организации', action: () => router.push('/admin/organization_settings'), route: '/admin/organization_settings' },
           { text: 'Работники', action: () => router.push('/admin/all_users'), route: '/admin/all_users' },
           { text: 'Выйти', action: () => logout() },
-        ],
+      ],
       [HeaderGroups.BANK_EMPLOYEE] : [
           { text: 'Запасы', action: () => router.push('/bank_employee/reserves'), route: '/bank_employee/reserves' },
           { text: 'Запросы', action: () => router.push('/bank_employee/requests'), route: '/bank_employee/requests'},
           { text: 'Выйти', action: () => logout() },
+      ],
+      [HeaderGroups.MEDICAL_EMPLOYEE] : [
+        { text: 'Запросы', action: () => router.push('/medical_employee/requests'), route: '/medical_employee/requests'},
+        { text: 'Выйти', action: () => logout() }
       ]
 }
 

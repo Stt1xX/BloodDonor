@@ -111,7 +111,7 @@
           Следующая
         </button>
       </div>
-      <NewBloodItemForm v-if="showForm" @close="closeForm" :title="formTitle" :bloodReserve="isEdit ? formManagedEntity : undefined" :is-edit="isEdit"/>
+      <CreateBloodReqWindow v-if="showForm" @close="closeForm" :title="formTitle" :bloodReserve="isEdit ? formManagedEntity : undefined" :is-edit="isEdit"/>
     </main>
     <Footer />
   </div>
@@ -122,11 +122,11 @@
 import {onBeforeUnmount, onMounted, ref} from "vue";
 import { HeaderGroups } from "@/js/utils.js";
 import Header from "@/components/shared/Header.vue";
-import NewBloodItemForm from "@/components/NewBloodItemForm.vue";
 import {showAlert} from "@/js/custom-alert.js";
 import axios from "axios";
 import {get_token} from "@/js/csrf-token.js";
 import Footer from "@/components/shared/Footer.vue";
+import CreateBloodReqWindow from "@/components/CreateBloodReqWindow.vue";
 
 const managedEntities = ref([]);
 
@@ -159,13 +159,20 @@ const totalPages = ref(1)
 const closeForm = () => {
   isEdit.value = false
   showForm.value = false
+  // formManagedEntity.value = {
+  //   organizationType: '',
+  //   name: '',
+  //   address: '',
+  //   phone: '',
+  //   work_time: '',
+  // }
   updateManagedEntities()
 }
 
 
 const editManagedEntity = (managedEntity) => {
   formTitle.value = 'Редактирование партии крови'
-  formManagedEntity.value = {...managedEntity}
+  formManagedEntity.value = managedEntity
   formManagedEntity.value.expirationDate = new Date(formManagedEntity.value.expirationDate)
   formManagedEntity.value.createdAt = new Date(formManagedEntity.value.createdAt)
   formManagedEntity.value.bloodGroup = Number(formManagedEntity.value.bloodGroup)
@@ -203,8 +210,8 @@ const nextPage = () => {
 
 let polling
 onMounted(() => {
-  updateManagedEntities()
-  polling = setInterval(updateManagedEntities, 7000);
+  // updateManagedEntities()
+  // polling = setInterval(updateManagedEntities, 7000);
   get_token()
 })
 
@@ -213,15 +220,15 @@ onBeforeUnmount(() => {
 })
 
 const getManagedEntities = async (abortController) => {
-  try {
-    const url = `/api/blood_units?rhesusFactor=${encodeURIComponent(rhesusFactor.value)}&bloodGroup=${bloodGroup.value}&reverse=${reverseSearch.value}&page=${currentPage.value}&size=8&sort=${sortBy.value}`
-    const response = await axios.get(url,{ signal: abortController.signal })
-    totalPages.value = response.data.page.totalPages;
-    managedEntities.value = response.data.page.content;
-    bloodVolumeByGroupAndRhesus.value =  response.data.summaryVolume;
-  } catch (error) {
-    showAlert(error.response.data);
-  }
+  // try {
+  //   const url = `/api/blood_units?rhesusFactor=${encodeURIComponent(rhesusFactor.value)}&bloodGroup=${bloodGroup.value}&reverse=${reverseSearch.value}&page=${currentPage.value}&size=8&sort=${sortBy.value}`
+  //   const response = await axios.get(url,{ signal: abortController.signal })
+  //   totalPages.value = response.data.page.totalPages;
+  //   managedEntities.value = response.data.page.content;
+  //   bloodVolumeByGroupAndRhesus.value =  response.data.summaryVolume;
+  // } catch (error) {
+  //   showAlert(error.response.data);
+  // }
 }
 
 const updateManagedEntities = () => {

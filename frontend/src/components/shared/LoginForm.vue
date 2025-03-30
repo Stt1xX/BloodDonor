@@ -1,19 +1,16 @@
 <template>
   <div class="mt-20 mb-52 w-full max-w-[450px] mx-8 p-8 bg-white rounded-2xl shadow-xl border border-red-100">
     <div class="flex flex-col">
-      <!-- Logo and Title -->
       <div class="text-center mb-8">
         <div class="mb-4">
-          <img src="@/assets/logo.png" alt="Logo" class="w-16 h-16 mx-auto rounded-full cursor-pointer" @click="refreshPage" />
+          <img src="../../assets/logo.png" alt="Logo" class="w-16 h-16 mx-auto rounded-full cursor-pointer" @click="refreshPage" />
         </div>
         <h2 class="text-3xl font-bold text-red-800 mb-2">Вход</h2>
         <p class="text-gray-600">Банк крови - спасаем жизни вместе</p>
         <div class="mt-2 w-16 h-1 bg-gradient-to-r from-red-500 to-red-600 mx-auto rounded-full"></div>
       </div>
 
-      <!-- Login Form -->
       <form @submit.prevent="handleLogin" class="grid grid-cols-1 gap-6">
-        <!-- Email Input -->
         <div class="group col-span-1">
           <label for="email" class="block text-sm font-medium text-gray-700">
             Email
@@ -33,7 +30,6 @@
           </div>
         </div>
 
-        <!-- Password Input -->
         <div class="group col-span-1">
           <label for="password" class="block text-sm font-medium text-gray-700">
             Пароль
@@ -52,8 +48,6 @@
             />
           </div>
         </div>
-
-        <!-- Submit Button -->
         <div class="col-span-1">
           <button
               type="submit"
@@ -63,7 +57,6 @@
           </button>
         </div>
 
-        <!-- Registration Link -->
         <div class="col-span-1 text-center">
           <router-link
               to="/registration"
@@ -132,7 +125,7 @@ const redirect_user = (role) => {
   if (role === 'ADMIN') {
     router.push('/admin/organization_settings')
   } else if (role === 'MEDICAL_EMPLOYEE') {
-    router.push('/medical_employee/main')
+    router.push('/medical_employee/requests')
   } else if (role === 'BANK_EMPLOYEE') {
     router.push('/bank_employee/reserves')
   } else {

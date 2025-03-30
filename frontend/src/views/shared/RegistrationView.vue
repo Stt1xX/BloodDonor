@@ -1,5 +1,5 @@
 <script setup>
-import RegistrationForm from '@/components/RegistrationForm.vue'
+import RegistrationForm from '@/components/shared/RegistrationForm.vue'
 import Footer from '@/components/shared/Footer.vue'
 </script>
 

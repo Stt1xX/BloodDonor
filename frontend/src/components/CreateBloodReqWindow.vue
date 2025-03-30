@@ -1,0 +1,219 @@
+<template>
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-1/2 relative">
+      <h2 class="text-3xl font-bold text-red-800 mb-4">Создание запроса</h2>
+
+      <div v-if="step === 1">
+        <form @submit.prevent="nextStep" class="grid grid-cols-1 gap-6">
+          <div class="col-span-1">
+            <div class="flex justify-between">
+              <div class="flex flex-col">
+                <div class="flex items-center">
+                  <label class="block text-sm font-medium text-gray-700">Группа крови</label>
+                  <span v-if="errors.bloodGroup" class="text-red-500 text-xs ml-2">{{ errors.bloodGroup }}</span>
+                </div>
+                <div class="flex space-x-2 mt-2">
+                  <button v-for="group in [1, 2, 3, 4]" :key="group"
+                          type="button"
+                          @click="bloodReserve.bloodGroup = group"
+                          :class="{
+                            'bg-red-500 text-white': bloodReserve.bloodGroup === group,
+                            'bg-white text-gray-700': bloodReserve.bloodGroup !== group,
+                            'hover:bg-red-500 hover:text-white transition-colors': true
+                          }"
+                          class="px-4 py-2 border rounded-md">
+                    {{ group }}
+                  </button>
+                </div>
+              </div>
+              <div class="flex flex-col">
+                <div class="flex items-center">
+                  <label class="block text-sm font-medium text-gray-700">Резус-фактор</label>
+                  <span v-if="errors.rhesusFactor" class="text-red-500 text-xs ml-2">{{ errors.rhesusFactor }}</span>
+                </div>
+                <div class="flex space-x-2 mt-2 justify-end">
+                  <button v-for="rhesus in ['+', '-']" :key="rhesus"
+                          type="button"
+                          @click="bloodReserve.rhesusFactor = rhesus"
+                          :class="{
+                            'bg-red-500 text-white': bloodReserve.rhesusFactor === rhesus,
+                            'bg-white text-gray-700': bloodReserve.rhesusFactor !== rhesus,
+                            'hover:bg-red-500 hover:text-white transition-colors': true
+                          }"
+                          class="px-4 py-2 border rounded-md">
+                    {{ rhesus }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-1 flex items-center space-x-2">
+            <input type="checkbox" v-model="bloodReserve.isUrgent" class="h-5 w-5 text-red-600 focus:ring-red-500"/>
+            <label class="block text-sm font-medium text-gray-700">Экстренный запрос</label>
+          </div>
+          <div class="col-span-1">
+            <div class="flex items-center">
+              <label class="block text-sm font-medium text-gray-700">Необходимый объем (л.)</label>
+              <span v-if="errors.volume" class="text-red-500 text-xs ml-2">{{ errors.volume }}</span>
+            </div>
+            <input type="text" v-model="bloodReserve.volume"
+                   class="mt-2 w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
+                   placeholder="Введите объём"/>
+
+          </div>
+          <div class="col-span-1 flex justify-between mt-4">
+            <button type="button" @click="emit('close')"
+                    class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors">
+              Отмена
+            </button>
+            <button type="submit"
+                    class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">
+              Далее
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div v-if="step === 2">
+        <input type="text" v-model="search" placeholder="Поиск по организациям..."
+               class="mb-4 w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 px-2 py-1"/>
+
+        <div v-if="filteredBanks.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
+          <div class="overflow-y-auto" style="max-height: 300px;"> <!-- Ограничиваем высоту и добавляем скролл -->
+            <table class="w-full">
+              <tbody>
+              <tr v-for="organization in filteredBanks"
+                  :key="organization.id"
+                  class="border-b border-gray-500 hover:bg-gray-50 cursor-pointer transition-colors"
+                  :class="{'bg-red-50': isSelected(organization)}"
+                  @click="toggleSelection(organization)">
+                <td class="p-4">
+                  <div class="font-medium">{{ organization.name }}</div>
+                  <div class="text-gray-500">{{ organization.address }}</div>
+                </td>
+                <td class="p-4">
+                  <div class="text-gray-500">{{ organization.phone }}</div>
+                </td>
+                <td class="p-4">{{ formatWorkingHours(organization.hoursFrom, organization.hoursTo,
+                    organization.minutesFrom, organization.minutesTo) }}</td>
+                <td class="p-4 w-8">
+                  <svg v-if="isSelected(organization)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p v-else class="text-gray-500 text-center mt-20 mb-20">Тут пока тихо...</p>
+
+        <div class="mt-4 flex justify-between">
+          <button type="button" @click="step = 1"
+                  class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors">
+            Назад
+          </button>
+          <button type="button" @click="submitRequest"
+                  class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+                  :disabled="selectedBanks.length === 0"
+                  :class="{'opacity-50 cursor-not-allowed': selectedBanks.length === 0}">
+            Отправить запрос
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue';
+import {convertOrganizationType, formatWorkingHours} from "@/js/utils.js";
+
+const emit = defineEmits(['close']);
+const props = defineProps({ title: String, isEdit: Boolean });
+const step = ref(1);
+const search = ref('');
+const selectedBanks = ref([]);
+const bloodReserve = ref({ bloodGroup: '', rhesusFactor: '', volume: '', isUrgent: false });
+const errors = ref({});
+
+// Тестовые данные (остаются без изменений)
+const banks = ref([
+  {id: 1, name: "Центральный банк крови Санкт-Петербурга", address: "ул. Калинина, 12", phone: "+7 (812) 123-45-67", hoursFrom: 8, hoursTo: 20, minutesFrom: 0, minutesTo: 0},
+  {id: 2, name: "Городская станция переливания крови", address: "пр. Просвещения, 45", phone: "+7 (812) 234-56-78", hoursFrom: 9, hoursTo: 18, minutesFrom: 30, minutesTo: 0},
+  {id: 3, name: "Банк крови при Городской больнице №1", address: "ул. Ленина, 5", phone: "+7 (812) 345-67-89", hoursFrom: 10, hoursTo: 17, minutesFrom: 0, minutesTo: 30},
+  {id: 4, name: "Региональный центр крови", address: "пр. Энгельса, 33", phone: "+7 (812) 456-78-90", hoursFrom: 7, hoursTo: 22, minutesFrom: 0, minutesTo: 0},
+  {id: 5, name: "Банк крови Детской больницы", address: "ул. Бассейная, 15", phone: "+7 (812) 567-89-01", hoursFrom: 8, hoursTo: 16, minutesFrom: 0, minutesTo: 0},
+  {id: 6, name: "Банк крови Медицинского университета", address: "ул. Льва Толстого, 6", phone: "+7 (812) 678-90-12", hoursFrom: 8, hoursTo: 20, minutesFrom: 0, minutesTo: 0},
+  {id: 7, name: "Экстренный банк крови", address: "ул. Гагарина, 1", phone: "+7 (812) 789-01-23", hoursFrom: 0, hoursTo: 24, minutesFrom: 0, minutesTo: 0},
+  {id: 8, name: "Банк крови Клинической больницы", address: "пр. Культуры, 4", phone: "+7 (812) 890-12-34", hoursFrom: 9, hoursTo: 21, minutesFrom: 0, minutesTo: 0},
+]);
+
+const filteredBanks = computed(() => {
+  if (!search.value) return banks.value;
+  const searchTerm = search.value.toLowerCase();
+  return banks.value.filter(bank =>
+      bank.name.toLowerCase().includes(searchTerm) ||
+      bank.address.toLowerCase().includes(searchTerm)
+  );
+});
+
+const isSelected = (bank) => {
+  return selectedBanks.value.some(b => b.id === bank.id);
+};
+
+const isValidNumber = (value) => {
+  return /^[0-9]+([.,][0-9]{1,2})?$/.test(value);
+};
+
+const nextStep = () => {
+  // errors.value = {};
+  // if (!bloodReserve.value.bloodGroup) errors.value.bloodGroup = 'Выберите группу крови';
+  // if (!bloodReserve.value.rhesusFactor) errors.value.rhesusFactor = 'Выберите резус-фактор';
+  // if (!bloodReserve.value.volume) {
+  //   errors.value.volume = 'Введите объём';
+  // } else if (!isValidNumber(bloodReserve.value.volume)) {
+  //   errors.value.volume = 'Введите корректный объём (например: 0.5, 1.2)';
+  // }
+  // if (Object.keys(errors.value).length === 0)
+  step.value = 2;
+};
+
+const toggleSelection = (bank) => {
+  if (isSelected(bank)) {
+    selectedBanks.value = selectedBanks.value.filter(b => b.id !== bank.id);
+  } else {
+    selectedBanks.value.push(bank);
+  }
+};
+
+const submitRequest = () => {
+  // Здесь можно добавить логику отправки запроса
+  console.log('Отправка запроса:', {
+    bloodReserve: bloodReserve.value,
+    selectedBanks: selectedBanks.value
+  });
+  emit('close');
+};
+</script>
+
+<style scoped>
+/* Добавляем кастомные стили для скролла */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+</style>

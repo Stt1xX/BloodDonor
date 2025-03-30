@@ -4,7 +4,7 @@ import LoginView from '@/views/shared/LoginView.vue'
 import RegistrationView from '@/views/shared/RegistrationView.vue'
 import OrganizationSettingsView from '@/views/adminViews/OrganizationSettingsView.vue'
 import BankReserveView from '@/views/bankViews/BankReserveView.vue'
-import MedicalInstitutionMain from '@/views/MedicalInstitutionMain.vue'
+import MedicalRequestsView from '@/views/medicalViews/MedicalRequestsView.vue'
 import EmployeeRequestsView from "@/views/adminViews/EmployeeRequestsView.vue";
 import {getUserInfo} from "@/js/user-info.js";
 import AllUsersView from "@/views/adminViews/AllUsersView.vue";
@@ -47,8 +47,8 @@ const routes = [
         meta: { requiresAuth: true }
     },
     {
-        path: '/medical_employee/main',
-        component: MedicalInstitutionMain,
+        path: '/medical_employee/requests',
+        component: MedicalRequestsView,
         meta: { requiresAuth: true }
     },
     {

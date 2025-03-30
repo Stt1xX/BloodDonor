@@ -1,19 +1,16 @@
 <template>
   <div class="mt-20 mb-52 w-full max-w-[970px] mx-8 p-8 bg-white rounded-2xl shadow-xl border border-red-100">
     <div class="flex flex-col">
-      <!-- Logo and Title -->
       <div class="text-center mb-8">
         <div class="mb-4">
-          <img src="@/assets/logo.png" alt="Logo" class="w-16 h-16 mx-auto rounded-full cursor-pointer" @click="refreshPage" />
+          <img src="../../assets/logo.png" alt="Logo" class="w-16 h-16 mx-auto rounded-full cursor-pointer" @click="refreshPage" />
         </div>
         <h2 class="text-3xl font-bold text-red-800 mb-2">Регистрация</h2>
         <p class="text-gray-600">Банк крови - спасаем жизни вместе</p>
         <div class="mt-2 w-16 h-1 bg-gradient-to-r from-red-500 to-red-600 mx-auto rounded-full"></div>
       </div>
 
-      <!-- Registration Form -->
       <form @submit.prevent="handleRegistration" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Name Input -->
         <div class="group col-span-1">
           <label for="name" class="block text-sm font-medium text-gray-700">
             Имя
@@ -53,7 +50,6 @@
           </div>
         </div>
 
-        <!-- Email Input -->
         <div class="group col-span-1">
           <label for="email" class="block text-sm font-medium text-gray-700">
             Email
@@ -73,7 +69,6 @@
           </div>
         </div>
 
-        <!-- Password Input -->
         <div class="group col-span-1">
           <label for="password" class="block text-sm font-medium text-gray-700">
             Пароль
@@ -93,7 +88,6 @@
           </div>
         </div>
 
-        <!-- Role Selector -->
         <div class="group col-span-1">
           <label for="role" class="block text-sm font-medium text-gray-700">
             Роль
@@ -107,7 +101,6 @@
           />
         </div>
 
-        <!-- Position Input -->
         <div class="group col-span-1">
           <label for="post" class="block text-sm font-medium text-gray-700">
             Должность
@@ -124,7 +117,6 @@
           </div>
         </div>
 
-        <!-- Institution Input -->
         <div class="group col-span-3 relative">
           <label for="institution" class="block text-sm font-medium text-gray-700">
             Заведение
@@ -156,7 +148,6 @@
           </div>
         </div>
 
-        <!-- Submit Button -->
         <div class="col-span-3">
           <button
               type="submit"
@@ -166,7 +157,6 @@
           </button>
         </div>
 
-        <!-- Login Link -->
         <div class="col-span-3 text-center">
           <router-link
               to="/login"
@@ -187,6 +177,7 @@ import axios from "axios";
 import debounce from 'lodash.debounce';
 import {showAlert} from "@/js/custom-alert.js";
 import {abstractFetching} from "@/js/utils.js";
+import router from "@/routes/routes.js";
 
 const name = ref('')
 const lastName = ref('')
@@ -243,6 +234,7 @@ const handleRegistration = async () => {
         organizationId : institution.value.id
       });
       showAlert(response.data)
+      await router.push('/login')
     } catch (error) {
       showAlert(error.response.data);
     }

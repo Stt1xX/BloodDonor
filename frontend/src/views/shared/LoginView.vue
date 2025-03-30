@@ -1,5 +1,5 @@
 <script setup>
-import LoginForm from '@/components/LoginForm.vue'
+import LoginForm from '@/components/shared/LoginForm.vue'
 import Footer from '@/components/shared/Footer.vue'
 </script>
 
