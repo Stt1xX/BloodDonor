@@ -37,7 +37,7 @@ public class BloodRequestsService {
     private final RequestToBankRepository requestToBankRepository;
     private final BloodRequestRepository bloodRequestRepository;
 
-    public Page<RequestToBank> getRequestsForBanker(BloodGroup group, RhFactor rhesus, Boolean reverse, Boolean isEmergency,
+    public Page<RequestToBank> getRequestsForBanker(BloodGroup group, RhFactor rhesus, Boolean reverse,
                                                     Pageable page) {
 
         var caller = userService.getCurrentUser();
@@ -47,7 +47,7 @@ public class BloodRequestsService {
         var org = caller.get().getOrganization();
 
         Specification<RequestToBank> filters = RequestToBankSpecs.withFilters(org, group, rhesus, List.of(RequestStatus.PENDING, RequestStatus.COMPLETED,
-                RequestStatus.REJECTED), isEmergency);
+                RequestStatus.REJECTED));
         Sort sort = reverse != null && reverse ? page.getSort().descending() : page.getSort();
         return requestToBankRepository.findAll(filters, PageRequest.of(page.getPageNumber(),
                 page.getPageSize(), sort));
@@ -67,7 +67,7 @@ public class BloodRequestsService {
                         RequestStatus.REJECTED) : List.of(status)));
 
         return requestToBankRepository.findAll(filters, PageRequest.of(page.getPageNumber(),
-                page.getPageSize(), Sort.by("createdAt")));
+                page.getPageSize()));
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = IllegalArgumentException.class)

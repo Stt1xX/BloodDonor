@@ -43,16 +43,6 @@ public class RequestToBankSpecs {
         };
     }
 
-    public static Specification<RequestToBank> withIsEmergency(Boolean isEmergency) {
-        return (root, query, cb) -> {
-            if (isEmergency == null) {
-                return cb.conjunction();
-            }
-            Join<RequestToBank, BloodRequest> requestJoin = root.join("request");
-            return cb.equal(requestJoin.get("isEmergency"), isEmergency);
-        };
-    }
-
     public static Specification<RequestToBank> withAnyStatus(List<RequestStatus> statuses) {
         return (root, query, cb) -> {
             if (statuses == null) {
@@ -66,14 +56,12 @@ public class RequestToBankSpecs {
             Organization medicalInstitution,
             BloodGroup bloodGroup,
             RhFactor rhFactor,
-            List<RequestStatus> statuses,
-            Boolean isEmergency) {
+            List<RequestStatus> statuses) {
 
         return Specification
                 .where(withMedicalInstitution(medicalInstitution))
                 .and(withBloodGroup(bloodGroup))
                 .and(withRhFactor(rhFactor))
-                .and(withAnyStatus(statuses))
-                .and(withIsEmergency(isEmergency));
+                .and(withAnyStatus(statuses));
     }
 }
