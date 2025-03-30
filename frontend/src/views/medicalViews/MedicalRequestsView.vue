@@ -128,7 +128,6 @@ import Footer from "@/components/shared/Footer.vue";
 import CreateBloodReqWindow from "@/components/CreateBloodReqWindow.vue";
 import RequestDetailsModal from "@/components/RequestDetailsModal.vue";
 
-// Тестовые данные
 const managedEntities = ref([
   {
     id: 1,
@@ -203,8 +202,7 @@ const showDetails = (request) => {
 
 const deleteManagedEntity = async (id) => {
   try {
-    // В реальном приложении здесь будет вызов API
-    managedEntities.value = managedEntities.value.filter(item => item.id !== id);
+    // TODO
     showAlert('Заявка успешно удалена');
   } catch (error) {
     showAlert(error.response?.data || 'Ошибка при удалении');
@@ -231,15 +229,31 @@ const closeForm = () => {
 };
 
 const updateManagedEntities = () => {
-  // В реальном приложении здесь будет вызов API
-  // getManagedEntities(new AbortController());
+  getManagedEntities(new AbortController());
 };
 
+const getManagedEntities = async (abortController) => {
+  // try {
+  //   const url = `/api/blood_requests/medical?type=&pattern=${encodeURIComponent(searchQuery.value)}&page=${currentPage.value}&size=8&sort=id`
+  //   const response = await axios.get(url,{ signal: abortController.signal })
+  //   totalPages.value = response.data.totalPages;
+  //   organizations.value = response.data.content;
+  // } catch (error) {
+  //   showAlert(error.response.data);
+  // }
+}
+
+
+let polling
 onMounted(() => {
-  get_token();
-});
+  // updateManagedEntities()
+  // polling = setInterval(updateManagedEntities, 7000);
+  get_token()
+})
 
 onBeforeUnmount(() => {
-  // Очистка интервалов, если есть
-});
+  clearInterval(polling)
+})
+
+
 </script>
