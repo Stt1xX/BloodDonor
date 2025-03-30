@@ -47,7 +47,7 @@
           </div>
         </div>
         <p>
-          Всего запасов: {{ bloodVolumeByGroupAndRhesus }}
+          Всего запасов: {{ bloodVolumeByGroupAndRhesus.toFixed(2) }}л.
         </p>
         <button
             @click="showForm = true; formTitle = 'Добавление партии крови';"

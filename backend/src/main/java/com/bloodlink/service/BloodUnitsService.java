@@ -1,5 +1,6 @@
 package com.bloodlink.service;
 
+import com.bloodlink.entities.BloodReserve;
 import com.bloodlink.entities.BloodUnit;
 import com.bloodlink.entities.DTOs.BloodUnitDTOfrom;
 import com.bloodlink.entities.DTOs.BloodUnitDTOto;
@@ -8,8 +9,10 @@ import com.bloodlink.entities.Organization;
 import com.bloodlink.entities.User;
 import com.bloodlink.entities.enums.BloodGroup;
 import com.bloodlink.entities.enums.RhFactor;
+import com.bloodlink.entities.specifications.BloodReserveSpecs;
 import com.bloodlink.entities.specifications.BloodUnitsSpecs;
 import com.bloodlink.repositories.BloodRequestRepository;
+import com.bloodlink.repositories.BloodReserveRepository;
 import com.bloodlink.repositories.BloodUnitRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +32,7 @@ public class BloodUnitsService {
 
     private final UserService userService;
     private final BloodUnitRepository bloodUnitRepository;
-    private final BloodRequestRepository bloodRequestRepository;
+    private final BloodReserveRepository bloodReserveRepository;
 
     public Page<BloodUnitDTOto> getOrganizationBloodUnits(BloodGroup group, RhFactor rhesus, Boolean reverse, Pageable page){
 
@@ -52,16 +55,17 @@ public class BloodUnitsService {
     }
 
     public Double getSummaryVolume(BloodGroup group, RhFactor rhesus){
-        Specification<BloodUnit> filters = Specification.where(
-                        group == null ? null : BloodUnitsSpecs.hasBloodType(group))
-                .and(rhesus == null ? null : BloodUnitsSpecs.hasRhFactor(rhesus));
+        Specification<BloodReserve> filters = Specification.where(
+                        group == null ? null : BloodReserveSpecs.hasBloodType(group))
+                .and(rhesus == null ? null : BloodReserveSpecs.hasRhFactor(rhesus));
+
         Optional<User> opt = userService.getCurrentUser();
         User user;
         if (opt.isPresent()) {
             user = opt.get();
-            filters.and(BloodUnitsSpecs.hasOrganization(user.getOrganization()));
-            return bloodUnitRepository.findAll(filters)
-                    .stream().map(BloodUnit::getVolume).reduce(0.0, Double::sum);
+            filters.and(BloodReserveSpecs.hasBank(user.getOrganization()));
+            return bloodReserveRepository.findAll(filters)
+                    .stream().map(BloodReserve::getTotalQuantity).reduce(0.0, Double::sum);
         }
         return 0.0;
     }

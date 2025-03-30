@@ -16,7 +16,7 @@ public class BloodReserveSpecs {
         return (root, query, builder) ->builder.equal(root.get("id").get("rhFactor"), rhFactor);
     }
 
-    public static Specification<BloodReserve> hasOrganization(final Organization organization) {
+    public static Specification<BloodReserve> hasBank(final Organization organization) {
         return (root, query, builder) -> builder.equal(root.get("bank"), organization);
     }
 }

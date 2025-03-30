@@ -40,15 +40,15 @@ public class BloodRequestResource {
                 .map(BloodRequestDTOtoMed::convert);
     }
 
-    @PreAuthorize("hasAnyAuthority('BANK_EMPLOYEE')")
-    @PostMapping("/accept/{id}")
-    public ResponseEntity<?> acceptBloodRequest(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(bloodRequestsService.save(dto));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.ok(e.getMessage());
-        }
-    }
+//    @PreAuthorize("hasAnyAuthority('BANK_EMPLOYEE')")
+//    @PostMapping("/accept/{id}")
+//    public ResponseEntity<?> acceptBloodRequest(@PathVariable Long id) {
+//        try {
+//            return ResponseEntity.ok(bloodRequestsService.save(dto));
+//        } catch (IllegalArgumentException e) {
+//            return ResponseEntity.ok(e.getMessage());
+//        }
+//    }
 
     @PreAuthorize("hasAnyAuthority('MEDICAL_EMPLOYEE')")
     @PostMapping

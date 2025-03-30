@@ -42,11 +42,14 @@
             </select>
           </div>
         </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-gray-700 font-medium">Инвертировать поиск:</span>
+          <input @change="updateManagedEntities()" type="checkbox" v-model="reverseSearch" class="form-checkbox h-5 w-5 text-red-600" />
+        </div>
         <p>
           Всего запросов: {{ RequestNumberByGroupAndRhesus }}
         </p>
         <button
-            @click="showForm = true; formTitle = 'Добавление партии крови';"
             class="invisible bg-red-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-700 transition-colors"
         >
           Добавить кровь
@@ -132,11 +135,6 @@ const managedEntities = ref([
   { id: 3, group: 2, rhesus: "-", volume: 3, date: "2025-03-26", medicalInstitutionName : "Главная поклиника ИТМО" }
 ]);
 
-
-const showForm = ref(false)
-const formTitle = ref('Добавление партии крови')
-const isEdit = ref(false)
-
 const toggleBloodGroup = (group) => {
   bloodGroup.value = bloodGroup.value === group ? null : group;
 };
@@ -145,7 +143,9 @@ const toggleRhesus = (rhesus) => {
   rhesusFactor.value = rhesusFactor.value === rhesus ? null : rhesus;
 };
 
+const showForm = ref(false)
 
+const reverseSearch = ref(false);
 const bloodGroup = ref(null);
 const rhesusFactor = ref(null);
 const formManagedEntity = ref({})
@@ -156,16 +156,7 @@ const currentPage = ref(0)
 const totalPages = ref(1)
 
 const closeForm = () => {
-  isEdit.value = false
-  showForm.value = false
-  formManagedEntity.value = {
-    organizationType: '',
-    name: '',
-    address: '',
-    phone: '',
-    work_time: '',
-  }
-  // updateManagedEntities()
+  updateManagedEntities()
 }
 
 const prevPage = () => {
@@ -186,8 +177,8 @@ const nextPage = () => {
 
 let polling
 onMounted(() => {
-  // updateManagedEntities()
-  // polling = setInterval(updateManagedEntities, 7000);
+  updateManagedEntities()
+  polling = setInterval(updateManagedEntities, 7000);
   get_token()
 })
 
@@ -197,10 +188,10 @@ onBeforeUnmount(() => {
 
 const getManagedEntities = async (abortController) => {
   try {
-    const url = `/api/blood-requests?rhesus=${rhesusFactor.value}&group=${bloodGroup.value}&page=${currentPage.value}&size=8&sort=id`
+    const url = `/api/blood_requests/bank?rhesusFactor=${rhesusFactor.value}&bloodGroup=${bloodGroup.value}&reverse=${reverseSearch.value}&page=${currentPage.value}&size=8&sort=${sortBy.value}`
     const response = await axios.get(url,{ signal: abortController.signal })
     totalPages.value = response.data.totalPages;
-    managedEntities.value = response.data.content.main;
+    managedEntities.value = response.data.content;
     RequestNumberByGroupAndRhesus.value =  response.data.content.summary;
   } catch (error) {
     showAlert(error.response.data);
