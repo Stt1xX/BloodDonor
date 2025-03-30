@@ -26,10 +26,10 @@ public class BloodRequestResource {
     @GetMapping("/bank")
     public Page<BloodRequestDTOtoBank> getBankBloodRequests(@RequestParam String bloodGroup,
                                                             @RequestParam String rhesusFactor,
-                                                            @RequestParam Boolean reverse, @RequestParam Boolean isEmergency, Pageable page) {
+                                                            @RequestParam Boolean reverse, Pageable page) {
         var group = BloodGroup.fromSymbol(bloodGroup);
         var factor = RhFactor.fromSymbol(rhesusFactor);
-        return bloodRequestsService.getRequestsForBanker(group, factor, reverse, isEmergency, page)
+        return bloodRequestsService.getRequestsForBanker(group, factor, reverse, page)
                 .map(BloodRequestDTOtoBank::convert);
     }
 
@@ -38,6 +38,16 @@ public class BloodRequestResource {
     public Page<BloodRequestDTOtoMed> getMedBloodRequests(@RequestParam RequestStatus status, Pageable page) {
         return bloodRequestsService.getRequestsForMed(status, page)
                 .map(BloodRequestDTOtoMed::convert);
+    }
+
+    @PreAuthorize("hasAnyAuthority('BANK_EMPLOYEE')")
+    @PostMapping("/accept/{id}")
+    public ResponseEntity<?> acceptBloodRequest(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(bloodRequestsService.save(dto));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.ok(e.getMessage());
+        }
     }
 
     @PreAuthorize("hasAnyAuthority('MEDICAL_EMPLOYEE')")
