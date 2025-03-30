@@ -56,9 +56,9 @@
               <div class="col-span-1">
                 <div class="flex items-center">
                   <label class="block text-sm font-medium text-gray-700">Необходимый объем (л.)</label>
-                  <span v-if="errors.volume" class="text-red-500 text-xs ml-2">{{ errors.volume }}</span>
+                  <span v-if="errors.volumeNeeded" class="text-red-500 text-xs ml-2">{{ errors.volumeNeeded }}</span>
                 </div>
-                <input type="text" v-model="bloodReserve.volume"
+                <input type="text" v-model="bloodReserve.volumeNeeded"
                        class="mt-2 w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
                        placeholder="Введите объём"/>
               </div>
@@ -77,15 +77,17 @@
 
         <div v-if="step === 2">
           <input type="text" v-model="search" placeholder="Поиск по организациям..."
+                 @focus="searchFunc"
+                 @input="searchDebounced"
                  class="mb-4 w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 px-2 py-1"/>
 
-          <div v-if="filteredBanks.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
+          <div v-if="banks.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
             <div class="overflow-y-auto" style="max-height: 400px;">
               <table class="w-full">
                 <tbody>
-                <tr v-for="organization in filteredBanks"
+                <tr v-for="organization in banks"
                     :key="organization.id"
-                    class="border-b border-gray-500 cursor-pointer transition-colors"
+                    class="border-gray-500 cursor-pointer transition-colors"
                     :class="{
                 'bg-red-100': isSelected(organization),
                 'hover:bg-gray-50': !isSelected(organization)
@@ -141,36 +143,41 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import {formatWorkingHours} from "@/js/utils.js";
+import {onMounted, ref} from 'vue';
+import {abstractFetching, formatWorkingHours} from "@/js/utils.js";
+import axios from "axios";
+import {showAlert} from "@/js/custom-alert.js";
+import debounce from "lodash.debounce";
 
 const emit = defineEmits(['close']);
 const step = ref(1);
 const search = ref('');
 const selectedBanks = ref([]);
-const bloodReserve = ref({ bloodGroup: '', rhesusFactor: '', volume: '', isEmergency: false, reason: '' });
+const bloodReserve = ref({ bloodGroup: '', rhesusFactor: '', volumeNeeded: '', isEmergency: false, reason: '' });
 const errors = ref({});
+const banks = ref([]);
 
-// Тестовые данные (остаются без изменений)
-const banks = ref([
-  {id: 1, name: "Центральный банк крови Санкт-Петербурга", address: "ул. Калинина, 12", phone: "+7 (812) 123-45-67", hoursFrom: 8, hoursTo: 20, minutesFrom: 0, minutesTo: 0},
-  {id: 2, name: "Городская станция переливания крови", address: "пр. Просвещения, 45", phone: "+7 (812) 234-56-78", hoursFrom: 9, hoursTo: 18, minutesFrom: 30, minutesTo: 0},
-  {id: 3, name: "Банк крови при Городской больнице №1", address: "ул. Ленина, 5", phone: "+7 (812) 345-67-89", hoursFrom: 10, hoursTo: 17, minutesFrom: 0, minutesTo: 30},
-  {id: 4, name: "Региональный центр крови", address: "пр. Энгельса, 33", phone: "+7 (812) 456-78-90", hoursFrom: 7, hoursTo: 22, minutesFrom: 0, minutesTo: 0},
-  {id: 5, name: "Банк крови Детской больницы", address: "ул. Бассейная, 15", phone: "+7 (812) 567-89-01", hoursFrom: 8, hoursTo: 16, minutesFrom: 0, minutesTo: 0},
-  {id: 6, name: "Банк крови Медицинского университета", address: "ул. Льва Толстого, 6", phone: "+7 (812) 678-90-12", hoursFrom: 8, hoursTo: 20, minutesFrom: 0, minutesTo: 0},
-  {id: 7, name: "Экстренный банк крови", address: "ул. Гагарина, 1", phone: "+7 (812) 789-01-23", hoursFrom: 0, hoursTo: 24, minutesFrom: 0, minutesTo: 0},
-  {id: 8, name: "Банк крови Клинической больницы", address: "пр. Культуры, 4", phone: "+7 (812) 890-12-34", hoursFrom: 9, hoursTo: 21, minutesFrom: 0, minutesTo: 0},
-]);
+const getBanksWithResources = async (abortController) => {
+  try{
+    const url = `/api/organizations/banks_with_resources?pattern=${search.value}`
+    const response = await axios.post(url, {
+      bloodGroup : bloodReserve.value.bloodGroup,
+      rhesusFactor : bloodReserve.value.rhesusFactor,
+      volumeNeeded : bloodReserve.value.volumeNeeded
+    }, { signal: abortController.signal });
+    banks.value = response.data
+  } catch (error){
+    showAlert(error)
+  }
+}
 
-const filteredBanks = computed(() => {
-  if (!search.value) return banks.value;
-  const searchTerm = search.value.toLowerCase();
-  return banks.value.filter(bank =>
-      bank.name.toLowerCase().includes(searchTerm) ||
-      bank.address.toLowerCase().includes(searchTerm)
-  );
-});
+const searchFunc = async () => {
+  await abstractFetching(getBanksWithResources)
+}
+
+const searchDebounced = debounce(searchFunc, 500);
+
+
 
 const isSelected = (bank) => {
   return selectedBanks.value.some(b => b.id === bank.id);
@@ -180,20 +187,24 @@ const isValidNumber = (value) => {
   return /^[0-9]+([.,][0-9]{1,2})?$/.test(value);
 };
 
-const nextStep = () => {
+const nextStep = async () => {
   errors.value = {};
   if (!bloodReserve.value.bloodGroup) errors.value.bloodGroup = 'Выберите группу крови';
   if (!bloodReserve.value.rhesusFactor) errors.value.rhesusFactor = 'Выберите резус-фактор';
-  if (!bloodReserve.value.volume) {
-    errors.value.volume = 'Введите объём';
-  } else if (!isValidNumber(bloodReserve.value.volume)) {
-    errors.value.volume = 'Введите корректный объём (например: 0.5, 1.2)';
+  if (!bloodReserve.value.volumeNeeded) {
+    errors.value.volumeNeeded = 'Введите объём';
+  } else if (!isValidNumber(bloodReserve.value.volumeNeeded)) {
+    errors.value.volumeNeeded = 'Введите корректный объём (например: 0.5, 1.2)';
   }
   if (!bloodReserve.value.reason) {
     errors.value.reason = 'Укажите причину запроса';
   }
-  if (Object.keys(errors.value).length === 0)
-  step.value = 2;
+  if (Object.keys(errors.value).length === 0){
+    await searchFunc()
+    step.value = 2;
+  }
+
+
 };
 
 const toggleSelection = (bank) => {
