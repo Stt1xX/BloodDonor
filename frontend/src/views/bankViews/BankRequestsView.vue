@@ -236,8 +236,15 @@ const reject = (managedEntity) => {
   showForm.value = true;
 };
 
-const accept = (managedEntity) => {
-  console.log("Accept: " + managedEntity)
+const accept = async (id) => {
+  try{
+    const url = `/api/blood_requests/accept/${id}`
+    const response = await axios.post(url)
+    showAlert(response.data)
+    updateManagedEntities()
+  } catch (error){
+    showAlert(error)
+  }
 }
 
 const handleRejectSubmit = (data) => {

@@ -32,6 +32,7 @@
         <table class="w-full">
           <thead>
           <tr class="bg-gray-100">
+            <th class="p-4 text-center">Получатель</th>
             <th class="p-4 text-center">Группа крови</th>
             <th class="p-4 text-center">Резус-фактор</th>
             <th class="p-4 text-center">Объем</th>
@@ -43,6 +44,9 @@
           </thead>
           <tbody>
           <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
+            <td class="p-4 text-center">
+              <div>{{ managedEntity.bank.name }}</div>
+            </td>
             <td class="p-4 text-center">
               <div>гр. {{ managedEntity.bloodGroup }}</div>
             </td>
