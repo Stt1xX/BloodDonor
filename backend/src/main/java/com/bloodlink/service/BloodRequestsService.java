@@ -63,17 +63,17 @@ public class BloodRequestsService {
         for (var bankId : dto.getBloodBanks()) {
             var bankOpt = organizationRepository.findById(bankId);
             if (bankOpt.isEmpty()) {
-                throw new IllegalArgumentException("Указанная организация не существует");
+                throw new IllegalArgumentException("Одна из указанных организаций не существует");
             }
             if (bankOpt.get().getType() != OrganizationType.BLOOD_BANK) {
-                throw new IllegalArgumentException("Указанная организация не является банком");
+                throw new IllegalArgumentException("Одна из указанных организаций не является банком");
             }
             var bankRequest = new RequestToBank();
             bankRequest.setBloodBank(bankOpt.get());
             bankRequest.setRequest(request);
             requestToBankRepository.save(bankRequest);
         }
-        return "Партия крови успешно добавлена!";
+        return "Запрос успешно отправлен!";
     }
 //
 //    @Transactional

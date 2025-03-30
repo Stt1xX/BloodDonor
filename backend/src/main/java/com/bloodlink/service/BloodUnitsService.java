@@ -9,6 +9,7 @@ import com.bloodlink.entities.User;
 import com.bloodlink.entities.enums.BloodGroup;
 import com.bloodlink.entities.enums.RhFactor;
 import com.bloodlink.entities.specifications.BloodUnitsSpecs;
+import com.bloodlink.repositories.BloodRequestRepository;
 import com.bloodlink.repositories.BloodUnitRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class BloodUnitsService {
 
     private final UserService userService;
     private final BloodUnitRepository bloodUnitRepository;
+    private final BloodRequestRepository bloodRequestRepository;
 
     public Page<BloodUnitDTOto> getOrganizationBloodUnits(BloodGroup group, RhFactor rhesus, Boolean reverse, Pageable page){
 
