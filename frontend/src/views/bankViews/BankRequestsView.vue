@@ -36,7 +36,7 @@
           </div>
           <div>
             <select v-model="sortBy" class="px-4 py-2 border rounded-md bg-white shadow-sm">
-              <option value="request.volume">По объему</option>
+              <option value="request.volumeNeeded">По объему</option>
               <option value="request.createdAt">По дате поставки</option>
               <option value="request.isEmergency">По приоритету</option>
             </select>
