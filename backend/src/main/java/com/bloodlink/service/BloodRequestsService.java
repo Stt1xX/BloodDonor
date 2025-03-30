@@ -45,14 +45,12 @@ public class BloodRequestsService {
             return Page.empty();
         }
         var org = caller.get().getOrganization();
-
-        // TODO Братишка разберись уже со спецификациями и фильтрациями
-//        Specification<RequestToBank> filters = RequestToBankSpecs.withFilters(org, group, rhesus, List.of(RequestStatus.PENDING, RequestStatus.COMPLETED,
-//                RequestStatus.REJECTED));
-//        Sort sort = reverse != null && reverse ? page.getSort().descending() : page.getSort();
-//        return requestToBankRepository.findAll(filters, PageRequest.of(page.getPageNumber(),
-//                page.getPageSize(), sort));
-        return requestToBankRepository.findAll(page);
+        Specification<RequestToBank> filters = RequestToBankSpecs.withFiltersAndBank(org, group, rhesus, List.of(RequestStatus.PENDING
+                , RequestStatus.COMPLETED,
+                RequestStatus.REJECTED));
+        Sort sort = reverse != null && reverse ? page.getSort().descending() : page.getSort();
+        return requestToBankRepository.findAll(filters, PageRequest.of(page.getPageNumber(),
+                page.getPageSize(), sort));
     }
 
     public Page<RequestToBank> getRequestsForMed(RequestStatus status,
@@ -63,7 +61,6 @@ public class BloodRequestsService {
             return Page.empty();
         }
         var org = caller.get().getOrganization();
-        // TODO Братишка разберись уже со спецификациями и фильтрациями
         Specification<RequestToBank> filters = Specification
                 .where(withMedicalInstitution(org))
                 .and(withAnyStatus(status == null ? List.of(RequestStatus.PENDING, RequestStatus.COMPLETED,

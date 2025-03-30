@@ -23,6 +23,15 @@ public class RequestToBankSpecs {
         };
     }
 
+    public static Specification<RequestToBank> withBank(Organization bank) {
+        return (root, query, cb) -> {
+            if (bank == null) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.get("bloodBank"), bank);
+        };
+    }
+
     public static Specification<RequestToBank> withBloodGroup(BloodGroup bloodGroup) {
         return (root, query, cb) -> {
             if (bloodGroup == null) {
@@ -52,7 +61,7 @@ public class RequestToBankSpecs {
         };
     }
 
-    public static Specification<RequestToBank> withFilters(
+    public static Specification<RequestToBank> withFiltersAndMedInstitution(
             Organization medicalInstitution,
             BloodGroup bloodGroup,
             RhFactor rhFactor,
@@ -60,6 +69,19 @@ public class RequestToBankSpecs {
 
         return Specification
                 .where(withMedicalInstitution(medicalInstitution))
+                .and(withBloodGroup(bloodGroup))
+                .and(withRhFactor(rhFactor))
+                .and(withAnyStatus(statuses));
+    }
+
+    public static Specification<RequestToBank> withFiltersAndBank(
+            Organization bank,
+            BloodGroup bloodGroup,
+            RhFactor rhFactor,
+            List<RequestStatus> statuses) {
+
+        return Specification
+                .where(withBank(bank))
                 .and(withBloodGroup(bloodGroup))
                 .and(withRhFactor(rhFactor))
                 .and(withAnyStatus(statuses));
