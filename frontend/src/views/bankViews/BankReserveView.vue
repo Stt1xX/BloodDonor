@@ -59,6 +59,15 @@
 
       <div v-if="managedEntities.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
         <table class="w-full">
+          <thead>
+          <tr class="bg-gray-100">
+            <th class="p-4 text-center">Группа крови</th>
+            <th class="p-4 text-center">Резус-фактор</th>
+            <th class="p-4 text-center">Объем</th>
+            <th class="p-4 text-center">Срок годности</th>
+            <th class="p-4 text-center">Действия</th>
+          </tr>
+          </thead>
           <tbody>
           <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
             <td class="p-4 text-center">

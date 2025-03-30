@@ -77,7 +77,7 @@
         </div>
 
         <div class="flex justify-end mt-4">
-          <button @click="emit('close')" class="bg-gray-500 text-white px-4 py-2 rounded mr-2 hover:bg-gray-600 transition-colors">
+          <button @click="emit('close')" type="button" class="bg-gray-500 text-white px-4 py-2 rounded mr-2 hover:bg-gray-600 transition-colors">
             Отмена
           </button>
           <button @click="confirmRejection" type="button" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">

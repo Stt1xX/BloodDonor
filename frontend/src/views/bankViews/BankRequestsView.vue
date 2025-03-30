@@ -58,22 +58,36 @@
 
       <div v-if="managedEntities.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
         <table class="w-full">
+          <thead>
+          <tr class="bg-gray-100">
+            <th class="p-4 text-center">Отправитель</th>
+            <th class="p-4 text-center">Группа крови</th>
+            <th class="p-4 text-center">Резус-фактор</th>
+            <th class="p-4 text-center">Объем</th>
+            <th class="p-4 text-center">Приоритет</th>
+            <th class="p-4 text-center">Дата создания</th>
+            <th class="p-4 text-center">Действия</th>
+          </tr>
+          </thead>
           <tbody>
           <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
             <td class="p-4 text-center">
-              <div>{{ managedEntity.medicalInstitutionName }}</div>
+              <div>{{ managedEntity.institution.name }}</div>
             </td>
             <td class="p-4 text-center">
-              <div>{{ managedEntity.group }}</div>
+              <div>{{ managedEntity.bloodGroup }}г.</div>
             </td>
             <td class="p-4 text-center">
-              <div>{{ managedEntity.rhesus }}</div>
+              <div>rh{{ managedEntity.rhesusFactor }}</div>
             </td>
             <td class="p-4 text-center">
-              <div>{{ managedEntity.volume }} л.</div>
+              <div>{{ managedEntity.volumeNeeded }}л.</div>
+            </td>
+            <td class="p-4 text-center text-red-500">
+              <div v-if="managedEntity.isEmergency">Cрочно!</div>
             </td>
             <td class="p-4 text-center">
-              {{ managedEntity.date }}
+              {{ formatTimestamp(managedEntity.createdAt) }}
             </td>
             <td class="p-4 text-center space-x-2">
               <button @click="accept(managedEntity.id)" class="text-green-600 hover:text-green-800">
@@ -84,6 +98,15 @@
               <button @click="reject(managedEntity)" class="text-red-600 hover:text-red-800">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <button
+                  @click.stop="showDetails(managedEntity)"
+                  class="text-blue-600 hover:text-blue-800"
+                  title="Подробнее"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </button>
             </td>
@@ -114,6 +137,11 @@
         </button>
       </div>
       <RejectBloodReqWindow v-if="showForm" @close="closeForm" @confirm="handleRejectSubmit" :request-data="formManagedEntity"/>
+      <RequestDetailsModal
+          v-if="selectedRequest"
+          :request="selectedRequest"
+          @close="selectedRequest = null"
+      />
     </main>
     <Footer />
   </div>
@@ -121,19 +149,16 @@
 
 <script setup>
 import {onBeforeUnmount, onMounted, ref} from "vue";
-import { HeaderGroups } from "@/js/utils.js";
+import {formatTimestamp, HeaderGroups} from "@/js/utils.js";
 import Header from "@/components/shared/Header.vue";
 import {showAlert} from "@/js/custom-alert.js";
 import axios from "axios";
 import {get_token} from "@/js/csrf-token.js";
 import Footer from "@/components/shared/Footer.vue";
 import RejectBloodReqWindow from "@/components/RejectBloodReqWindow.vue";
+import RequestDetailsModal from "@/components/RequestDetailsModal.vue";
 
-const managedEntities = ref([
-  { id: 1, group: 1, rhesus: "+", volume: 5, date: "2025-03-25", medicalInstitutionName : "Главная поклиника ИТМО"},
-  { id: 2, group: 3, rhesus: "+", volume: 4, date: "2025-03-27", medicalInstitutionName : "Главная поклиника ИТМО" },
-  { id: 3, group: 2, rhesus: "-", volume: 3, date: "2025-03-26", medicalInstitutionName : "Главная поклиника ИТМО" }
-]);
+const managedEntities = ref([]);
 
 const toggleBloodGroup = (group) => {
   bloodGroup.value = bloodGroup.value === group ? null : group;
@@ -144,6 +169,7 @@ const toggleRhesus = (rhesus) => {
 };
 
 const showForm = ref(false)
+const selectedRequest = ref(null);
 
 const reverseSearch = ref(false);
 const bloodGroup = ref(null);
@@ -156,6 +182,7 @@ const currentPage = ref(0)
 const totalPages = ref(1)
 
 const closeForm = () => {
+  showForm.value = false
   updateManagedEntities()
 }
 
@@ -192,7 +219,7 @@ const getManagedEntities = async (abortController) => {
     const response = await axios.get(url,{ signal: abortController.signal })
     totalPages.value = response.data.totalPages;
     managedEntities.value = response.data.content;
-    RequestNumberByGroupAndRhesus.value =  response.data.content.summary;
+    RequestNumberByGroupAndRhesus.value =  response.data.totalElements;
   } catch (error) {
     showAlert(error.response.data);
   }
@@ -214,6 +241,10 @@ const accept = (managedEntity) => {
 const handleRejectSubmit = (data) => {
   console.log("Отказ оформлен:", data);
   closeForm();
+};
+
+const showDetails = (request) => {
+  selectedRequest.value = request;
 };
 
 </script>
