@@ -1,56 +1,27 @@
 <template>
   <div class="min-h-screen flex flex-col bg-gray-100">
-    <Header :header-group="HeaderGroups.BANK_EMPLOYEE" />
+    <Header :header-group="HeaderGroups.MEDICAL_EMPLOYEE" />
 
     <main class="flex-grow container mx-auto py-16 px-8 flex flex-col items-center">
       <div class="w-full flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
         <div class="flex items-center flex-wrap gap-4">
           <div class="flex items-center space-x-2">
-            <span class="text-gray-700 font-medium">Группа:</span>
+            <span class="text-gray-700 font-medium">Статус:</span>
             <button
-                v-for="group in [1, 2, 3, 4]"
-                :key="group"
-                @click="toggleBloodGroup(group)"
+                v-for="status in ['В ожидании', 'Отклонено', 'Принято']"
+                :key="status"
+                @click="toggleStatus(status)"
                 :class="[
-                group === bloodGroup ? 'bg-red-500 text-white' : 'bg-white',
-                'hover:bg-red-500 hover:text-white transition-colors border px-4 py-2 rounded-md shadow-sm'
+                  status === requestStatus ? 'bg-red-500 text-white' : 'bg-white',
+                  'hover:bg-red-500 hover:text-white transition-colors border px-4 py-2 rounded-md shadow-sm'
                 ]"
             >
-              {{ group }}
+              {{ status }}
             </button>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="text-gray-700 font-medium">Резус:</span>
-            <button
-                v-for="rhesus in ['+', '-']"
-                :key="rhesus"
-                @click="toggleRhesus(rhesus)"
-                :class="[
-                rhesus === rhesusFactor ? 'bg-red-500 text-white' : 'bg-white',
-                'hover:bg-red-500 hover:text-white transition-colors border px-4 py-2 rounded-md shadow-sm'
-                ]"
-                class="px-4 py-2 border rounded-md shadow-sm"
-            >
-              {{ rhesus }}
-            </button>
-          </div>
-          <div>
-            <select @change="updateManagedEntities()" v-model="sortBy" class="px-4 py-2 border rounded-md bg-white shadow-sm">
-              <option value="volume">По объему</option>
-              <option value="createdAt">По дате поставки</option>
-              <option value="expirationDate">По дате просрочки</option>
-            </select>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="text-gray-700 font-medium">Инвертировать поиск:</span>
-            <input @change="updateManagedEntities()" type="checkbox" v-model="reverseSearch" class="form-checkbox h-5 w-5 text-red-600" />
           </div>
         </div>
-        <p>
-          Всего запасов: {{ bloodVolumeByGroupAndRhesus }}
-        </p>
         <button
-            @click="showForm = true; formTitle = 'Добавление партии крови';"
+            @click="showForm = true"
             class="bg-red-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-700 transition-colors"
         >
           Добавить кровь
@@ -59,27 +30,51 @@
 
       <div v-if="managedEntities.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
         <table class="w-full">
+          <thead>
+          <tr class="bg-gray-100">
+            <th class="p-4 text-center">Группа крови</th>
+            <th class="p-4 text-center">Резус-фактор</th>
+            <th class="p-4 text-center">Объем</th>
+            <th class="p-4 text-center">Статус</th>
+            <th class="p-4 text-center">Дата создания</th>
+            <th class="p-4 text-center">Действия</th>
+          </tr>
+          </thead>
           <tbody>
-          <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
+          <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0 hover:bg-gray-50">
             <td class="p-4 text-center">
               <div>гр. {{ managedEntity.bloodGroup }}</div>
             </td>
             <td class="p-4 text-center">
-              <div>rh{{ managedEntity.rhesusFactor }}</div>
+              <div>rh{{ managedEntity.rhFactor }}</div>
             </td>
             <td class="p-4 text-center">
               <div>{{ managedEntity.volume }} л.</div>
             </td>
             <td class="p-4 text-center">
-              от {{ managedEntity.createdAt }} до {{ managedEntity.expirationDate }}
+              <span :class="getStatusClass(managedEntity.requestStatus)" class="px-3 py-1 rounded-full text-sm">
+                {{ managedEntity.requestStatus }}
+              </span>
+            </td>
+            <td class="p-4 text-center">
+              {{ formatDate(managedEntity.createdAt) }}
             </td>
             <td class="p-4 text-center space-x-2">
-              <button @click="editManagedEntity(managedEntity)" class="text-blue-600 hover:text-blue-800">
+              <button
+                  @click.stop="showDetails(managedEntity)"
+                  class="text-blue-600 hover:text-blue-800"
+                  title="Подробнее"
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 3.5l4 4-12 12-4 1 1-4 12-12z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </button>
-              <button @click="deleteManagedEntity(managedEntity.id)" class="text-red-600 hover:text-red-800">
+              <button
+                  v-if="managedEntity.requestStatus === 'В ожидании'"
+                  @click.stop="deleteManagedEntity(managedEntity.id)"
+                  class="text-red-600 hover:text-red-800"
+                  title="Удалить"
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -111,12 +106,16 @@
           Следующая
         </button>
       </div>
-      <CreateBloodReqWindow v-if="showForm" @close="closeForm" :title="formTitle" :bloodReserve="isEdit ? formManagedEntity : undefined" :is-edit="isEdit"/>
+      <CreateBloodReqWindow v-if="showForm" @close="closeForm"/>
+      <RequestDetailsModal
+          v-if="selectedRequest"
+          :request="selectedRequest"
+          @close="selectedRequest = null"
+      />
     </main>
     <Footer />
   </div>
 </template>
-
 
 <script setup>
 import {onBeforeUnmount, onMounted, ref} from "vue";
@@ -127,112 +126,120 @@ import axios from "axios";
 import {get_token} from "@/js/csrf-token.js";
 import Footer from "@/components/shared/Footer.vue";
 import CreateBloodReqWindow from "@/components/CreateBloodReqWindow.vue";
+import RequestDetailsModal from "@/components/RequestDetailsModal.vue";
 
-const managedEntities = ref([]);
+// Тестовые данные
+const managedEntities = ref([
+  {
+    id: 1,
+    bloodGroup: 1,
+    rhFactor: '+',
+    volume: 1.5,
+    requestStatus: 'В ожидании',
+    createdAt: '2023-05-15T10:30:00',
+    author: 'Иванов И.И.',
+    details: 'Необходимо для операции на сердце',
+    processedBy: null,
+    rejectionReason: null
+  },
+  {
+    id: 2,
+    bloodGroup: 2,
+    rhFactor: '-',
+    volume: 2.0,
+    requestStatus: 'Принято',
+    createdAt: '2023-05-14T14:45:00',
+    author: 'Петров П.П.',
+    details: 'Запланированная операция',
+    processedBy: 'Сидорова С.С.',
+    processedAt: '2023-05-14T15:30:00',
+    rejectionReason: null
+  },
+  {
+    id: 3,
+    bloodGroup: 3,
+    rhFactor: '+',
+    volume: 1.0,
+    requestStatus: 'Отклонено',
+    createdAt: '2023-05-13T09:15:00',
+    author: 'Смирнов С.С.',
+    details: 'Недостаточно доноров',
+    processedBy: 'Кузнецова К.К.',
+    processedAt: '2023-05-13T10:20:00',
+    rejectionReason: 'Недостаточно доноров с данной группой крови'
+  }
+]);
+
+const selectedRequest = ref(null);
 
 
-const showForm = ref(false)
-const formTitle = ref('Добавление партии крови')
-const isEdit = ref(false)
+const showForm = ref(false);
+const requestStatus = ref(null);
+const currentPage = ref(0);
+const totalPages = ref(1);
 
-const toggleBloodGroup = (group) => {
-  bloodGroup.value = bloodGroup.value === group ? null : group;
-  updateManagedEntities()
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 };
 
-const toggleRhesus = (rhesus) => {
-  rhesusFactor.value = rhesusFactor.value === rhesus ? null : rhesus;
-  updateManagedEntities()
+const getStatusClass = (status) => {
+  switch(status) {
+    case 'В ожидании': return 'bg-yellow-100 text-yellow-800';
+    case 'Принято': return 'bg-green-100 text-green-800';
+    case 'Отклонено': return 'bg-red-100 text-red-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
 };
 
+const toggleStatus = (status) => {
+  requestStatus.value = requestStatus.value === status ? null : status;
+  updateManagedEntities();
+};
 
-const bloodGroup = ref(null);
-const rhesusFactor = ref(null);
-const formManagedEntity = ref({})
-const bloodVolumeByGroupAndRhesus = ref(0);
-const sortBy = ref("volume");
-const reverseSearch = ref(false);
-
-const currentPage = ref(0)
-const totalPages = ref(1)
-
-const closeForm = () => {
-  isEdit.value = false
-  showForm.value = false
-  // formManagedEntity.value = {
-  //   organizationType: '',
-  //   name: '',
-  //   address: '',
-  //   phone: '',
-  //   work_time: '',
-  // }
-  updateManagedEntities()
-}
-
-
-const editManagedEntity = (managedEntity) => {
-  formTitle.value = 'Редактирование партии крови'
-  formManagedEntity.value = managedEntity
-  formManagedEntity.value.expirationDate = new Date(formManagedEntity.value.expirationDate)
-  formManagedEntity.value.createdAt = new Date(formManagedEntity.value.createdAt)
-  formManagedEntity.value.bloodGroup = Number(formManagedEntity.value.bloodGroup)
-  isEdit.value = true
-  showForm.value = true
-}
+const showDetails = (request) => {
+  selectedRequest.value = request;
+};
 
 const deleteManagedEntity = async (id) => {
   try {
-    const url = `/api/blood_units?id=${id}`
-    const response = await axios.delete(url)
-    showAlert(response.data)
+    // В реальном приложении здесь будет вызов API
+    managedEntities.value = managedEntities.value.filter(item => item.id !== id);
+    showAlert('Заявка успешно удалена');
   } catch (error) {
-    showAlert(error.response.data);
+    showAlert(error.response?.data || 'Ошибка при удалении');
   }
-  updateManagedEntities()
-}
-
+};
 
 const prevPage = () => {
   if (currentPage.value >= 1) {
     currentPage.value--;
-    updateManagedEntities()
+    updateManagedEntities();
   }
 };
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
-    updateManagedEntities()
+    updateManagedEntities();
   }
 };
 
-
-
-let polling
-onMounted(() => {
-  // updateManagedEntities()
-  // polling = setInterval(updateManagedEntities, 7000);
-  get_token()
-})
-
-onBeforeUnmount(() => {
-  clearInterval(polling)
-})
-
-const getManagedEntities = async (abortController) => {
-  // try {
-  //   const url = `/api/blood_units?rhesusFactor=${encodeURIComponent(rhesusFactor.value)}&bloodGroup=${bloodGroup.value}&reverse=${reverseSearch.value}&page=${currentPage.value}&size=8&sort=${sortBy.value}`
-  //   const response = await axios.get(url,{ signal: abortController.signal })
-  //   totalPages.value = response.data.page.totalPages;
-  //   managedEntities.value = response.data.page.content;
-  //   bloodVolumeByGroupAndRhesus.value =  response.data.summaryVolume;
-  // } catch (error) {
-  //   showAlert(error.response.data);
-  // }
-}
+const closeForm = () => {
+  showForm.value = false;
+  updateManagedEntities();
+};
 
 const updateManagedEntities = () => {
-  getManagedEntities(new AbortController())
-}
+  // В реальном приложении здесь будет вызов API
+  // getManagedEntities(new AbortController());
+};
 
+onMounted(() => {
+  get_token();
+});
+
+onBeforeUnmount(() => {
+  // Очистка интервалов, если есть
+});
 </script>
