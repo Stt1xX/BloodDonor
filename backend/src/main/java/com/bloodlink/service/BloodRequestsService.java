@@ -46,9 +46,8 @@ public class BloodRequestsService {
         Specification<RequestToBank> filters = RequestToBankSpecs.withFilters(org, group, rhesus, List.of(RequestStatus.PENDING, RequestStatus.COMPLETED,
                 RequestStatus.REJECTED), isEmergency);
         Sort sort = reverse != null && reverse ? page.getSort().descending() : page.getSort();
-        var requests = requestToBankRepository.findAll(filters, PageRequest.of(page.getPageNumber(),
+        return requestToBankRepository.findAll(filters, PageRequest.of(page.getPageNumber(),
                 page.getPageSize(), sort));
-        return requests;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = IllegalArgumentException.class)

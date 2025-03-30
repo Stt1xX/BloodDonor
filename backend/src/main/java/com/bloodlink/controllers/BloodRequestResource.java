@@ -33,6 +33,9 @@ public class BloodRequestResource {
                 .map(BloodRequestDTOtoBank::convert);
     }
 
+    // TODO для медиков есть только возможность выбрать статус заявки
+    //  (можно просматривать успешные, отклоненные, ожидающие подтверждения)
+    //  либо просто смотреть все. Сортировка всегда должна быть по дате отправки заявки
     @PreAuthorize("hasAnyAuthority('MEDICAL_EMPLOYEE')")
     @GetMapping("/medical")
     public Page<BloodRequestDTOtoMed> getMedBloodRequests(@RequestParam String bloodGroup,
