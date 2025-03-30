@@ -3,6 +3,7 @@ package com.bloodlink.configs;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.function.RequestPredicate;
 import org.springframework.web.servlet.function.RouterFunction;
@@ -17,6 +18,7 @@ import static org.springframework.web.servlet.function.RouterFunctions.route;
 
 
 @Configuration
+@EnableRetry
 public class WebConfig implements WebMvcConfigurer {
 
     @Bean
