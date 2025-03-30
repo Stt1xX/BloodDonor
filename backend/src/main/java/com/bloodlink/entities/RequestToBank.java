@@ -1,63 +1,56 @@
 package com.bloodlink.entities;
 
-import com.bloodlink.entities.enums.BloodGroup;
-import com.bloodlink.entities.enums.RhFactor;
+import com.bloodlink.entities.enums.RequestStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Entity
 @AllArgsConstructor
 @With
-@Table(name = "blood_requests")
+@Table(name = "requests_to_bank")
 @NoArgsConstructor
-public class BloodRequest {
+public class RequestToBank {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @Enumerated(EnumType.STRING)
-    private BloodGroup bloodGroup;
-
-    @Enumerated(EnumType.STRING)
-    private RhFactor rhFactor;
-
-    private Double volumeNeeded;
-
-    private Boolean isEmergency;
+    private RequestStatus status;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "medical_institution_id")
-    private Organization medicalInstitution;
+    @JoinColumn(name = "blood_bank_id")
+    private Organization bloodBank;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "request_id")
+    private BloodRequest request;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String description;
+    private String rejectionReason;
 
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "creator_id")
-    private User creator;
+    @JoinColumn(name = "banker_id")
+    private User banker;
 
-    @OneToMany
-    @Cascade(org.hibernate.annotations.CascadeType.PERSIST)
-    private List<RequestToBank> bankRequests;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        status = RequestStatus.PENDING;
     }
 
     @PreUpdate

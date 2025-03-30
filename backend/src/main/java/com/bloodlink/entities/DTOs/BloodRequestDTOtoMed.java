@@ -1,6 +1,6 @@
 package com.bloodlink.entities.DTOs;
 
-import com.bloodlink.entities.BloodRequest;
+import com.bloodlink.entities.RequestToBank;
 import com.bloodlink.entities.enums.BloodGroup;
 import com.bloodlink.entities.enums.RequestStatus;
 import com.bloodlink.entities.enums.RhFactor;
@@ -15,21 +15,28 @@ public class BloodRequestDTOtoMed {
 
     private Long id;
     private BloodGroup bloodGroup;
-    private Long requestGroupId;
     private RhFactor rhesusFactor;
+    private String description;
     private Double volumeNeeded;
-    private RequestStatus status;
-    private OrganizationDTOto bank;
     private Boolean isEmergency;
+
+    private RequestStatus status;
+    private String rejectionReason;
+    private OrganizationDTOto bank;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String rejectionReason;
 
-    public static BloodRequestDTOtoMed convert(BloodRequest bloodRequest) {
+    private UserDTOto banker;
+    private UserDTOto creator;
+
+    public static BloodRequestDTOtoMed convert(RequestToBank request) {
+        var bloodRequest = request.getRequest();
         return new BloodRequestDTOtoMed(bloodRequest.getId(), bloodRequest.getBloodGroup(),
-                bloodRequest.getRequestGroupId(),
-                bloodRequest.getRhFactor(), bloodRequest.getVolumeNeeded(), bloodRequest.getStatus(),
-                OrganizationDTOto.convert(bloodRequest.getBloodBank()), bloodRequest.getIsEmergency(),
-                bloodRequest.getCreatedAt(), bloodRequest.getUpdatedAt(), bloodRequest.getRejectionReason());
+                bloodRequest.getRhFactor(), bloodRequest.getDescription(), bloodRequest.getVolumeNeeded(),
+                bloodRequest.getIsEmergency(), request.getStatus(), request.getRejectionReason(),
+                OrganizationDTOto.convert(request.getBloodBank()), request.getCreatedAt(),
+                request.getUpdatedAt(), UserDTOto.convert(request.getBanker()),
+                UserDTOto.convert(bloodRequest.getCreator()));
     }
 }

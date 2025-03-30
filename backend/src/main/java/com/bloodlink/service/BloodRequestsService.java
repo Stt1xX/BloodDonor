@@ -2,13 +2,15 @@ package com.bloodlink.service;
 
 import com.bloodlink.entities.BloodRequest;
 import com.bloodlink.entities.DTOs.BloodRequestDTOfrom;
+import com.bloodlink.entities.RequestToBank;
 import com.bloodlink.entities.enums.BloodGroup;
 import com.bloodlink.entities.enums.OrganizationType;
 import com.bloodlink.entities.enums.RequestStatus;
 import com.bloodlink.entities.enums.RhFactor;
-import com.bloodlink.entities.specifications.BloodRequestSpecs;
+import com.bloodlink.entities.specifications.RequestToBankSpecs;
 import com.bloodlink.repositories.BloodRequestRepository;
 import com.bloodlink.repositories.OrganizationRepository;
+import com.bloodlink.repositories.RequestToBankRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,11 +30,12 @@ import java.util.List;
 public class BloodRequestsService {
 
     private final UserService userService;
-    private final BloodRequestRepository bloodRequestRepository;
     private final OrganizationRepository organizationRepository;
+    private final RequestToBankRepository requestToBankRepository;
+    private final BloodRequestRepository bloodRequestRepository;
 
-    public Page<BloodRequest> getRequests(BloodGroup group, RhFactor rhesus, Boolean reverse, Boolean isEmergency,
-                                          Pageable page) {
+    public Page<RequestToBank> getRequests(BloodGroup group, RhFactor rhesus, Boolean reverse, Boolean isEmergency,
+                                           Pageable page) {
 
         var caller = userService.getCurrentUser();
         if (caller.isEmpty()) {
@@ -40,16 +43,10 @@ public class BloodRequestsService {
         }
         var org = caller.get().getOrganization();
 
-        Specification<BloodRequest> filters = Specification.where(
-                        group == null ? null : BloodRequestSpecs.hasBloodType(group))
-                .and(rhesus == null ? null : BloodRequestSpecs.hasRhFactor(rhesus))
-                .and(isEmergency == null ? null : BloodRequestSpecs.isEmergency(isEmergency))
-                .and(BloodRequestSpecs.hasOrganization(org))
-                .and(BloodRequestSpecs.hasAnyStatus(List.of(RequestStatus.PENDING, RequestStatus.COMPLETED,
-                        RequestStatus.REJECTED)));
-
+        Specification<RequestToBank> filters = RequestToBankSpecs.withFilters(org, group, rhesus, List.of(RequestStatus.PENDING, RequestStatus.COMPLETED,
+                RequestStatus.REJECTED), isEmergency);
         Sort sort = reverse != null && reverse ? page.getSort().descending() : page.getSort();
-        var requests = bloodRequestRepository.findAll(filters, PageRequest.of(page.getPageNumber(),
+        var requests = requestToBankRepository.findAll(filters, PageRequest.of(page.getPageNumber(),
                 page.getPageSize(), sort));
         return requests;
     }
@@ -61,13 +58,10 @@ public class BloodRequestsService {
         if (caller.isEmpty()) {
             return "Не могу распознать вас";
         }
-        var org = caller.get().getOrganization();
-        Long groupId = null;
+        BloodRequest request = dto.convert(caller.get());
+        request = bloodRequestRepository.save(request);
 
         for (var bankId : dto.getBloodBanks()) {
-            //Might better be cloned
-            BloodRequest request = dto.convert(org);
-            if (groupId != null) request.setRequestGroupId(groupId);
             var bankOpt = organizationRepository.findById(bankId);
             if (bankOpt.isEmpty()) {
                 throw new IllegalArgumentException("Указанная организация не существует");
@@ -75,11 +69,10 @@ public class BloodRequestsService {
             if (bankOpt.get().getType() != OrganizationType.BLOOD_BANK) {
                 throw new IllegalArgumentException("Указанная организация не является банком");
             }
-
-            var bank = bankOpt.get();
-            request.setBloodBank(bank);
-            request = bloodRequestRepository.save(request);
-            if (groupId == null) groupId = request.getRequestGroupId();
+            var bankRequest = new RequestToBank();
+            bankRequest.setBloodBank(bankOpt.get());
+            bankRequest.setRequest(request);
+            requestToBankRepository.save(bankRequest);
         }
         return "Партия крови успешно добавлена!";
     }

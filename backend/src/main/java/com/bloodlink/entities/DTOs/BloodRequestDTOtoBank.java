@@ -1,6 +1,6 @@
 package com.bloodlink.entities.DTOs;
 
-import com.bloodlink.entities.BloodRequest;
+import com.bloodlink.entities.RequestToBank;
 import com.bloodlink.entities.enums.BloodGroup;
 import com.bloodlink.entities.enums.RequestStatus;
 import com.bloodlink.entities.enums.RhFactor;
@@ -15,21 +15,28 @@ public class BloodRequestDTOtoBank {
 
     private Long id;
     private BloodGroup bloodGroup;
-    private Long requestGroupId;
     private RhFactor rhesusFactor;
+    private String description;
     private Double volumeNeeded;
-    private RequestStatus status;
-    private OrganizationDTOto institution;
     private Boolean isEmergency;
+
+    private RequestStatus status;
+    private String rejectionReason;
+    private OrganizationDTOto institution;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String rejectionReason;
 
-    public static BloodRequestDTOtoBank convert(BloodRequest bloodRequest) {
+    private UserDTOto banker;
+    private UserDTOto creator;
+
+    public static BloodRequestDTOtoBank convert(RequestToBank request) {
+        var bloodRequest = request.getRequest();
         return new BloodRequestDTOtoBank(bloodRequest.getId(), bloodRequest.getBloodGroup(),
-                bloodRequest.getRequestGroupId(),
-                bloodRequest.getRhFactor(), bloodRequest.getVolumeNeeded(), bloodRequest.getStatus(),
-                OrganizationDTOto.convert(bloodRequest.getMedicalInstitution()), bloodRequest.getIsEmergency(),
-                bloodRequest.getCreatedAt(), bloodRequest.getUpdatedAt(), bloodRequest.getRejectionReason());
+                bloodRequest.getRhFactor(), bloodRequest.getDescription(), bloodRequest.getVolumeNeeded(),
+                bloodRequest.getIsEmergency(), request.getStatus(), request.getRejectionReason(),
+                OrganizationDTOto.convert(bloodRequest.getMedicalInstitution()), request.getCreatedAt(),
+                request.getUpdatedAt(), UserDTOto.convert(request.getBanker()),
+                UserDTOto.convert(bloodRequest.getCreator()));
     }
 }
