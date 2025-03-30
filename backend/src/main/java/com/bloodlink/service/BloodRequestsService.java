@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 
 import static com.bloodlink.entities.specifications.RequestToBankSpecs.withAnyStatus;
 import static com.bloodlink.entities.specifications.RequestToBankSpecs.withMedicalInstitution;
@@ -71,7 +72,6 @@ public class BloodRequestsService {
     }
 
 
-
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = IllegalArgumentException.class)
     @Retryable(include = {SQLException.class})
     public String save(BloodRequestDTOfrom dto) {
@@ -96,6 +96,38 @@ public class BloodRequestsService {
             requestToBankRepository.save(bankRequest);
         }
         return "Партия крови успешно добавлена!";
+    }
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = IllegalArgumentException.class)
+    @Retryable(include = {SQLException.class})
+    public String accept(Long id){
+        var callerOpt = userService.getCurrentUser();
+        if (callerOpt.isEmpty()) {
+            return "Не могу распознать вас";
+        }
+        var reqToBankOpt = requestToBankRepository.findById(id);
+        if(reqToBankOpt.isEmpty()){
+            throw new IllegalArgumentException("Предоставлен невалидный id запроса");
+        }
+        var reqToBank = reqToBankOpt.get();
+        var caller = callerOpt.get();
+        if(!Objects.equals(reqToBank.getBloodBank().getId(), caller.getOrganization().getId())){
+            throw new IllegalArgumentException("Это не ваш запрос");
+        }
+        if(reqToBank.getStatus() != RequestStatus.PENDING){
+            throw new IllegalArgumentException("Этот запрос не ожидает принятия. Возможно, он уже принят, отклонён " +
+                    "или удалён.");
+        }
+
+        reqToBank.setStatus(RequestStatus.COMPLETED);
+        reqToBank.setBloodBank(caller.getOrganization());
+        reqToBank.setBanker(caller);
+        for(var req : reqToBank.getRequest().getBankRequests()){
+            if(req.getStatus() != RequestStatus.COMPLETED){
+                req.setStatus(RequestStatus.REJECTED);
+            }
+        }
+
+        return "Заявка успешно принята";
     }
 //
 //    @Transactional
