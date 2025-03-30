@@ -51,6 +51,16 @@ public class BloodRequestResource {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('BANK_EMPLOYEE')")
+    @PostMapping("/reject/{id}")
+    public ResponseEntity<?> rejectBloodRequest(@PathVariable Long id, @RequestBody String reason) {
+        try {
+            return ResponseEntity.ok(bloodRequestsService.reject(id, reason));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.ok(e.getMessage());
+        }
+    }
+
     @PreAuthorize("hasAnyAuthority('MEDICAL_EMPLOYEE')")
     @PostMapping
     public ResponseEntity<?> addBloodRequest(@RequestBody @Valid BloodRequestDTOfrom dto) {
