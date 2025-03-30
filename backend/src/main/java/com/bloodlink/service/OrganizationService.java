@@ -1,5 +1,6 @@
 package com.bloodlink.service;
 
+import com.bloodlink.entities.DTOs.BloodRequestDTOfrom;
 import com.bloodlink.entities.DTOs.OrganizationDTOfrom;
 import com.bloodlink.entities.DTOs.OrganizationDTOto;
 import com.bloodlink.entities.Organization;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -35,11 +37,16 @@ public class OrganizationService {
                 case BANK_EMPLOYEE ->OrganizationType.BLOOD_BANK;
             };
         }
-        Specification<Organization> filters = Specification.where(!StringUtils.hasLength(pattern) ? null :
-                    OrganizationSpecs.nameLike(pattern))
+
+        Specification<Organization> textFilters = StringUtils.hasLength(pattern)
+                ? OrganizationSpecs.nameLike(pattern)
                 .or(OrganizationSpecs.addressLike(pattern))
                 .or(OrganizationSpecs.phoneLike(pattern))
+                : null;
+
+        Specification<Organization> filters = Specification.where(textFilters)
                 .and(OrganizationSpecs.hasType(typeEnum));
+
 
         var p = organizationRepository.findAll(filters, page);
         return p.map(OrganizationDTOto::convert);
@@ -85,5 +92,21 @@ public class OrganizationService {
 
     public Organization get(Long id) {
         return id == null ? null : organizationRepository.findById(id).orElse(null);
+    }
+
+    public List<OrganizationDTOto> getBanksByResources(BloodRequestDTOfrom dto, String pattern){
+        Specification<Organization> textFilters = StringUtils.hasLength(pattern)
+                ? OrganizationSpecs.nameLike(pattern)
+                .or(OrganizationSpecs.addressLike(pattern))
+                .or(OrganizationSpecs.phoneLike(pattern))
+                : null;
+
+        Specification<Organization> filters = Specification.where(textFilters)
+                .and(OrganizationSpecs.hasType(OrganizationType.BLOOD_BANK));
+
+//        organizationRepository.findAll(filters).forEach(organization -> {
+//
+//        })
+        return null;
     }
 }
