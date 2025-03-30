@@ -76,7 +76,9 @@
         </div>
 
         <div v-if="step === 2">
-          <input type="text" v-model="searchQuery" placeholder="Поиск по организациям..."
+          <input type="text" v-model="search" placeholder="Поиск по организациям..."
+                 @focus="searchFunc"
+                 @input="searchDebounced"
                  class="mb-4 w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 px-2 py-1"/>
 
           <div v-if="banks.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
@@ -85,7 +87,7 @@
                 <tbody>
                 <tr v-for="organization in banks"
                     :key="organization.id"
-                    class="border-b border-gray-500 cursor-pointer transition-colors"
+                    class="border-gray-500 cursor-pointer transition-colors"
                     :class="{
                 'bg-red-100': isSelected(organization),
                 'hover:bg-gray-50': !isSelected(organization)
@@ -141,10 +143,11 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue';
-import {formatWorkingHours} from "@/js/utils.js";
+import {onMounted, ref} from 'vue';
+import {abstractFetching, formatWorkingHours} from "@/js/utils.js";
 import axios from "axios";
 import {showAlert} from "@/js/custom-alert.js";
+import debounce from "lodash.debounce";
 
 const emit = defineEmits(['close']);
 const step = ref(1);
@@ -152,12 +155,25 @@ const searchQuery = ref('');
 const selectedBanks = ref([]);
 const bloodRequest = ref({ bloodGroup: '', rhesusFactor: '', volumeNeeded: '', isEmergency: false, description: '' });
 const errors = ref({});
-
 const banks = ref([]);
 
-onMounted(() => {
-  updateManagedEntities()
-})
+const getBanksWithResources = async (abortController) => {
+  try{
+    const url = `/api/organizations/banks_with_resources?pattern=${search.value}`
+    const response = await axios.post(url, {
+      bloodGroup : bloodReserve.value.bloodGroup,
+      rhesusFactor : bloodReserve.value.rhesusFactor,
+      volumeNeeded : bloodReserve.value.volumeNeeded
+    }, { signal: abortController.signal });
+    banks.value = response.data
+  } catch (error){
+    showAlert(error)
+  }
+}
+
+const searchFunc = async () => {
+  await abstractFetching(getBanksWithResources)
+}
 
 const updateManagedEntities = () => {
   getManagedEntities(new AbortController())
@@ -172,6 +188,9 @@ const getManagedEntities = async (abortController) => {
     showAlert(error.response.data);
   }
 }
+const searchDebounced = debounce(searchFunc, 500);
+
+
 
 const isSelected = (bank) => {
   return selectedBanks.value.some(b => b.id === bank.id);
@@ -181,7 +200,7 @@ const isValidNumber = (value) => {
   return /^[0-9]+([.,][0-9]{1,2})?$/.test(value);
 };
 
-const nextStep = () => {
+const nextStep = async () => {
   errors.value = {};
   if (!bloodRequest.value.bloodGroup) errors.value.bloodGroup = 'Выберите группу крови';
   if (!bloodRequest.value.rhesusFactor) errors.value.rhesusFactor = 'Выберите резус-фактор';
@@ -193,8 +212,12 @@ const nextStep = () => {
   if (!bloodRequest.value.description) {
     errors.value.description = 'Укажите причину запроса';
   }
-  if (Object.keys(errors.value).length === 0)
-  step.value = 2;
+  if (Object.keys(errors.value).length === 0){
+    await searchFunc()
+    step.value = 2;
+  }
+
+
 };
 
 const toggleSelection = (bank) => {

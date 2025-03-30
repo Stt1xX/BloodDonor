@@ -1,7 +1,7 @@
 package com.bloodlink.controllers;
 
+import com.bloodlink.entities.DTOs.BloodRequestDTOfrom;
 import com.bloodlink.entities.DTOs.OrganizationDTOfrom;
-import com.bloodlink.exceptions.CustomDuplicateException;
 import com.bloodlink.service.OrganizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,13 @@ public class OrganizationsResource {
                                             Pageable page) {
         return ResponseEntity.ok(organizationService.getAll(type, pattern, page));
     }
+
+
+    @PostMapping("/banks_with_resources")
+    public ResponseEntity<?> getBanksWithResources(@RequestBody BloodRequestDTOfrom dto, @RequestParam String pattern) {
+        return ResponseEntity.ok(organizationService.getBanksByResources(dto, pattern));
+    }
+
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
