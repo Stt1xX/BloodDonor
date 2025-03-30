@@ -66,6 +66,7 @@
             <th class="p-4 text-center">Объем</th>
             <th class="p-4 text-center">Приоритет</th>
             <th class="p-4 text-center">Дата создания</th>
+            <th class="p-4 text-center">Статус</th>
             <th class="p-4 text-center">Действия</th>
           </tr>
           </thead>
@@ -88,6 +89,11 @@
             </td>
             <td class="p-4 text-center">
               {{ formatTimestamp(managedEntity.createdAt) }}
+            </td>
+            <td class="p-4 text-center">
+              <span :class="getStatusClass(managedEntity.status)" class="px-3 py-1 rounded-full text-sm">
+                {{ managedEntity.status }}
+              </span>
             </td>
             <td class="p-4 text-center space-x-2">
               <button @click="accept(managedEntity.id)" class="text-green-600 hover:text-green-800">
@@ -243,7 +249,7 @@ const accept = async (id) => {
     showAlert(response.data)
     updateManagedEntities()
   } catch (error){
-    showAlert(error)
+    showAlert(error.response.data);
   }
 }
 
@@ -254,6 +260,15 @@ const handleRejectSubmit = (data) => {
 
 const showDetails = (request) => {
   selectedRequest.value = request;
+};
+
+const getStatusClass = (status) => {
+  switch(status) {
+    case 'В ожидании': return 'bg-yellow-100 text-yellow-800';
+    case 'Принято': return 'bg-green-100 text-green-800';
+    case 'Отклонено': return 'bg-red-100 text-red-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
 };
 
 </script>

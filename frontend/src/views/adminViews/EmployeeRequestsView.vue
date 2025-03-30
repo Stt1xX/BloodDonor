@@ -13,6 +13,14 @@
       </div>
           <div v-if="managedEntities.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
             <table class="w-full">
+              <thead>
+              <tr>
+                <th class="p-4 text-left">Пользователь</th>
+                <th class="p-4 text-left">Контакты</th>
+                <th class="p-4 text-left">Дата создания</th>
+                <th class="p-4 text-left">Действия</th>
+              </tr>
+              </thead>
               <tbody>
               <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
                 <td class="p-4">

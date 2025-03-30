@@ -36,9 +36,9 @@
             <th class="p-4 text-center">Группа крови</th>
             <th class="p-4 text-center">Резус-фактор</th>
             <th class="p-4 text-center">Объем</th>
-            <th class="p-4 text-center">Статус</th>
             <th class="p-4 text-center">Приоритет</th>
             <th class="p-4 text-center">Дата создания</th>
+            <th class="p-4 text-center">Статус</th>
             <th class="p-4 text-center">Действия</th>
           </tr>
           </thead>
@@ -56,16 +56,16 @@
             <td class="p-4 text-center">
               <div>{{ managedEntity.volumeNeeded }} л.</div>
             </td>
-            <td class="p-4 text-center">
-              <span :class="getStatusClass(managedEntity.status)" class="px-3 py-1 rounded-full text-sm">
-                {{ managedEntity.status }}
-              </span>
-            </td>
             <td class="p-4 text-center text-red-500">
               <div v-if="managedEntity.isEmergency">Срочно!</div>
             </td>
             <td class="p-4 text-center">
               {{ formatDate(managedEntity.createdAt) }}
+            </td>
+            <td class="p-4 text-center">
+              <span :class="getStatusClass(managedEntity.status)" class="px-3 py-1 rounded-full text-sm">
+                {{ managedEntity.status }}
+              </span>
             </td>
             <td class="p-4 text-center space-x-2">
               <button

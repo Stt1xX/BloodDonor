@@ -14,6 +14,15 @@
       </div>
         <div v-if="organizations.length > 0" class="w-full  rounded-lg border border-gray-500 overflow-hidden">
         <table class="w-full">
+          <thead>
+          <tr>
+            <th class="p-4 text-left">Наименование</th>
+            <th class="p-4 text-left">Контакты</th>
+            <th class="p-4 text-left">Тип</th>
+            <th class="p-4 text-left">График работы</th>
+            <th class="p-4 text-left">Действия</th>
+          </tr>
+          </thead>
           <tbody>
           <tr v-for="organization in organizations" :key="organization.id" class="border-b border-gray-500 last:border-b-0">
             <td class="p-4">
