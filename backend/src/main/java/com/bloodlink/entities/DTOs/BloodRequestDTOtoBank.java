@@ -37,7 +37,7 @@ public class BloodRequestDTOtoBank {
                 bloodRequest.getRhFactor(), bloodRequest.getDescription(), bloodRequest.getVolumeNeeded(),
                 bloodRequest.getIsEmergency(), request.getStatus(), request.getRejectionReason(),
                 OrganizationDTOto.convert(bloodRequest.getMedicalInstitution()), request.getCreatedAt(),
-                request.getUpdatedAt(), UserDTOto.convert(request.getBanker()),
-                UserDTOto.convert(bloodRequest.getCreator()));
+                request.getUpdatedAt(), request.getBanker() != null ? UserDTOto.convert(request.getBanker()) : null,
+                bloodRequest.getCreator() != null ?  UserDTOto.convert(bloodRequest.getCreator()) : null);
     }
 }

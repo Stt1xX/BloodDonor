@@ -33,11 +33,11 @@ public class BloodRequestDTOtoMed {
 
     public static BloodRequestDTOtoMed convert(RequestToBank request) {
         var bloodRequest = request.getRequest();
-        return new BloodRequestDTOtoMed(request.getId(), bloodRequest.getId(),  bloodRequest.getBloodGroup(),
+        return new BloodRequestDTOtoMed(request.getId(), bloodRequest.getId(), bloodRequest.getBloodGroup(),
                 bloodRequest.getRhFactor(), bloodRequest.getDescription(), bloodRequest.getVolumeNeeded(),
                 bloodRequest.getIsEmergency(), request.getStatus(), request.getRejectionReason(),
                 OrganizationDTOto.convert(request.getBloodBank()), request.getCreatedAt(),
-                request.getUpdatedAt(), UserDTOto.convert(request.getBanker()),
-                UserDTOto.convert(bloodRequest.getCreator()));
+                request.getUpdatedAt(), request.getBanker() != null ? UserDTOto.convert(request.getBanker()) : null,
+                bloodRequest.getCreator() != null ? UserDTOto.convert(bloodRequest.getCreator()) : null);
     }
 }

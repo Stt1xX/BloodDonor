@@ -48,9 +48,10 @@ public class BloodRequestsService {
 
         Specification<RequestToBank> filters = RequestToBankSpecs.withFilters(org, group, rhesus, List.of(RequestStatus.PENDING, RequestStatus.COMPLETED,
                 RequestStatus.REJECTED));
-        Sort sort = reverse != null && reverse ? page.getSort().descending() : page.getSort();
-        return requestToBankRepository.findAll(filters, PageRequest.of(page.getPageNumber(),
-                page.getPageSize(), sort));
+//        Sort sort = reverse != null && reverse ? page.getSort().descending() : page.getSort();
+//        return requestToBankRepository.findAll(filters, PageRequest.of(page.getPageNumber(),
+//                page.getPageSize(), sort));
+        return requestToBankRepository.findAll(page);
     }
 
     public Page<RequestToBank> getRequestsForMed(RequestStatus status,
@@ -70,6 +71,8 @@ public class BloodRequestsService {
                 page.getPageSize()));
     }
 
+
+
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = IllegalArgumentException.class)
     @Retryable(include = {SQLException.class})
     public String save(BloodRequestDTOfrom dto) {
@@ -83,17 +86,17 @@ public class BloodRequestsService {
         for (var bankId : dto.getBloodBanks()) {
             var bankOpt = organizationRepository.findById(bankId);
             if (bankOpt.isEmpty()) {
-                throw new IllegalArgumentException("Одна из указанных организаций не существует");
+                throw new IllegalArgumentException("Указанная организация не существует");
             }
             if (bankOpt.get().getType() != OrganizationType.BLOOD_BANK) {
-                throw new IllegalArgumentException("Одна из указанных организаций не является банком");
+                throw new IllegalArgumentException("Указанная организация не является банком");
             }
             var bankRequest = new RequestToBank();
             bankRequest.setBloodBank(bankOpt.get());
             bankRequest.setRequest(request);
             requestToBankRepository.save(bankRequest);
         }
-        return "Запрос успешно отправлен!";
+        return "Партия крови успешно добавлена!";
     }
 //
 //    @Transactional
