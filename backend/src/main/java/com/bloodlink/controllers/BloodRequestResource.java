@@ -35,8 +35,9 @@ public class BloodRequestResource {
 
     @PreAuthorize("hasAnyAuthority('MEDICAL_EMPLOYEE')")
     @GetMapping("/medical")
-    public Page<BloodRequestDTOtoMed> getMedBloodRequests(@RequestParam RequestStatus status, Pageable page) {
-        return bloodRequestsService.getRequestsForMed(status, page)
+    public Page<BloodRequestDTOtoMed> getMedBloodRequests(@RequestParam String status, Pageable page) {
+        var st = RequestStatus.fromName(status);
+        return bloodRequestsService.getRequestsForMed(st, page)
                 .map(BloodRequestDTOtoMed::convert);
     }
 

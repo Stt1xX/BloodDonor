@@ -29,7 +29,7 @@
               <p class="text-sm text-gray-500">Статус</p>
               <p>
                 <span :class="statusClasses" class="px-3 py-1 rounded-full text-sm">
-                  {{ convertRequestStatusType(request.status) }}
+                  {{ request.status }}
                 </span>
               </p>
             </div>
@@ -55,13 +55,13 @@
             </p>
           </div>
 
-          <div v-if="request.banker && convertRequestStatusType(request.status) !== 'В ожидании'" class="pt-2">
+          <div v-if="request.banker && request.status !== 'В ожидании'" class="pt-2">
             <p class="text-sm text-gray-500">Обработано</p>
             <p class="font-medium">{{ request.banker.name }}</p>
             <p class="text-sm text-gray-500">{{ formatDate(request.updatedAt) }}</p>
           </div>
 
-          <div v-if="request.rejectionReason && convertRequestStatusType(request.status) === 'Отклонено'" class="pt-2">
+          <div v-if="request.rejectionReason && request.status === 'Отклонено'" class="pt-2">
             <p class="text-sm text-gray-500">Причина отклонения</p>
             <p class="font-medium text-red-600">{{ request.rejectionReason }}</p>
           </div>
@@ -87,7 +87,6 @@
 
 <script setup>
 import { computed } from 'vue';
-import {convertRequestStatusType} from "@/js/utils.js";
 
 const props = defineProps({
   request: {
@@ -99,7 +98,7 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 
 const statusClasses = computed(() => {
-  switch(convertRequestStatusType(props.request.status)) {
+  switch(props.request.status) {
     case 'В ожидании': return 'bg-yellow-100 text-yellow-800';
     case 'Принято': return 'bg-green-100 text-green-800';
     case 'Отклонено': return 'bg-red-100 text-red-800';

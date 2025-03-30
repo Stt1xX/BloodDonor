@@ -24,7 +24,7 @@
             @click="showForm = true"
             class="bg-red-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-700 transition-colors"
         >
-          Добавить кровь
+          Cоздать запрос
         </button>
       </div>
 
@@ -36,25 +36,29 @@
             <th class="p-4 text-center">Резус-фактор</th>
             <th class="p-4 text-center">Объем</th>
             <th class="p-4 text-center">Статус</th>
+            <th class="p-4 text-center">Приоритет</th>
             <th class="p-4 text-center">Дата создания</th>
             <th class="p-4 text-center">Действия</th>
           </tr>
           </thead>
           <tbody>
-          <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0 hover:bg-gray-50">
+          <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
             <td class="p-4 text-center">
               <div>гр. {{ managedEntity.bloodGroup }}</div>
             </td>
             <td class="p-4 text-center">
-              <div>rh{{ managedEntity.rhFactor }}</div>
+              <div>rh{{ managedEntity.rhesusFactor }}</div>
             </td>
             <td class="p-4 text-center">
-              <div>{{ managedEntity.volume }} л.</div>
+              <div>{{ managedEntity.volumeNeeded }} л.</div>
             </td>
             <td class="p-4 text-center">
-              <span :class="getStatusClass(managedEntity.requestStatus)" class="px-3 py-1 rounded-full text-sm">
-                {{ managedEntity.requestStatus }}
+              <span :class="getStatusClass(managedEntity.status)" class="px-3 py-1 rounded-full text-sm">
+                {{ managedEntity.status }}
               </span>
+            </td>
+            <td class="p-4 text-center text-red-500">
+              <div v-if="managedEntity.isEmergency">Срочно!</div>
             </td>
             <td class="p-4 text-center">
               {{ formatDate(managedEntity.createdAt) }}
@@ -119,7 +123,7 @@
 
 <script setup>
 import {onBeforeUnmount, onMounted, ref} from "vue";
-import { HeaderGroups } from "@/js/utils.js";
+import {HeaderGroups} from "@/js/utils.js";
 import Header from "@/components/shared/Header.vue";
 import {showAlert} from "@/js/custom-alert.js";
 import axios from "axios";
@@ -128,47 +132,7 @@ import Footer from "@/components/shared/Footer.vue";
 import CreateBloodReqWindow from "@/components/CreateBloodReqWindow.vue";
 import RequestDetailsModal from "@/components/RequestDetailsModal.vue";
 
-const managedEntities = ref([
-  {
-    id: 1,
-    bloodGroup: 1,
-    rhFactor: '+',
-    volume: 1.5,
-    requestStatus: 'В ожидании',
-    createdAt: '2023-05-15T10:30:00',
-    author: 'Иванов И.И.',
-    details: 'Необходимо для операции на сердце',
-    processedBy: null,
-    rejectionReason: null
-  },
-  {
-    id: 2,
-    bloodGroup: 2,
-    rhFactor: '-',
-    volume: 2.0,
-    requestStatus: 'Принято',
-    createdAt: '2023-05-14T14:45:00',
-    author: 'Петров П.П.',
-    details: 'Запланированная операция',
-    processedBy: 'Сидорова С.С.',
-    processedAt: '2023-05-14T15:30:00',
-    rejectionReason: null
-  },
-  {
-    id: 3,
-    bloodGroup: 3,
-    rhFactor: '+',
-    volume: 1.0,
-    requestStatus: 'Отклонено',
-    createdAt: '2023-05-13T09:15:00',
-    author: 'Смирнов С.С.',
-    details: 'Недостаточно доноров',
-    processedBy: 'Кузнецова К.К.',
-    processedAt: '2023-05-13T10:20:00',
-    rejectionReason: 'Недостаточно доноров с данной группой крови'
-  }
-]);
-
+const managedEntities = ref([]);
 const selectedRequest = ref(null);
 
 
@@ -233,21 +197,21 @@ const updateManagedEntities = () => {
 };
 
 const getManagedEntities = async (abortController) => {
-  // try {
-  //   const url = `/api/blood_requests/medical?type=&pattern=${encodeURIComponent(searchQuery.value)}&page=${currentPage.value}&size=8&sort=id`
-  //   const response = await axios.get(url,{ signal: abortController.signal })
-  //   totalPages.value = response.data.totalPages;
-  //   organizations.value = response.data.content;
-  // } catch (error) {
-  //   showAlert(error.response.data);
-  // }
+  try {
+    const url = `/api/blood_requests/medical?status=${requestStatus.value}&page=${currentPage.value}&size=8&sort=id`
+    const response = await axios.get(url,{ signal: abortController.signal })
+    totalPages.value = response.data.totalPages;
+    managedEntities.value = response.data.content;
+  } catch (error) {
+    showAlert(error.response.data);
+  }
 }
 
 
 let polling
 onMounted(() => {
-  // updateManagedEntities()
-  // polling = setInterval(updateManagedEntities, 7000);
+  updateManagedEntities()
+  polling = setInterval(updateManagedEntities, 7000);
   get_token()
 })
 

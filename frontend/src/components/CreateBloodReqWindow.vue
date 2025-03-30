@@ -163,7 +163,7 @@ const getBanksWithResources = async (abortController) => {
     const response = await axios.post(url, {
       bloodGroup : bloodRequest.value.bloodGroup,
       rhesusFactor : bloodRequest.value.rhesusFactor,
-      volumeNeeded : bloodRequest.value.volumeNeeded
+      volumeNeeded : bloodRequest.value.volumeNeeded.toString().replace(',', '.')
     }, { signal: abortController.signal });
     banks.value = response.data
   } catch (error){
@@ -218,6 +218,7 @@ const submitRequest = async () => {
     const url = '/api/blood_requests'
     const request = bloodRequest.value
     request.bloodBanks = selectedBanks.value.map(bank => bank.id)
+    request.volumeNeeded = bloodRequest.value.volumeNeeded.toString().replace(',', '.')
     const response = await axios.post(url, request)
     showAlert(response.data)
     if (response.status === 200)

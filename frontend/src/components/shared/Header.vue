@@ -194,6 +194,7 @@ const isActive = (routePath) => {
 
 const headerButtons = {
   [HeaderGroups.ADMIN] : [
+    { text: 'Заявки', action: () => router.push('/admin/requests'), route: '/admin/requests'},
     { text: 'Организации', action: () => router.push('/admin/organization_settings'), route: '/admin/organization_settings' },
     { text: 'Работники', action: () => router.push('/admin/all_users'), route: '/admin/all_users' },
     { text: 'Выйти', action: () => logout() },

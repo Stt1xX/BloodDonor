@@ -4,21 +4,6 @@ export const HeaderGroups = {
     MEDICAL_EMPLOYEE : 2
 }
 
-export const convertRequestStatusType = (type)  => {
-    switch (type){
-        case 'PENDING':
-            return 'В ожидании';
-        case 'REJECTED':
-            return 'Отклонено';
-        case 'COMPLETED':
-            return 'Принято';
-        case 'DELETED':
-            return 'Отменено';
-        default:
-            return 'Unknown';
-    }
-}
-
 export const convertOrganizationType = (type) => {
     switch (type) {
         case 'MEDICAL_INSTITUTION':

@@ -35,7 +35,7 @@
             </button>
           </div>
           <div>
-            <select v-model="sortBy" class="px-4 py-2 border rounded-md bg-white shadow-sm">
+            <select @change="updateManagedEntities()" v-model="sortBy" class="px-4 py-2 border rounded-md bg-white shadow-sm">
               <option value="request.volumeNeeded">По объему</option>
               <option value="request.createdAt">По дате поставки</option>
               <option value="request.isEmergency">По приоритету</option>
@@ -84,7 +84,7 @@
               <div>{{ managedEntity.volumeNeeded }}л.</div>
             </td>
             <td class="p-4 text-center text-red-500">
-              <div v-if="managedEntity.isEmergency">Cрочно!</div>
+              <div v-if="managedEntity.isEmergency">Срочно!</div>
             </td>
             <td class="p-4 text-center">
               {{ formatTimestamp(managedEntity.createdAt) }}
@@ -162,10 +162,12 @@ const managedEntities = ref([]);
 
 const toggleBloodGroup = (group) => {
   bloodGroup.value = bloodGroup.value === group ? null : group;
+  updateManagedEntities()
 };
 
 const toggleRhesus = (rhesus) => {
   rhesusFactor.value = rhesusFactor.value === rhesus ? null : rhesus;
+  updateManagedEntities()
 };
 
 const showForm = ref(false)
