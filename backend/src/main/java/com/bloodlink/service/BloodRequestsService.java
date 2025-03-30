@@ -25,6 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.SQLException;
 import java.util.List;
 
+import static com.bloodlink.entities.specifications.RequestToBankSpecs.withAnyStatus;
+import static com.bloodlink.entities.specifications.RequestToBankSpecs.withMedicalInstitution;
+
 @RequiredArgsConstructor
 @Service
 public class BloodRequestsService {
@@ -34,8 +37,8 @@ public class BloodRequestsService {
     private final RequestToBankRepository requestToBankRepository;
     private final BloodRequestRepository bloodRequestRepository;
 
-    public Page<RequestToBank> getRequests(BloodGroup group, RhFactor rhesus, Boolean reverse, Boolean isEmergency,
-                                           Pageable page) {
+    public Page<RequestToBank> getRequestsForBanker(BloodGroup group, RhFactor rhesus, Boolean reverse, Boolean isEmergency,
+                                                    Pageable page) {
 
         var caller = userService.getCurrentUser();
         if (caller.isEmpty()) {
@@ -48,6 +51,23 @@ public class BloodRequestsService {
         Sort sort = reverse != null && reverse ? page.getSort().descending() : page.getSort();
         return requestToBankRepository.findAll(filters, PageRequest.of(page.getPageNumber(),
                 page.getPageSize(), sort));
+    }
+
+    public Page<RequestToBank> getRequestsForMed(RequestStatus status,
+                                                 Pageable page) {
+
+        var caller = userService.getCurrentUser();
+        if (caller.isEmpty()) {
+            return Page.empty();
+        }
+        var org = caller.get().getOrganization();
+        Specification<RequestToBank> filters = Specification
+                .where(withMedicalInstitution(org))
+                .and(withAnyStatus(status == null ? List.of(RequestStatus.PENDING, RequestStatus.COMPLETED,
+                        RequestStatus.REJECTED) : List.of(status)));
+
+        return requestToBankRepository.findAll(filters, PageRequest.of(page.getPageNumber(),
+                page.getPageSize(), Sort.by("createdAt")));
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = IllegalArgumentException.class)
