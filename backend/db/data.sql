@@ -8,12 +8,13 @@ VALUES
 
 INSERT INTO users (email, name, surname, password, post, role, organization_id, is_deleted)
 VALUES
-    ('admin@blood.com', 'Иван', 'Иванов', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Администратор', 'ADMIN', NULL, FALSE),
-    ('banker@alpha.com', 'Алиса', 'Смирнова', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Сотрудник банка', 'BANK_EMPLOYEE', 1, FALSE),
-    ('banker@beta.com', 'Дмитрий', 'Петров', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Сотрудник банка', 'BANK_EMPLOYEE', 2, FALSE),
-    ('banker@gamma.com', 'Елена', 'Козлова', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Сотрудник банка', 'BANK_EMPLOYEE', 5, FALSE),
-    ('medic@hospital1.com', 'Борис', 'Сидоров', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Медработник', 'MEDICAL_EMPLOYEE', 3, FALSE),
-    ('medic@clinic.com', 'Мария', 'Федорова', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Медработник', 'MEDICAL_EMPLOYEE', 4, FALSE);
+    ('admin@blood.com', 'Иван', 'Иванов', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Главный администратор', 'ADMIN', NULL, FALSE),
+    ('banker@alpha.com', 'Алиса', 'Смирнова', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Директор', 'BANK_EMPLOYEE', 1, FALSE),
+    ('banker1@alpha.com', 'Роман', 'Курцын', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Рядовой сотрудник', 'BANK_EMPLOYEE', 1, FALSE),
+    ('banker@beta.com', 'Дмитрий', 'Петров', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Рядовой сотрудник', 'BANK_EMPLOYEE', 2, FALSE),
+    ('banker@gamma.com', 'Елена', 'Козлова', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Рядовой сотрудник', 'BANK_EMPLOYEE', 5, FALSE),
+    ('medic@hospital1.com', 'Борис', 'Сидоров', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Главный врач', 'MEDICAL_EMPLOYEE', 3, FALSE),
+    ('medic@clinic.com', 'Мария', 'Федорова', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Заведующий хирургическим отделением', 'MEDICAL_EMPLOYEE', 4, FALSE);
 
 DO $$
 DECLARE

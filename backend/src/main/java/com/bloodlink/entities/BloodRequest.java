@@ -50,7 +50,7 @@ public class BloodRequest {
     @JoinColumn(name = "creator_id")
     private User creator;
 
-    @OneToMany
+    @OneToMany(mappedBy = "request")
     @Cascade(org.hibernate.annotations.CascadeType.PERSIST)
     private List<RequestToBank> bankRequests;
 

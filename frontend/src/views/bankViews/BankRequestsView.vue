@@ -96,12 +96,12 @@
               </span>
             </td>
             <td class="p-4 text-center space-x-2">
-              <button @click="accept(managedEntity.id)" class="text-green-600 hover:text-green-800">
+              <button v-if="managedEntity.status === 'В ожидании'" @click="accept(managedEntity.id)" class="text-green-600 hover:text-green-800">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
               </button>
-              <button @click="reject(managedEntity)" class="text-red-600 hover:text-red-800">
+              <button  v-if="managedEntity.status === 'В ожидании'" @click="reject(managedEntity)" class="text-red-600 hover:text-red-800">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>

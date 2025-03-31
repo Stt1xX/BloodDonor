@@ -23,9 +23,14 @@ public class NotificationResource {
         return notificationService.getUnreadNotifications(page).map(NotificationDTOto::convert);
     }
 
-    @PostMapping("/read")
-    public ResponseEntity<?> readNotifications(@RequestBody List<Long> ids) {
+    @PostMapping("/read_all")
+    public ResponseEntity<?> readAllNotifications(@RequestBody List<Long> ids) {
         return ResponseEntity.ok(notificationService.readNotifications(ids));
+    }
+
+    @PostMapping("/read")
+    public ResponseEntity<?> readNotification(@RequestParam Long id) {
+        return ResponseEntity.ok(notificationService.readNotification(id));
     }
 
 

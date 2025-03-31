@@ -334,3 +334,13 @@ ALTER TABLE public.blood_requests OWNER TO admin;
 --
 -- PostgreSQL database dump complete
 --
+
+CREATE TABLE public.notifications (
+                               id SERIAL PRIMARY KEY,
+                               user_id BIGINT,
+                               is_read BOOLEAN NOT NULL DEFAULT FALSE,
+                               notification TEXT NOT NULL,
+                               created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                               CONSTRAINT fk_notifications_user FOREIGN KEY (user_id)
+                                   REFERENCES public.users (id) ON DELETE CASCADE
+);

@@ -99,8 +99,6 @@ public class BloodRequestsService {
             bankRequest.setRequest(request);
             requestToBankRepository.save(bankRequest);
 
-            logger.info( bankOpt.get().getMembers().toString());
-            //Sending Notifications
             notificationService.createNewRequestNotification(bankOpt.get(), request);
         }
         return "Запрос на кровь успешно добавлен!";
@@ -137,7 +135,7 @@ public class BloodRequestsService {
                 req.setStatus(RequestStatus.DELETED);
             }
         }
-
+        notificationService.createChangeStatusNotification(reqToBank);
         return "Заявка успешно принята";
     }
 
@@ -166,6 +164,7 @@ public class BloodRequestsService {
         reqToBank.setStatus(RequestStatus.REJECTED);
         reqToBank.setRejectionReason(reason);
         reqToBank.setBanker(caller);
+        notificationService.createChangeStatusNotification(reqToBank);
         return "Заявка успешно отклонена";
     }
 
