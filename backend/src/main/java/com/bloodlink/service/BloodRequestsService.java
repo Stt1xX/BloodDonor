@@ -37,6 +37,7 @@ public class BloodRequestsService {
     private final OrganizationRepository organizationRepository;
     private final RequestToBankRepository requestToBankRepository;
     private final BloodRequestRepository bloodRequestRepository;
+    private final BloodUnitsService bloodUnitsService;
 
     public Page<RequestToBank> getRequestsForBanker(BloodGroup group, RhFactor rhesus, Boolean reverse,
                                                     Pageable page) {
@@ -97,70 +98,68 @@ public class BloodRequestsService {
         }
         return "Партия крови успешно добавлена!";
     }
+
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = IllegalArgumentException.class)
     @Retryable(include = {SQLException.class})
-    public String accept(Long id){
+    public String accept(Long id) {
         var callerOpt = userService.getCurrentUser();
         if (callerOpt.isEmpty()) {
             return "Не могу распознать вас";
         }
         var reqToBankOpt = requestToBankRepository.findById(id);
-        if(reqToBankOpt.isEmpty()){
+        if (reqToBankOpt.isEmpty()) {
             throw new IllegalArgumentException("Предоставлен невалидный id запроса");
         }
         var reqToBank = reqToBankOpt.get();
         var caller = callerOpt.get();
-        if(!Objects.equals(reqToBank.getBloodBank().getId(), caller.getOrganization().getId())){
+        if (!Objects.equals(reqToBank.getBloodBank().getId(), caller.getOrganization().getId())) {
             throw new IllegalArgumentException("Это не ваш запрос");
         }
-        if(reqToBank.getStatus() != RequestStatus.PENDING){
+        if (reqToBank.getStatus() != RequestStatus.PENDING) {
             throw new IllegalArgumentException("Этот запрос не ожидает принятия. Возможно, он уже принят, отклонён " +
                     "или удалён.");
         }
 
+        var request = reqToBank.getRequest();
+        bloodUnitsService.fillBloodRequest(request.getBloodGroup(), request.getRhFactor(), request.getVolumeNeeded());
+
         reqToBank.setStatus(RequestStatus.COMPLETED);
-        reqToBank.setBloodBank(caller.getOrganization());
         reqToBank.setBanker(caller);
-        for(var req : reqToBank.getRequest().getBankRequests()){
-            if(req.getStatus() != RequestStatus.COMPLETED){
+        for (var req : reqToBank.getRequest().getBankRequests()) {
+            if (req.getStatus() != RequestStatus.COMPLETED) {
                 req.setStatus(RequestStatus.REJECTED);
             }
         }
 
         return "Заявка успешно принята";
     }
-//
-//    @Transactional
-//    public String delete(Long id) {
-//        return userService.getCurrentUser().map(user -> {
-//            return bloodUnitRepository.findById(id).map(
-//                    bloodUnit -> {
-//                        if (Objects.equals(user.getOrganization().getId(), bloodUnit.getBloodBank().getId())) {
-//                            bloodUnitRepository.delete(bloodUnit);
-//                            return "Партия крови успешно удалена!";
-//                        } else {
-//                            return "Похоже эта партия принадлежит другому банку";
-//                        }
-//                    }
-//            ).orElse("Не могу найти данную партию крови");
-//        }).orElse("Не могу распознать вас");
-//    }
-//
-//
-//    @Transactional
-//    public String update(BloodUnitDTOfrom dto) {
-//        BloodUnit unit = dto.convert();
-//        if (unit.getId() == null) {
-//            throw new IllegalArgumentException("Для обновления организации не предоставлен id");
-//        }
-//        return bloodUnitRepository.findById(unit.getId()).map(un -> {
-//            return userService.getCurrentUser().map(user -> {
-//                unit.setBloodBank(user.getOrganization());
-//                bloodUnitRepository.save(unit);
-//                return "Партия крови успешно изменена!";
-//            }).orElse("Не могу распознать вас");
-//        }).orElse("Не могу найти данную партию крови");
-//    }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = IllegalArgumentException.class)
+    @Retryable(include = {SQLException.class})
+    public String reject(Long id, String reason) {
+        var callerOpt = userService.getCurrentUser();
+        if (callerOpt.isEmpty()) {
+            return "Не могу распознать вас";
+        }
+        var reqToBankOpt = requestToBankRepository.findById(id);
+        if (reqToBankOpt.isEmpty()) {
+            throw new IllegalArgumentException("Предоставлен невалидный id запроса");
+        }
+        var reqToBank = reqToBankOpt.get();
+        var caller = callerOpt.get();
+        if (!Objects.equals(reqToBank.getBloodBank().getId(), caller.getOrganization().getId())) {
+            throw new IllegalArgumentException("Это не ваш запрос");
+        }
+
+        if (reqToBank.getStatus() != RequestStatus.PENDING) {
+            throw new IllegalArgumentException("Этот запрос не ожидает принятия. Возможно, он уже принят, отклонён " +
+                    "или удалён.");
+        }
+
+        reqToBank.setStatus(RequestStatus.REJECTED);
+        reqToBank.setRejectionReason(reason);
+        reqToBank.setBanker(caller);
+        return "Заявка успешно отклонена";
+    }
 
 }
