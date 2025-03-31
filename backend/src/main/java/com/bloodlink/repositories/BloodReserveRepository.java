@@ -15,7 +15,7 @@ public interface BloodReserveRepository extends JpaRepository<BloodReserve, Long
     @Query("SELECT b.bank FROM BloodReserve b WHERE " +
             "b.id.bloodGroup = :bloodGroup " +
             "AND b.id.rhFactor = :rhFactor " +
-            "AND b.totalQuantity > :totalQuantity")
+            "AND b.totalQuantity >= :totalQuantity")
     List<Organization> findByIdAndTotalQuantityGreaterThan
             (@Param("bloodGroup") BloodGroup bloodGroup,
              @Param("rhFactor") RhFactor rhFactor,
