@@ -3,6 +3,11 @@ package com.bloodlink.entities;
 import com.bloodlink.entities.enums.OrganizationType;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -24,4 +29,8 @@ public class Organization {
 
     @Enumerated(EnumType.STRING)
     private OrganizationType type;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "organization")
+    private List<User> members;
 }
