@@ -344,3 +344,13 @@ CREATE TABLE public.notifications (
                                CONSTRAINT fk_notifications_user FOREIGN KEY (user_id)
                                    REFERENCES public.users (id) ON DELETE CASCADE
 );
+
+-- INDEXES
+
+CREATE INDEX idx_blood_group_rh_total
+    ON public.blood_reserves (blood_group, rh_factor, total_quantity);
+
+CREATE INDEX idx_notifications_user_read
+    ON public.notifications (user_id, is_read);
+
+

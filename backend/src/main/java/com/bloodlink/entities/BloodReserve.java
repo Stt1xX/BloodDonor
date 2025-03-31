@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "blood_reserves")
+@Table(name="blood_reserves")
 @AllArgsConstructor
 public class BloodReserve {
     @EmbeddedId
