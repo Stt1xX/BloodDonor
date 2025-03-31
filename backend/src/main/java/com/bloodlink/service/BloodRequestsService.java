@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 import static com.bloodlink.entities.specifications.RequestToBankSpecs.withAnyStatus;
 import static com.bloodlink.entities.specifications.RequestToBankSpecs.withMedicalInstitution;
@@ -38,7 +39,9 @@ public class BloodRequestsService {
     private final RequestToBankRepository requestToBankRepository;
     private final BloodRequestRepository bloodRequestRepository;
     private final BloodUnitsService bloodUnitsService;
+    private final NotificationService notificationService;
 
+    private final Logger logger = Logger.getLogger(BloodRequestsService.class.getName());
     public Page<RequestToBank> getRequestsForBanker(BloodGroup group, RhFactor rhesus, Boolean reverse,
                                                     Pageable page) {
 
@@ -95,8 +98,12 @@ public class BloodRequestsService {
             bankRequest.setBloodBank(bankOpt.get());
             bankRequest.setRequest(request);
             requestToBankRepository.save(bankRequest);
+
+            logger.info( bankOpt.get().getMembers().toString());
+            //Sending Notifications
+            notificationService.createNewRequestNotification(bankOpt.get(), request);
         }
-        return "Партия крови успешно добавлена!";
+        return "Запрос на кровь успешно добавлен!";
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = IllegalArgumentException.class)
