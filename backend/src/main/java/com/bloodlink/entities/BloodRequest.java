@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -50,8 +49,7 @@ public class BloodRequest {
     @JoinColumn(name = "creator_id")
     private User creator;
 
-    @OneToMany
-    @Cascade(org.hibernate.annotations.CascadeType.PERSIST)
+    @OneToMany(mappedBy = "request", cascade = CascadeType.PERSIST)
     private List<RequestToBank> bankRequests;
 
     @PrePersist

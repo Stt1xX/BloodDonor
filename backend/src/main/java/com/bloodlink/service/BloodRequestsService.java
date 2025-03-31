@@ -126,8 +126,8 @@ public class BloodRequestsService {
         reqToBank.setStatus(RequestStatus.COMPLETED);
         reqToBank.setBanker(caller);
         for (var req : reqToBank.getRequest().getBankRequests()) {
-            if (req.getStatus() != RequestStatus.COMPLETED) {
-                req.setStatus(RequestStatus.REJECTED);
+            if (req.getStatus() == RequestStatus.PENDING) {
+                req.setStatus(RequestStatus.DELETED);
             }
         }
 

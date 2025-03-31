@@ -18,8 +18,8 @@
                         type="button"
                         :disabled="true"
                         :class="{
-                          'bg-red-500 text-white':  requestData.group === group,
-                          'bg-white text-gray-700': requestData.group !== group,
+                          'bg-red-500 text-white':  parseInt(requestData.bloodGroup) === group,
+                          'bg-white text-gray-700': parseInt(requestData.bloodGroup) !== group,
                           'transition-colors': true
                         }"
                         class="px-4 py-2 border rounded-md">
@@ -38,8 +38,8 @@
                         type="button"
                         :disabled="true"
                         :class="{
-                          'bg-red-500 text-white': requestData.rhesus === rhesus,
-                          'bg-white text-gray-700': requestData.rhesus !== rhesus,
+                          'bg-red-500 text-white': requestData.rhesusFactor === rhesus,
+                          'bg-white text-gray-700': requestData.rhesusFactor !== rhesus,
                           'transition-colors': true
                         }"
                         class="px-4 py-2 border rounded-md">
@@ -53,18 +53,18 @@
 
         <div class="col-span-1">
           <label class="block text-sm font-medium text-gray-700">
-            Дата просрочки
+            Дата создания
           </label>
-          <input type="text" id="volume" v-model="requestData.date" disabled
+          <input type="text" id="volume" v-model="requestData.createdAt" disabled
                  class="mt-2 w-full border-gray-300 rounded-md shadow-sm"
-                 placeholder="Введите дату просрочки"/>
+                 placeholder="Введите дату создания"/>
         </div>
 
         <div class="col-span-1">
           <label for="volume" class="block text-sm font-medium text-gray-700">
             Объём (л.)
           </label>
-          <input type="text" id="volume" v-model="requestData.volume" disabled
+          <input type="text" id="volume" v-model="requestData.volumeNeeded" disabled
                  class="mt-2 w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
                  placeholder="Введите объём"/>
         </div>
@@ -110,6 +110,9 @@ const confirmRejection = () => {
     return;
   }
   errorMessage.value = '';
-  emit('confirm', { reason: rejectionReason.value });
+  emit('confirm', {
+    id: props.requestData.id,
+    reason: rejectionReason.value
+  });
 };
 </script>

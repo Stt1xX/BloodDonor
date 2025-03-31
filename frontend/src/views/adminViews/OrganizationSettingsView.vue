@@ -24,7 +24,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="organization in organizations" :key="organization.id" class="border-b border-gray-500 last:border-b-0">
+          <tr v-for="organization in organizations" :key="organization.id" class="border-b border-gray-500 last:border-b-0 first:border-t">
             <td class="p-4">
               <div>{{ organization.name }}</div>
               <div class="text-gray-500">{{ organization.address }}</div>

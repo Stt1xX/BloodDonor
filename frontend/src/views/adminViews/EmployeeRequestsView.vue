@@ -22,7 +22,7 @@
               </tr>
               </thead>
               <tbody>
-              <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
+              <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0 first:border-t">
                 <td class="p-4">
                   <div>{{ managedEntity.name }} {{ managedEntity.surname }}</div>
                   <div class="text-gray-500">{{ convertUserRole(managedEntity.role) }}</div>

@@ -71,7 +71,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
+          <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0 first:border-t">
             <td class="p-4 text-center">
               <div>{{ managedEntity.institution.name }}</div>
             </td>
@@ -239,6 +239,7 @@ const updateManagedEntities = () => {
 
 const reject = (managedEntity) => {
   formManagedEntity.value = { ...managedEntity };
+  formManagedEntity.value.createdAt = formatTimestamp(formManagedEntity.value.createdAt)
   showForm.value = true;
 };
 
@@ -253,8 +254,17 @@ const accept = async (id) => {
   }
 }
 
-const handleRejectSubmit = (data) => {
-  console.log("Отказ оформлен:", data);
+const handleRejectSubmit = async (data) => {
+  try{
+    const url = `/api/blood_requests/reject/${data.id}`
+    const response = await axios.post(url, data.reason,    {
+      headers: { 'Content-Type': 'text/plain' }
+    })
+    showAlert(response.data)
+    updateManagedEntities()
+  } catch (error){
+    showAlert(error.response.data);
+  }
   closeForm();
 };
 

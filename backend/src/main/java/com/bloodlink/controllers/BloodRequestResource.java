@@ -55,6 +55,7 @@ public class BloodRequestResource {
     @PostMapping("/reject/{id}")
     public ResponseEntity<?> rejectBloodRequest(@PathVariable Long id, @RequestBody String reason) {
         try {
+            System.out.println(reason);
             return ResponseEntity.ok(bloodRequestsService.reject(id, reason));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.ok(e.getMessage());
@@ -70,17 +71,4 @@ public class BloodRequestResource {
             return ResponseEntity.ok(e.getMessage());
         }
     }
-//
-//    @PreAuthorize("hasAnyAuthority('BANK_EMPLOYEE')")
-//    @DeleteMapping
-//    public ResponseEntity<?> removeBloodUnit(@RequestParam Long id) {
-//        return ResponseEntity.ok(bloodUnitsService.delete(id));
-//    }
-//
-//    @PreAuthorize("hasAnyAuthority('BANK_EMPLOYEE')")
-//    @PutMapping
-//    public ResponseEntity<?> updateOrganization(@Valid @RequestBody BloodUnitDTOfrom dto) {
-//        return ResponseEntity.ok(bloodUnitsService.update(dto));
-//    }
-
 }

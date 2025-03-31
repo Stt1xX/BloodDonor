@@ -8,6 +8,9 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: BloodLink
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./db/data.sql:/docker-entrypoint-initdb.d/02-data.sql
     ports:
       - "5433:5432"
     networks:

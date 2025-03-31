@@ -84,10 +84,17 @@
           <div v-if="banks.length > 0" class="w-full rounded-lg border border-gray-500 overflow-hidden">
             <div class="overflow-y-auto" style="max-height: 400px;">
               <table class="w-full">
+                <thead>
+                <tr>
+                  <th class="p-4 text-left">Наименование</th>
+                  <th class="p-4 text-left">Контакты</th>
+                  <th class="p-4 text-left">График работы</th>
+                </tr>
+                </thead>
                 <tbody>
                 <tr v-for="organization in banks"
                     :key="organization.id"
-                    class="border-gray-500 cursor-pointer transition-colors"
+                    class="border-b border-gray-500 last:border-b-0 first:border-t"
                     :class="{
                 'bg-red-100': isSelected(organization),
                 'hover:bg-gray-50': !isSelected(organization)

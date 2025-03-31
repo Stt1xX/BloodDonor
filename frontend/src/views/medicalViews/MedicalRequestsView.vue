@@ -43,7 +43,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0">
+          <tr v-for="managedEntity in managedEntities" :key="managedEntity.id" class="border-b border-gray-500 last:border-b-0 first:border-t">
             <td class="p-4 text-center">
               <div>{{ managedEntity.bank.name }}</div>
             </td>
