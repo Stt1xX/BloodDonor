@@ -94,7 +94,7 @@ const totalPages = ref(0)
 const managedEntities = ref([])
 
 const prevPage = () => {
-  if (currentPage.value > 1) {
+  if (currentPage.value >= 1) {
     currentPage.value--;
     updateManagedEntities()
   }

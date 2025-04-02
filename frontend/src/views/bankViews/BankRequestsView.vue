@@ -195,7 +195,7 @@ const closeForm = () => {
 }
 
 const prevPage = () => {
-  if (currentPage.value > 1) {
+  if (currentPage.value >= 1) {
     currentPage.value--;
     getManagedEntities()
   }
