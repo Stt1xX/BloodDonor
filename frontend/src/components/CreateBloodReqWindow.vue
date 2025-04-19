@@ -166,7 +166,8 @@ const banks = ref([]);
 
 const getBanksWithResources = async (abortController) => {
   try{
-    const url = `/api/organizations/banks_with_resources?pattern=${searchQuery.value}`
+    const encodedPattern = encodeURIComponent(searchQuery.value);
+    const url = `/api/organizations/banks_with_resources?pattern=${encodedPattern}`
     const response = await axios.post(url, {
       bloodGroup : bloodRequest.value.bloodGroup,
       rhesusFactor : bloodRequest.value.rhesusFactor,
