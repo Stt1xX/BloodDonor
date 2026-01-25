@@ -4,9 +4,9 @@ services:
     image: postgres:16-alpine
     container_name: bloodlink_db
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: BloodLink
+      POSTGRES_USER: ${DB_USERNAME:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
+      POSTGRES_DB: ${DB_NAME:-BloodLink}
     volumes:
       - ./backend/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql
       - ./backend/db/data.sql:/docker-entrypoint-initdb.d/02-data.sql
@@ -16,7 +16,7 @@ services:
     networks:
       - bloodlink-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d BloodLink"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-admin} -d ${DB_NAME:-BloodLink}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,10 +28,13 @@ services:
       dockerfile: Dockerfile
     container_name: bloodlink_backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/BloodLink
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: admin
-      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-BloodLink}
+      DB_USERNAME: ${DB_USERNAME:-admin}
+      DB_PASSWORD: ${DB_PASSWORD:-admin}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:80,http://localhost}
     ports:
       - "8080:8080"
     depends_on:
