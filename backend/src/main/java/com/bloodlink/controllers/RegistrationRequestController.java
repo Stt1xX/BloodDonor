@@ -1,6 +1,6 @@
 package com.bloodlink.controllers;
 
-import com.bloodlink.entities.DTOs.RegistrationRequestDTOto;
+import com.bloodlink.dto.response.RegistrationRequestResponse;
 import com.bloodlink.service.RegistrationRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ public class RegistrationRequestController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
-    public ResponseEntity<Page<RegistrationRequestDTOto>> getRequests(
+    public ResponseEntity<Page<RegistrationRequestResponse>> getRequests(
             @RequestParam String pattern,
             Pageable page) {
         log.debug("Getting registration requests with pattern={}", pattern);

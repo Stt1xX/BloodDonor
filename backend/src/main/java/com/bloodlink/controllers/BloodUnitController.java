@@ -1,7 +1,7 @@
 package com.bloodlink.controllers;
 
-import com.bloodlink.entities.DTOs.BloodUnitDTOfrom;
-import com.bloodlink.entities.DTOs.BloodUnitDTOto;
+import com.bloodlink.dto.request.BloodUnitCreateRequest;
+import com.bloodlink.dto.response.BloodUnitResponse;
 import com.bloodlink.entities.enums.BloodGroup;
 import com.bloodlink.entities.enums.RhFactor;
 import com.bloodlink.service.BloodUnitsService;
@@ -36,7 +36,7 @@ public class BloodUnitController {
         var group = BloodGroup.fromValue(bloodGroup);
         var factor = RhFactor.fromValue(rhesusFactor);
         
-        Page<BloodUnitDTOto> unitsPage = bloodUnitsService.getOrganizationBloodUnits(group, factor, reverse, page);
+        Page<BloodUnitResponse> unitsPage = bloodUnitsService.getOrganizationBloodUnits(group, factor, reverse, page);
         Double summaryVolume = bloodUnitsService.getSummaryVolume(group, factor);
         
         return ResponseEntity.ok(Map.of(
@@ -48,7 +48,7 @@ public class BloodUnitController {
     @PreAuthorize("hasAnyAuthority('BANK_EMPLOYEE')")
     @PostMapping
     public ResponseEntity<Map<String, String>> addBloodUnit(
-            @RequestBody @Valid BloodUnitDTOfrom dto) {
+            @RequestBody @Valid BloodUnitCreateRequest dto) {
         log.info("Creating new blood unit: bloodGroup={}, rh={}, volume={}", 
                 dto.getBloodGroup(), dto.getRhesusFactor(), dto.getVolume());
         var created = bloodUnitsService.save(dto);
@@ -68,7 +68,7 @@ public class BloodUnitController {
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> updateBloodUnit(
             @PathVariable Long id,
-            @Valid @RequestBody BloodUnitDTOfrom dto) {
+            @Valid @RequestBody BloodUnitCreateRequest dto) {
         log.info("Updating blood unit id={}", id);
         bloodUnitsService.update(dto);
         return ResponseEntity.ok(Map.of("message", "Партия крови успешно изменена!"));

@@ -1,6 +1,7 @@
 package com.bloodlink.service;
 
-import com.bloodlink.entities.DTOs.UserDTOto;
+import com.bloodlink.dto.mapper.UserMapper;
+import com.bloodlink.dto.response.UserResponse;
 import com.bloodlink.entities.User;
 import com.bloodlink.entities.specifications.UserSpecs;
 import com.bloodlink.exceptions.AccessDeniedException;
@@ -27,6 +28,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     public User getByEmail(String email) {
         return userRepository.findByEmailAndIsDeletedFalse(email)
@@ -54,7 +56,7 @@ public class UserService {
         return Optional.empty();
     }
 
-    public Page<UserDTOto> getAll(String pattern, Pageable page) {
+    public Page<UserResponse> getAll(String pattern, Pageable page) {
         Specification<User> filters = Specification.where(!StringUtils.hasLength(pattern) ? null :
                         UserSpecs.nameLike(pattern))
                 .or(UserSpecs.surnameLike(pattern))
@@ -62,7 +64,7 @@ public class UserService {
                 .and(UserSpecs.notDeleted());
         var p = userRepository.findAll(filters, page);
 
-        return p.map(UserDTOto::convert);
+        return p.map(userMapper::toResponse);
     }
 
     @Transactional

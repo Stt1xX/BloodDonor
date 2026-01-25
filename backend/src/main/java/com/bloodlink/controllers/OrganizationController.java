@@ -1,8 +1,8 @@
 package com.bloodlink.controllers;
 
-import com.bloodlink.entities.DTOs.BloodRequestDTOfrom;
-import com.bloodlink.entities.DTOs.OrganizationDTOfrom;
-import com.bloodlink.entities.DTOs.OrganizationDTOto;
+import com.bloodlink.dto.request.BloodRequestCreateRequest;
+import com.bloodlink.dto.request.OrganizationCreateRequest;
+import com.bloodlink.dto.response.OrganizationResponse;
 import com.bloodlink.entities.Organization;
 import com.bloodlink.service.OrganizationService;
 import jakarta.validation.Valid;
@@ -27,7 +27,7 @@ public class OrganizationController {
     private final OrganizationService organizationService;
 
     @GetMapping
-    public ResponseEntity<Page<OrganizationDTOto>> getOrganizations(
+    public ResponseEntity<Page<OrganizationResponse>> getOrganizations(
             @RequestParam String type,
             @RequestParam String pattern,
             Pageable page) {
@@ -36,8 +36,8 @@ public class OrganizationController {
     }
 
     @PostMapping("/banks-with-resources")
-    public ResponseEntity<List<OrganizationDTOto>> getBanksWithResources(
-            @RequestBody BloodRequestDTOfrom dto,
+    public ResponseEntity<List<OrganizationResponse>> getBanksWithResources(
+            @RequestBody BloodRequestCreateRequest dto,
             @RequestParam String pattern) {
         log.debug("Getting banks with resources for blood group={}, rh={}", 
                 dto.getBloodGroup(), dto.getRhesusFactor());
@@ -47,7 +47,7 @@ public class OrganizationController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseEntity<Map<String, String>> addNewOrganization(
-            @Valid @RequestBody OrganizationDTOfrom organizationDto) {
+            @Valid @RequestBody OrganizationCreateRequest organizationDto) {
         log.info("Creating new organization: {}", organizationDto.getName());
         Organization created = organizationService.save(organizationDto);
         URI location = URI.create("/api/organizations/" + created.getId());
@@ -58,7 +58,7 @@ public class OrganizationController {
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> updateOrganization(
             @PathVariable Long id,
-            @Valid @RequestBody OrganizationDTOfrom organizationDto) {
+            @Valid @RequestBody OrganizationCreateRequest organizationDto) {
         log.info("Updating organization id={}", id);
         organizationService.update(organizationDto);
         return ResponseEntity.ok(Map.of("message", "Информация о заведении обновлена"));

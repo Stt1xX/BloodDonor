@@ -1,6 +1,7 @@
 package com.bloodlink.controllers;
 
-import com.bloodlink.entities.DTOs.NotificationDTOto;
+import com.bloodlink.dto.mapper.NotificationMapper;
+import com.bloodlink.dto.response.NotificationResponse;
 import com.bloodlink.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,13 +20,14 @@ import java.util.Map;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final NotificationMapper notificationMapper;
 
     @GetMapping
-    public ResponseEntity<Page<NotificationDTOto>> getUnreadNotifications(Pageable page) {
+    public ResponseEntity<Page<NotificationResponse>> getUnreadNotifications(Pageable page) {
         log.debug("Getting unread notifications");
-        Page<NotificationDTOto> notifications = notificationService
+        Page<NotificationResponse> notifications = notificationService
                 .getUnreadNotifications(page)
-                .map(NotificationDTOto::convert);
+                .map(notificationMapper::toResponse);
         return ResponseEntity.ok(notifications);
     }
 

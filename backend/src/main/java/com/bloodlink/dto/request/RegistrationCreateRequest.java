@@ -1,15 +1,20 @@
-package com.bloodlink.entities.DTOs;
+package com.bloodlink.dto.request;
 
-import com.bloodlink.entities.RegistrationRequest;
+import com.bloodlink.entities.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import com.bloodlink.entities.enums.Role;
-
+/**
+ * Request DTO for user registration.
+ */
 @Data
-public class RegistrationRequestDTOfrom {
+@AllArgsConstructor
+@NoArgsConstructor
+public class RegistrationCreateRequest {
 
     @NotBlank(message = "Поле не может быть пустым")
     private String name;
@@ -20,7 +25,7 @@ public class RegistrationRequestDTOfrom {
     @Email(message = "Некорректный email")
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "Пароль не может быть пустым")
     @Size(min = 5, message = "Пароль должен содержать минимум 5 символов")
     private String password;
 
@@ -30,16 +35,4 @@ public class RegistrationRequestDTOfrom {
     private String post;
 
     private Long organizationId;
-
-    public RegistrationRequest convert() {
-        RegistrationRequest registrationRequest = new RegistrationRequest();
-        registrationRequest.setName(this.name);
-        registrationRequest.setSurname(this.surname);
-        registrationRequest.setEmail(this.email);
-        registrationRequest.setPassword(this.password);
-        registrationRequest.setRole(this.role);
-        registrationRequest.setPost(this.post);
-        return registrationRequest;
-    }
 }
-

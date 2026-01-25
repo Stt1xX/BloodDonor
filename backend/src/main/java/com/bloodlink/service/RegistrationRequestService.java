@@ -1,7 +1,8 @@
 package com.bloodlink.service;
 
-import com.bloodlink.entities.DTOs.RegistrationRequestDTOfrom;
-import com.bloodlink.entities.DTOs.RegistrationRequestDTOto;
+import com.bloodlink.dto.mapper.RegistrationRequestMapper;
+import com.bloodlink.dto.request.RegistrationCreateRequest;
+import com.bloodlink.dto.response.RegistrationRequestResponse;
 import com.bloodlink.entities.Organization;
 import com.bloodlink.entities.RegistrationRequest;
 import com.bloodlink.entities.User;
@@ -34,21 +35,22 @@ public class RegistrationRequestService {
     private final UserService userService;
     private final UserRepository userRepository;
     private final OrganizationService organizationService;
+    private final RegistrationRequestMapper registrationRequestMapper;
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public RegistrationRequest save(RegistrationRequestDTOfrom requestDTOfrom) {
-        log.info("Processing registration request for email={}", requestDTOfrom.getEmail());
+    public RegistrationRequest save(RegistrationCreateRequest dto) {
+        log.info("Processing registration request for email={}", dto.getEmail());
         
-        validateEmailUniqueness(requestDTOfrom.getEmail());
-        validateOrganization(requestDTOfrom);
+        validateEmailUniqueness(dto.getEmail());
+        validateOrganization(dto);
         
-        RegistrationRequest request = requestDTOfrom.convert();
-        request.setOrganization(organizationService.get(requestDTOfrom.getOrganizationId()));
-        request.setPassword(encoder.encode(request.getPassword()));
+        RegistrationRequest request = registrationRequestMapper.toEntity(dto);
+        request.setOrganization(organizationService.get(dto.getOrganizationId()));
+        request.setPassword(encoder.encode(dto.getPassword()));
         
         if (userRepository.countByRole(Role.ADMIN) == 0 && request.getRole() == Role.ADMIN) {
             registerUser(request);
-            log.info("First admin created: {}", requestDTOfrom.getEmail());
+            log.info("First admin created: {}", dto.getEmail());
             return request;
         } else {
             RegistrationRequest saved = registrationRequestRepository.save(request);
@@ -57,7 +59,7 @@ public class RegistrationRequestService {
         }
     }
 
-    public Page<RegistrationRequestDTOto> getRequestsDto(String pattern, Pageable p) {
+    public Page<RegistrationRequestResponse> getRequestsDto(String pattern, Pageable p) {
         Specification<RegistrationRequest> filters = Specification.where(!StringUtils.hasLength(pattern) ? null :
                     RegistrationRequestsSpecs.nameLike(pattern))
                 .or(RegistrationRequestsSpecs.surnameLike(pattern))
@@ -65,7 +67,7 @@ public class RegistrationRequestService {
                 .or(RegistrationRequestsSpecs.roleLike(pattern));
 
         var requests = registrationRequestRepository.findAll(filters, p);
-        return requests.map(RegistrationRequestDTOto::convert);
+        return requests.map(registrationRequestMapper::toResponse);
     }
 
     @Transactional
@@ -99,7 +101,7 @@ public class RegistrationRequestService {
         }
     }
 
-    private void validateOrganization(RegistrationRequestDTOfrom dto) {
+    private void validateOrganization(RegistrationCreateRequest dto) {
         if (dto.getRole() == Role.ADMIN) {
             return; // Админу не нужна организация
         }

@@ -1,9 +1,10 @@
 package com.bloodlink.service;
 
+import com.bloodlink.dto.mapper.BloodUnitMapper;
+import com.bloodlink.dto.request.BloodUnitCreateRequest;
+import com.bloodlink.dto.response.BloodUnitResponse;
 import com.bloodlink.entities.BloodReserve;
 import com.bloodlink.entities.BloodUnit;
-import com.bloodlink.entities.DTOs.BloodUnitDTOfrom;
-import com.bloodlink.entities.DTOs.BloodUnitDTOto;
 import com.bloodlink.entities.User;
 import com.bloodlink.entities.enums.BloodGroup;
 import com.bloodlink.entities.enums.RhFactor;
@@ -39,8 +40,9 @@ public class BloodUnitsService {
     private final UserService userService;
     private final BloodUnitRepository bloodUnitRepository;
     private final BloodReserveRepository bloodReserveRepository;
+    private final BloodUnitMapper bloodUnitMapper;
 
-    public Page<BloodUnitDTOto> getOrganizationBloodUnits(BloodGroup group, RhFactor rhesus, Boolean reverse, Pageable page) {
+    public Page<BloodUnitResponse> getOrganizationBloodUnits(BloodGroup group, RhFactor rhesus, Boolean reverse, Pageable page) {
         User user = userService.getCurrentUser();
         
         Specification<BloodUnit> filters = Specification.where(
@@ -51,7 +53,7 @@ public class BloodUnitsService {
         Sort sort = reverse != null && reverse ? page.getSort().descending() : page.getSort();
         var units = bloodUnitRepository.findAll(filters,
                 PageRequest.of(page.getPageNumber(), page.getPageSize(), sort));
-        return units.map(BloodUnitDTOto::convert);
+        return units.map(bloodUnitMapper::toResponse);
     }
 
     public Double getSummaryVolume(BloodGroup group, RhFactor rhesus) {
@@ -99,12 +101,12 @@ public class BloodUnitsService {
     }
 
     @Transactional
-    public BloodUnit save(BloodUnitDTOfrom dto) {
+    public BloodUnit save(BloodUnitCreateRequest dto) {
         User user = userService.getCurrentUser();
         log.info("Creating blood unit: group={}, rh={}, volume={}", 
                 dto.getBloodGroup(), dto.getRhesusFactor(), dto.getVolume());
         
-        BloodUnit unit = dto.convert();
+        BloodUnit unit = bloodUnitMapper.toEntity(dto);
         unit.setBloodBank(user.getOrganization());
         return bloodUnitRepository.save(unit);
     }
@@ -125,7 +127,7 @@ public class BloodUnitsService {
     }
 
     @Transactional
-    public BloodUnit update(BloodUnitDTOfrom dto) {
+    public BloodUnit update(BloodUnitCreateRequest dto) {
         if (dto.getId() == null) {
             throw new BusinessException("Для обновления партии крови не предоставлен id");
         }
@@ -140,9 +142,8 @@ public class BloodUnitsService {
         }
         
         log.info("Updating blood unit id={}", dto.getId());
-        BloodUnit unit = dto.convert();
-        unit.setBloodBank(user.getOrganization());
-        return bloodUnitRepository.save(unit);
+        bloodUnitMapper.updateEntityFromRequest(dto, existingUnit);
+        return bloodUnitRepository.save(existingUnit);
     }
 
     @Transactional

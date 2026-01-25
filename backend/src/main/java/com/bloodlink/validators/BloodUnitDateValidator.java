@@ -1,16 +1,15 @@
 package com.bloodlink.validators;
 
-import com.bloodlink.entities.BloodUnit;
-import com.bloodlink.entities.DTOs.BloodUnitDTOfrom;
+import com.bloodlink.dto.request.BloodUnitCreateRequest;
 import com.bloodlink.validators.annotaions.ValidBloodUnitDates;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.time.LocalDate;
 
-public class BloodUnitDateValidator implements ConstraintValidator<ValidBloodUnitDates, BloodUnitDTOfrom> {
+public class BloodUnitDateValidator implements ConstraintValidator<ValidBloodUnitDates, BloodUnitCreateRequest> {
 
     @Override
-    public boolean isValid(BloodUnitDTOfrom bloodUnit, ConstraintValidatorContext context) {
+    public boolean isValid(BloodUnitCreateRequest bloodUnit, ConstraintValidatorContext context) {
         if (bloodUnit.getCreatedAt() == null || bloodUnit.getExpirationDate() == null) {
             return false;
         }

@@ -1,6 +1,6 @@
 package com.bloodlink.controllers;
 
-import com.bloodlink.entities.DTOs.RegistrationRequestDTOfrom;
+import com.bloodlink.dto.request.RegistrationCreateRequest;
 import com.bloodlink.entities.RegistrationRequest;
 import com.bloodlink.service.RegistrationRequestService;
 import jakarta.validation.Valid;
@@ -22,7 +22,7 @@ public class RegistrationController {
 
     @PostMapping("/requests")
     public ResponseEntity<Map<String, String>> createUserRequest(
-            @Valid @RequestBody RegistrationRequestDTOfrom request) {
+            @Valid @RequestBody RegistrationCreateRequest request) {
         log.info("Creating registration request for email={}", request.getEmail());
         RegistrationRequest created = registrationRequestService.save(request);
         URI location = URI.create("/api/registration-requests/" + created.getId());

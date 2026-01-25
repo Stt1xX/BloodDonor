@@ -1,4 +1,4 @@
-package com.bloodlink.entities.DTOs;
+package com.bloodlink.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

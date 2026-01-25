@@ -1,6 +1,6 @@
 package com.bloodlink.controllers;
 
-import com.bloodlink.entities.DTOs.UserDTOto;
+import com.bloodlink.dto.response.UserResponse;
 import com.bloodlink.entities.User;
 import com.bloodlink.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
-    public ResponseEntity<Page<UserDTOto>> getUsers(
+    public ResponseEntity<Page<UserResponse>> getUsers(
             @RequestParam String pattern,
             Pageable page) {
         log.debug("Getting users with pattern={}", pattern);

@@ -1,9 +1,10 @@
 package com.bloodlink.service;
 
+import com.bloodlink.dto.mapper.OrganizationMapper;
+import com.bloodlink.dto.request.BloodRequestCreateRequest;
+import com.bloodlink.dto.request.OrganizationCreateRequest;
+import com.bloodlink.dto.response.OrganizationResponse;
 import com.bloodlink.entities.BloodReserve;
-import com.bloodlink.entities.DTOs.BloodRequestDTOfrom;
-import com.bloodlink.entities.DTOs.OrganizationDTOfrom;
-import com.bloodlink.entities.DTOs.OrganizationDTOto;
 import com.bloodlink.entities.Organization;
 import com.bloodlink.entities.enums.BloodGroup;
 import com.bloodlink.entities.enums.OrganizationType;
@@ -11,7 +12,6 @@ import com.bloodlink.entities.enums.RhFactor;
 import com.bloodlink.entities.enums.Role;
 import com.bloodlink.entities.id.BloodReserveId;
 import com.bloodlink.entities.specifications.OrganizationSpecs;
-import com.bloodlink.exceptions.BusinessException;
 import com.bloodlink.exceptions.ConflictException;
 import com.bloodlink.exceptions.ResourceNotFoundException;
 import com.bloodlink.exceptions.ValidationException;
@@ -38,8 +38,9 @@ public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
     private final BloodReserveRepository bloodReserveRepository;
+    private final OrganizationMapper organizationMapper;
 
-    public Page<OrganizationDTOto> getAll(String type, String pattern, Pageable page) {
+    public Page<OrganizationResponse> getAll(String type, String pattern, Pageable page) {
         OrganizationType typeEnum = null;
         var role = Role.fromString(type);
         if (role != null) {
@@ -60,20 +61,21 @@ public class OrganizationService {
                 .and(OrganizationSpecs.hasType(typeEnum));
 
         var p = organizationRepository.findAll(filters, page);
-        return p.map(OrganizationDTOto::convert);
+        return p.map(organizationMapper::toResponse);
     }
 
     @Transactional
-    public Organization save(OrganizationDTOfrom organizationDTOfrom) {
-        log.info("Creating organization: {}", organizationDTOfrom.getName());
+    public Organization save(OrganizationCreateRequest dto) {
+        log.info("Creating organization: {}", dto.getName());
         
-        if (organizationDTOfrom.getType() != OrganizationType.BLOOD_BANK &&
-            organizationDTOfrom.getType() != OrganizationType.MEDICAL_INSTITUTION) {
+        if (dto.getType() != OrganizationType.BLOOD_BANK &&
+            dto.getType() != OrganizationType.MEDICAL_INSTITUTION) {
             throw new ValidationException("Некорректный тип организации");
         }
         
         try {
-            Organization org = organizationRepository.save(organizationDTOfrom.convert());
+            Organization org = organizationMapper.toEntity(dto);
+            org = organizationRepository.save(org);
             createBloodReservesForBank(org);
             log.info("Organization created id={}", org.getId());
             return org;
@@ -99,16 +101,16 @@ public class OrganizationService {
     }
 
     @Transactional
-    public Organization update(OrganizationDTOfrom organizationDTOfrom) {
-        if (organizationDTOfrom.getId() == null) {
+    public Organization update(OrganizationCreateRequest dto) {
+        if (dto.getId() == null) {
             throw new ValidationException("Для обновления организации не предоставлен id");
         }
         
-        Organization existing = organizationRepository.findById(organizationDTOfrom.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Организация не найдена: " + organizationDTOfrom.getId()));
+        Organization existing = organizationRepository.findById(dto.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Организация не найдена: " + dto.getId()));
         
-        log.info("Updating organization id={}", organizationDTOfrom.getId());
-        return save(organizationDTOfrom);
+        log.info("Updating organization id={}", dto.getId());
+        return save(dto);
     }
 
     @Transactional
@@ -124,7 +126,7 @@ public class OrganizationService {
         return id == null ? null : organizationRepository.findById(id).orElse(null);
     }
 
-    public List<OrganizationDTOto> getBanksByResources(BloodRequestDTOfrom dto, String pattern){
+    public List<OrganizationResponse> getBanksByResources(BloodRequestCreateRequest dto, String pattern){
         if (dto.getBloodGroup() == null || dto.getRhesusFactor() == null || dto.getVolumeNeeded() == null){
             return List.of();
         }
@@ -139,7 +141,7 @@ public class OrganizationService {
 
         return organizationRepository.findAll(filters).stream()
                 .filter(banksWithResources::contains)
-                .map(OrganizationDTOto::convert)
+                .map(organizationMapper::toResponse)
                 .collect(Collectors.toList());
     }
 }

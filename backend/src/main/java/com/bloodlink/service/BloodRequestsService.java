@@ -1,7 +1,8 @@
 package com.bloodlink.service;
 
+import com.bloodlink.dto.mapper.BloodRequestMapper;
+import com.bloodlink.dto.request.BloodRequestCreateRequest;
 import com.bloodlink.entities.BloodRequest;
-import com.bloodlink.entities.DTOs.BloodRequestDTOfrom;
 import com.bloodlink.entities.Organization;
 import com.bloodlink.entities.RequestToBank;
 import com.bloodlink.entities.User;
@@ -46,6 +47,7 @@ public class BloodRequestsService {
     private final BloodRequestRepository bloodRequestRepository;
     private final BloodUnitsService bloodUnitsService;
     private final NotificationService notificationService;
+    private final BloodRequestMapper bloodRequestMapper;
 
     public Page<RequestToBank> getRequestsForBanker(BloodGroup group, RhFactor rhesus, Boolean reverse,
                                                     Pageable page) {
@@ -77,11 +79,11 @@ public class BloodRequestsService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = Exception.class)
     @Retryable(include = {SQLException.class})
-    public BloodRequest save(BloodRequestDTOfrom dto) {
+    public BloodRequest save(BloodRequestCreateRequest dto) {
         User caller = userService.getCurrentUser();
         log.info("Creating blood request by user={}", caller.getEmail());
         
-        BloodRequest request = dto.convert(caller);
+        BloodRequest request = bloodRequestMapper.toEntity(dto, caller);
         request = bloodRequestRepository.save(request);
 
         for (Long bankId : dto.getBloodBanks()) {

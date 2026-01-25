@@ -1,9 +1,10 @@
 package com.bloodlink.controllers;
 
+import com.bloodlink.dto.mapper.BloodRequestMapper;
+import com.bloodlink.dto.request.BloodRequestCreateRequest;
+import com.bloodlink.dto.response.BloodRequestBankResponse;
+import com.bloodlink.dto.response.BloodRequestMedicalResponse;
 import com.bloodlink.entities.BloodRequest;
-import com.bloodlink.entities.DTOs.BloodRequestDTOfrom;
-import com.bloodlink.entities.DTOs.BloodRequestDTOtoBank;
-import com.bloodlink.entities.DTOs.BloodRequestDTOtoMed;
 import com.bloodlink.entities.enums.BloodGroup;
 import com.bloodlink.entities.enums.RequestStatus;
 import com.bloodlink.entities.enums.RhFactor;
@@ -27,10 +28,11 @@ import java.util.Map;
 public class BloodRequestController {
 
     private final BloodRequestsService bloodRequestsService;
+    private final BloodRequestMapper bloodRequestMapper;
 
     @PreAuthorize("hasAnyAuthority('BANK_EMPLOYEE')")
     @GetMapping("/bank")
-    public ResponseEntity<Page<BloodRequestDTOtoBank>> getBankBloodRequests(
+    public ResponseEntity<Page<BloodRequestBankResponse>> getBankBloodRequests(
             @RequestParam String bloodGroup,
             @RequestParam String rhesusFactor,
             @RequestParam Boolean reverse,
@@ -38,22 +40,22 @@ public class BloodRequestController {
         log.debug("Getting blood requests for bank: bloodGroup={}, rh={}", bloodGroup, rhesusFactor);
         var group = BloodGroup.fromValue(bloodGroup);
         var factor = RhFactor.fromValue(rhesusFactor);
-        Page<BloodRequestDTOtoBank> result = bloodRequestsService
+        Page<BloodRequestBankResponse> result = bloodRequestsService
                 .getRequestsForBanker(group, factor, reverse, page)
-                .map(BloodRequestDTOtoBank::convert);
+                .map(bloodRequestMapper::toBankResponse);
         return ResponseEntity.ok(result);
     }
 
     @PreAuthorize("hasAnyAuthority('MEDICAL_EMPLOYEE')")
     @GetMapping("/medical")
-    public ResponseEntity<Page<BloodRequestDTOtoMed>> getMedBloodRequests(
+    public ResponseEntity<Page<BloodRequestMedicalResponse>> getMedBloodRequests(
             @RequestParam String status,
             Pageable page) {
         log.debug("Getting blood requests for medical: status={}", status);
         var st = RequestStatus.fromName(status);
-        Page<BloodRequestDTOtoMed> result = bloodRequestsService
+        Page<BloodRequestMedicalResponse> result = bloodRequestsService
                 .getRequestsForMed(st, page)
-                .map(BloodRequestDTOtoMed::convert);
+                .map(bloodRequestMapper::toMedicalResponse);
         return ResponseEntity.ok(result);
     }
 
@@ -79,7 +81,7 @@ public class BloodRequestController {
     @PreAuthorize("hasAnyAuthority('MEDICAL_EMPLOYEE')")
     @PostMapping
     public ResponseEntity<Map<String, String>> addBloodRequest(
-            @RequestBody @Valid BloodRequestDTOfrom dto) {
+            @RequestBody @Valid BloodRequestCreateRequest dto) {
         log.info("Creating new blood request: bloodGroup={}, rh={}", 
                 dto.getBloodGroup(), dto.getRhesusFactor());
         BloodRequest created = bloodRequestsService.save(dto);

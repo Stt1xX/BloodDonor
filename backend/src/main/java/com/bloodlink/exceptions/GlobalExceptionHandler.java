@@ -1,6 +1,6 @@
 package com.bloodlink.exceptions;
 
-import com.bloodlink.entities.DTOs.ErrorResponse;
+import com.bloodlink.dto.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
