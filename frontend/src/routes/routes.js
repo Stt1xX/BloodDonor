@@ -1,55 +1,73 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { getUserInfo } from '@/js/user-info.js'
 
+// LoginView is eagerly loaded as it's the entry point
 import LoginView from '@/views/shared/LoginView.vue'
-import RegistrationView from '@/views/shared/RegistrationView.vue'
-import OrganizationSettingsView from '@/views/adminViews/OrganizationSettingsView.vue'
-import BankReserveView from '@/views/bankViews/BankReserveView.vue'
-import MedicalRequestsView from '@/views/medicalViews/MedicalRequestsView.vue'
-import EmployeeRequestsView from "@/views/adminViews/EmployeeRequestsView.vue";
-import {getUserInfo} from "@/js/user-info.js";
-import AllUsersView from "@/views/adminViews/AllUsersView.vue";
-import NotFoundView from '@/views/shared/NotFoundView.vue'
-import BankRequestsView from "@/views/bankViews/BankRequestsView.vue";
+
+// Lazy-loaded views - these will be code-split into separate chunks
+const RegistrationView = () => import('@/views/shared/RegistrationView.vue')
+const NotFoundView = () => import('@/views/shared/NotFoundView.vue')
+
+// Admin views
+const OrganizationSettingsView = () => import('@/views/adminViews/OrganizationSettingsView.vue')
+const EmployeeRequestsView = () => import('@/views/adminViews/EmployeeRequestsView.vue')
+const AllUsersView = () => import('@/views/adminViews/AllUsersView.vue')
+
+// Bank employee views
+const BankReserveView = () => import('@/views/bankViews/BankReserveView.vue')
+const BankRequestsView = () => import('@/views/bankViews/BankRequestsView.vue')
+
+// Medical employee views
+const MedicalRequestsView = () => import('@/views/medicalViews/MedicalRequestsView.vue')
+
 const routes = [
     {
         path: '/login',
+        name: 'Login',
         component: LoginView,
         meta: { requiresAuth: false }
     },
     {
         path: '/registration',
+        name: 'Registration',
         component: RegistrationView,
         meta: { requiresAuth: false }
     },
     {
         path: '/admin/organization_settings',
+        name: 'OrganizationSettings',
         component: OrganizationSettingsView,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, role: 'ADMIN' }
     },
     {
         path: '/admin/requests',
+        name: 'EmployeeRequests',
         component: EmployeeRequestsView,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, role: 'ADMIN' }
     },
     {
         path: '/admin/all_users',
+        name: 'AllUsers',
         component: AllUsersView,
-        meta: {requiresAuth: true }
+        meta: { requiresAuth: true, role: 'ADMIN' }
     },
     {
         path: '/bank_employee/reserves',
+        name: 'BankReserves',
         component: BankReserveView,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, role: 'BANK_EMPLOYEE' }
     },
     {
-        path: "/bank_employee/requests",
+        path: '/bank_employee/requests',
+        name: 'BankRequests',
         component: BankRequestsView,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, role: 'BANK_EMPLOYEE' }
     },
     {
         path: '/medical_employee/requests',
+        name: 'MedicalRequests',
         component: MedicalRequestsView,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, role: 'MEDICAL_EMPLOYEE' }
     },
     {
         path: '/',
@@ -57,6 +75,7 @@ const routes = [
     },
     {
         path: '/:pathMatch(.*)*',
+        name: 'NotFound',
         component: NotFoundView
     }
 ]
