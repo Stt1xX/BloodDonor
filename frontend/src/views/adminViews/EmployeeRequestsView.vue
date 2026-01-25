@@ -121,7 +121,7 @@ onBeforeUnmount(() => {
 const getManagedEntities = async (abortController) => {
   try {
     const encodedPattern = encodeURIComponent(searchQuery.value);
-    const url = `/api/requests?pattern=${encodedPattern}&page=${currentPage.value}&size=8&sort=id`
+    const url = `/api/registration-requests?pattern=${encodedPattern}&page=${currentPage.value}&size=8&sort=id`
     const response = await axios.get(url,{ signal: abortController.signal })
     totalPages.value = response.data.totalPages;
     managedEntities.value = response.data.content;
@@ -135,15 +135,15 @@ const updateManagedEntities = () => {
 }
 
 const accept = async (id) => {
-  const url = `/api/requests/approve/${id}`
-  const response = await axios.post(url)
+  const url = `/api/registration-requests/${id}/approve`
+  const response = await axios.patch(url)
   showAlert(response.data)
   updateManagedEntities()
 }
 
 const reject = async (id) => {
-  const url = `/api/requests/reject/${id}`
-  const response = await axios.post(url)
+  const url = `/api/registration-requests/${id}/reject`
+  const response = await axios.patch(url)
   showAlert(response.data)
   updateManagedEntities()
 }

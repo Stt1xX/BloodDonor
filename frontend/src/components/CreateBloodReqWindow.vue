@@ -167,7 +167,7 @@ const banks = ref([]);
 const getBanksWithResources = async (abortController) => {
   try{
     const encodedPattern = encodeURIComponent(searchQuery.value);
-    const url = `/api/organizations/banks_with_resources?pattern=${encodedPattern}`
+    const url = `/api/organizations/banks-with-resources?pattern=${encodedPattern}`
     const response = await axios.post(url, {
       bloodGroup : bloodRequest.value.bloodGroup,
       rhesusFactor : bloodRequest.value.rhesusFactor,
@@ -223,13 +223,13 @@ const toggleSelection = (bank) => {
 
 const submitRequest = async () => {
   try{
-    const url = '/api/blood_requests'
+    const url = '/api/blood-requests'
     const request = bloodRequest.value
     request.bloodBanks = selectedBanks.value.map(bank => bank.id)
     request.volumeNeeded = bloodRequest.value.volumeNeeded.toString().replace(',', '.')
     const response = await axios.post(url, request)
-    showAlert(response.data)
-    if (response.status === 200)
+    showAlert(response.data?.message || 'Заявка создана')
+    if (response.status === 200 || response.status === 201)
       emit('close');
   } catch (error){
     showAlert(error.data)

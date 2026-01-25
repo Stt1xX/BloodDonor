@@ -184,9 +184,9 @@ const editManagedEntity = (managedEntity) => {
 
 const deleteManagedEntity = async (id) => {
   try {
-    const url = `/api/blood_units?id=${id}`
-    const response = await axios.delete(url)
-    showAlert(response.data)
+    const url = `/api/blood-units/${id}`
+    await axios.delete(url)
+    showAlert('Партия удалена')
   } catch (error) {
     showAlert(error.response.data);
   }
@@ -223,7 +223,7 @@ onBeforeUnmount(() => {
 
 const getManagedEntities = async (abortController) => {
   try {
-    const url = `/api/blood_units?rhesusFactor=${encodeURIComponent(rhesusFactor.value)}&bloodGroup=${bloodGroup.value}&reverse=${reverseSearch.value}&page=${currentPage.value}&size=8&sort=${sortBy.value}`
+    const url = `/api/blood-units?rhesusFactor=${encodeURIComponent(rhesusFactor.value)}&bloodGroup=${bloodGroup.value}&reverse=${reverseSearch.value}&page=${currentPage.value}&size=8&sort=${sortBy.value}`
     const response = await axios.get(url,{ signal: abortController.signal })
     totalPages.value = response.data.page.totalPages;
     managedEntities.value = response.data.page.content;

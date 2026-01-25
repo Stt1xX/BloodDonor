@@ -202,7 +202,7 @@ const updateManagedEntities = () => {
 
 const getManagedEntities = async (abortController) => {
   try {
-    const url = `/api/blood_requests/medical?status=${requestStatus.value}&page=${currentPage.value}&size=8&sort=id`
+    const url = `/api/blood-requests/medical?status=${requestStatus.value}&page=${currentPage.value}&size=8&sort=id`
     const response = await axios.get(url,{ signal: abortController.signal })
     totalPages.value = response.data.totalPages;
     managedEntities.value = response.data.content;

@@ -10,7 +10,7 @@ export const user = ref({
 
 export const getUserInfo = async () => {
     try {
-        const response = await axios.get("/api/user/info")
+        const response = await axios.get("/api/users/me")
         user.value = response.data
     } catch (error) {
         showAlert(error.response.data);

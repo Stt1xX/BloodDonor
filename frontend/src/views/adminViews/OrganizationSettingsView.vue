@@ -117,9 +117,9 @@ const editOrganization = (organization) => {
 
 const deleteOrganization = async (id) => {
   try {
-    const url = `/api/organizations?id=${id}`
+    const url = `/api/organizations/${id}`
     const response = await axios.delete(url)
-    showAlert(response.data)
+    showAlert(response.data?.message || 'Организация удалена')
   } catch (error) {
     showAlert(error.response.data);
   }

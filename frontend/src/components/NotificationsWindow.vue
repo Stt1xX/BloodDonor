@@ -89,7 +89,7 @@ const markAsRead = async (notification) => {
   if (notification.read) return;
 
   try {
-    await axios.post(`/api/notifications/read?id=${notification.id}`);
+    await axios.patch(`/api/notifications/${notification.id}/read`);
     notifications.value = notifications.value.filter(n => n.id !== notification.id)
   } catch (error) {
     showAlert(error.response.data);
@@ -103,7 +103,7 @@ const markAllAsRead = async () => {
     const unreadIds = notifications.value
         .filter(n => !n.read)
         .map(n => n.id);
-    await axios.post('/api/notifications/read_all', unreadIds);
+    await axios.patch('/api/notifications/read-all', unreadIds);
     notifications.value = []
   } catch (error) {
     showAlert(error.response.data);

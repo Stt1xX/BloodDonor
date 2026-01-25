@@ -182,7 +182,7 @@ const validateForm = () => {
 
 const createBloodReserve = async () => {
   try {
-    const response = await axios.post('/api/blood_units', {
+    const response = await axios.post('/api/blood-units', {
       bloodGroup: bloodReserve.value.bloodGroup,
       rhesusFactor: bloodReserve.value.rhesusFactor,
       expirationDate: bloodReserve.value.expirationDate.toISOString().split('T')[0],
@@ -198,7 +198,7 @@ const createBloodReserve = async () => {
 
 const editBloodReserve = async () => {
   try {
-    const response = await axios.put('/api/blood_units', {
+    const response = await axios.put('/api/blood-units', {
       id: bloodReserve.value.id,
       bloodGroup: bloodReserve.value.bloodGroup,
       rhesusFactor: bloodReserve.value.rhesusFactor,

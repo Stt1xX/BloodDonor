@@ -116,7 +116,7 @@ onBeforeUnmount(() => {
 const getManagedEntities = async (abortController) => {
   try {
     const encodedPattern = encodeURIComponent(searchQuery.value);
-    const url = `/api/user?pattern=${encodedPattern}&page=${currentPage.value}&size=8&sort=id`
+    const url = `/api/users?pattern=${encodedPattern}&page=${currentPage.value}&size=8&sort=id`
     const response = await axios.get(url,{ signal: abortController.signal })
     totalPages.value = response.data.totalPages;
     managedEntities.value = response.data.content;
@@ -130,7 +130,7 @@ const updateManagedEntities = () => {
 }
 
 const remove = async (id) => {
-  const url = `/api/user?id=${id}`
+  const url = `/api/users/${id}`
   const response = await axios.delete(url)
   showAlert(response.data)
   updateManagedEntities()

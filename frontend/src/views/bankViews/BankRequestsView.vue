@@ -223,7 +223,7 @@ onBeforeUnmount(() => {
 
 const getManagedEntities = async (abortController) => {
   try {
-    const url = `/api/blood_requests/bank?rhesusFactor=${rhesusFactor.value}&bloodGroup=${bloodGroup.value}&reverse=${reverseSearch.value}&page=${currentPage.value}&size=8&sort=${sortBy.value}`
+    const url = `/api/blood-requests/bank?rhesusFactor=${rhesusFactor.value}&bloodGroup=${bloodGroup.value}&reverse=${reverseSearch.value}&page=${currentPage.value}&size=8&sort=${sortBy.value}`
     const response = await axios.get(url,{ signal: abortController.signal })
     totalPages.value = response.data.totalPages;
     managedEntities.value = response.data.content;
@@ -245,9 +245,9 @@ const reject = (managedEntity) => {
 
 const accept = async (id) => {
   try{
-    const url = `/api/blood_requests/accept/${id}`
-    const response = await axios.post(url)
-    showAlert(response.data)
+    const url = `/api/blood-requests/${id}/accept`
+    const response = await axios.patch(url)
+    showAlert(response.data?.message || 'Заявка принята')
     updateManagedEntities()
   } catch (error){
     showAlert(error.response.data);
@@ -256,11 +256,9 @@ const accept = async (id) => {
 
 const handleRejectSubmit = async (data) => {
   try{
-    const url = `/api/blood_requests/reject/${data.id}`
-    const response = await axios.post(url, data.reason,    {
-      headers: { 'Content-Type': 'text/plain' }
-    })
-    showAlert(response.data)
+    const url = `/api/blood-requests/${data.id}/reject`
+    const response = await axios.patch(url, { reason: data.reason })
+    showAlert(response.data?.message || 'Заявка отклонена')
     updateManagedEntities()
   } catch (error){
     showAlert(error.response.data);
