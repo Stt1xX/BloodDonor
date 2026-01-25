@@ -47,7 +47,7 @@ dependencies {
 
 bootJar {
     archiveFileName = 'my-application.jar'
-    mainClass = 'com.bloodlink.backend.BackendApplication'
+    mainClass = 'com.bloodlink.BackendApplication'
 }
 
 

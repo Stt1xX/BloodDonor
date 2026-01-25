@@ -1,0 +1,69 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: bloodlink_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: BloodLink
+    volumes:
+      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./backend/db/data.sql:/docker-entrypoint-initdb.d/02-data.sql
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - bloodlink-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d BloodLink"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bloodlink_backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/BloodLink
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - bloodlink-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Vue.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:8080
+    container_name: bloodlink_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - bloodlink-network
+
+networks:
+  bloodlink-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
