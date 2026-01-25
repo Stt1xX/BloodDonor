@@ -74,7 +74,7 @@ public class NotificationService {
             notification.setUser(member);
             notification.setRead(false);
             notification.setNotification(String.format("Получен новый запрос: %sгр., rh%s, %sл.",
-                    request.getBloodGroup().getSymbol(), request.getRhFactor().getSymbol(), request.getVolumeNeeded()));
+                    request.getBloodGroup().getValue(), request.getRhFactor().getDisplaySymbol(), request.getVolumeNeeded()));
             notificationRepository.save(notification);
         }
     }
@@ -86,7 +86,7 @@ public class NotificationService {
             notification.setUser(member);
             notification.setRead(false);
             notification.setNotification(String.format("Партия крови устарела, я ее удалил: %sгр., rh%s, %sл.",
-            unit.getBloodGroup().getSymbol(), unit.getRhFactor().getSymbol(), unit.getVolume()));
+            unit.getBloodGroup().getValue(), unit.getRhFactor().getDisplaySymbol(), unit.getVolume()));
 
             notificationRepository.save(notification);
         }
@@ -101,7 +101,7 @@ public class NotificationService {
             String retStr = String.format(request.getStatus() == RequestStatus.COMPLETED ?
                             "Вам одобрили заявку: %sгр., rh%s, %sл." :
                             "Вам отклонили заявку: %sгр., rh%s, %sл.",
-                    request.getRequest().getBloodGroup().getSymbol(), request.getRequest().getRhFactor().getSymbol(), request.getRequest().getVolumeNeeded());
+                    request.getRequest().getBloodGroup().getValue(), request.getRequest().getRhFactor().getDisplaySymbol(), request.getRequest().getVolumeNeeded());
             notification.setNotification(retStr);
 
             notificationRepository.save(notification);

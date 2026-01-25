@@ -4,29 +4,32 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum BloodGroup {
-    A("1"),
-    B("2"),
-    AB("3"),
-    O("4");
+    A("A"),
+    B("B"),
+    AB("AB"),
+    O("O");
 
-    private final String symbol;
+    private final String value;
 
-    BloodGroup(String symbol) {
-        this.symbol = symbol;
+    BloodGroup(String value) {
+        this.value = value;
     }
 
     @JsonValue
-    public String getSymbol() {
-        return symbol;
+    public String getValue() {
+        return value;
     }
 
     @JsonCreator
-    public static BloodGroup fromSymbol(String symbol) {
+    public static BloodGroup fromValue(String value) {
+        if (value == null) {
+            return null;
+        }
         for (BloodGroup type : values()) {
-            if (type.symbol.equals(symbol)) {
+            if (type.value.equalsIgnoreCase(value)) {
                 return type;
             }
         }
-        return null;
+        throw new IllegalArgumentException("Unknown blood group: " + value);
     }
 } 

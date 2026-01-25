@@ -25,8 +25,8 @@ public class BloodUnitResource {
     @GetMapping
     public Map<String, Object>  getBloodUnits(@RequestParam String bloodGroup, @RequestParam String rhesusFactor,
                                               @RequestParam Boolean reverse, Pageable page){
-        var group = BloodGroup.fromSymbol(bloodGroup);
-        var factor = RhFactor.fromSymbol(rhesusFactor);
+        var group = BloodGroup.fromValue(bloodGroup);
+        var factor = RhFactor.fromValue(rhesusFactor);
         Map<String, Object> retMap = new HashMap<>();
         retMap.put("page", bloodUnitsService.getOrganizationBloodUnits(group, factor, reverse, page));
         retMap.put("summaryVolume", bloodUnitsService.getSummaryVolume(group, factor));

@@ -27,8 +27,8 @@ public class BloodRequestResource {
     public Page<BloodRequestDTOtoBank> getBankBloodRequests(@RequestParam String bloodGroup,
                                                             @RequestParam String rhesusFactor,
                                                             @RequestParam Boolean reverse, Pageable page) {
-        var group = BloodGroup.fromSymbol(bloodGroup);
-        var factor = RhFactor.fromSymbol(rhesusFactor);
+        var group = BloodGroup.fromValue(bloodGroup);
+        var factor = RhFactor.fromValue(rhesusFactor);
         return bloodRequestsService.getRequestsForBanker(group, factor, reverse, page)
                 .map(BloodRequestDTOtoBank::convert);
     }

@@ -9,12 +9,12 @@ public class RhFactorConverter implements AttributeConverter<RhFactor, String> {
 
     @Override
     public String convertToDatabaseColumn(RhFactor rhFactor) {
-        return (rhFactor != null) ? rhFactor.getSymbol() : null;
+        return (rhFactor != null) ? rhFactor.getValue() : null;
     }
 
     @Override
     public RhFactor convertToEntityAttribute(String dbData) {
-        return (dbData != null) ? RhFactor.fromSymbol(dbData) : null;
+        return (dbData != null) ? RhFactor.fromValue(dbData) : null;
     }
 }
 

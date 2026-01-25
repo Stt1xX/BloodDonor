@@ -9,11 +9,11 @@ public class BloodTypeConverter implements AttributeConverter<BloodGroup, String
 
     @Override
     public String convertToDatabaseColumn(BloodGroup bloodGroup) {
-        return (bloodGroup != null) ? bloodGroup.getSymbol() : null;
+        return (bloodGroup != null) ? bloodGroup.getValue() : null;
     }
 
     @Override
     public BloodGroup convertToEntityAttribute(String dbData) {
-        return (dbData != null) ? BloodGroup.fromSymbol(dbData) : null;
+        return (dbData != null) ? BloodGroup.fromValue(dbData) : null;
     }
 }
