@@ -1,5 +1,6 @@
 package com.bloodlink.entities.enums;
 
+import com.bloodlink.exceptions.ValidationException;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -31,7 +32,7 @@ public enum RhFactor {
         // Support legacy +/- symbols
         if ("+".equals(value)) return POSITIVE;
         if ("-".equals(value)) return NEGATIVE;
-        throw new IllegalArgumentException("Unknown Rh factor: " + value);
+        throw new ValidationException("Неизвестный резус-фактор: " + value);
     }
 
     // Display symbol for UI

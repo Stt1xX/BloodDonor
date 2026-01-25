@@ -1,5 +1,6 @@
 package com.bloodlink.entities.enums;
 
+import com.bloodlink.exceptions.ValidationException;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -30,6 +31,6 @@ public enum BloodGroup {
                 return type;
             }
         }
-        throw new IllegalArgumentException("Unknown blood group: " + value);
+        throw new ValidationException("Неизвестная группа крови: " + value);
     }
 } 

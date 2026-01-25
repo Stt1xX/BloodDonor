@@ -9,7 +9,7 @@ import com.bloodlink.entities.enums.OrganizationType;
 import com.bloodlink.entities.enums.Role;
 import com.bloodlink.entities.specifications.RegistrationRequestsSpecs;
 import com.bloodlink.exceptions.BusinessException;
-import com.bloodlink.exceptions.CustomDuplicateException;
+import com.bloodlink.exceptions.ConflictException;
 import com.bloodlink.exceptions.ResourceNotFoundException;
 import com.bloodlink.repositories.RegistrationRequestRepository;
 import com.bloodlink.repositories.UserRepository;
@@ -95,7 +95,7 @@ public class RegistrationRequestService {
     private void validateEmailUniqueness(String email) {
         if (userService.findByEmail(email).isPresent() ||
                 registrationRequestRepository.findByEmail(email).isPresent()) {
-            throw new CustomDuplicateException("Пользователь или запрос с таким email уже существует");
+            throw new ConflictException("Пользователь или запрос с таким email уже существует");
         }
     }
 

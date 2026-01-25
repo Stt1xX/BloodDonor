@@ -3,6 +3,7 @@ package com.bloodlink.controllers;
 import com.bloodlink.entities.DTOs.BloodRequestDTOfrom;
 import com.bloodlink.entities.DTOs.OrganizationDTOfrom;
 import com.bloodlink.entities.DTOs.OrganizationDTOto;
+import com.bloodlink.entities.Organization;
 import com.bloodlink.service.OrganizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/organizations")
@@ -43,20 +46,22 @@ public class OrganizationController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public ResponseEntity<String> addNewOrganization(
+    public ResponseEntity<Map<String, String>> addNewOrganization(
             @Valid @RequestBody OrganizationDTOfrom organizationDto) {
         log.info("Creating new organization: {}", organizationDto.getName());
-        String result = organizationService.save(organizationDto);
-        return ResponseEntity.status(201).body(result);
+        Organization created = organizationService.save(organizationDto);
+        URI location = URI.create("/api/organizations/" + created.getId());
+        return ResponseEntity.created(location).body(Map.of("message", "Организация успешно добавлена"));
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateOrganization(
+    public ResponseEntity<Map<String, String>> updateOrganization(
             @PathVariable Long id,
             @Valid @RequestBody OrganizationDTOfrom organizationDto) {
         log.info("Updating organization id={}", id);
-        return ResponseEntity.ok(organizationService.update(organizationDto));
+        organizationService.update(organizationDto);
+        return ResponseEntity.ok(Map.of("message", "Информация о заведении обновлена"));
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

@@ -11,10 +11,14 @@ import com.bloodlink.entities.enums.RhFactor;
 import com.bloodlink.entities.enums.Role;
 import com.bloodlink.entities.id.BloodReserveId;
 import com.bloodlink.entities.specifications.OrganizationSpecs;
-import com.bloodlink.exceptions.CustomDuplicateException;
+import com.bloodlink.exceptions.BusinessException;
+import com.bloodlink.exceptions.ConflictException;
+import com.bloodlink.exceptions.ResourceNotFoundException;
+import com.bloodlink.exceptions.ValidationException;
 import com.bloodlink.repositories.BloodReserveRepository;
 import com.bloodlink.repositories.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,13 +28,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
@@ -43,7 +46,7 @@ public class OrganizationService {
             typeEnum = switch (role) {
                 case ADMIN -> null;
                 case MEDICAL_EMPLOYEE -> OrganizationType.MEDICAL_INSTITUTION;
-                case BANK_EMPLOYEE ->OrganizationType.BLOOD_BANK;
+                case BANK_EMPLOYEE -> OrganizationType.BLOOD_BANK;
             };
         }
 
@@ -56,24 +59,26 @@ public class OrganizationService {
         Specification<Organization> filters = Specification.where(textFilters)
                 .and(OrganizationSpecs.hasType(typeEnum));
 
-
         var p = organizationRepository.findAll(filters, page);
         return p.map(OrganizationDTOto::convert);
     }
 
     @Transactional
-    public String save(OrganizationDTOfrom organizationDTOfrom) {
+    public Organization save(OrganizationDTOfrom organizationDTOfrom) {
+        log.info("Creating organization: {}", organizationDTOfrom.getName());
+        
+        if (organizationDTOfrom.getType() != OrganizationType.BLOOD_BANK &&
+            organizationDTOfrom.getType() != OrganizationType.MEDICAL_INSTITUTION) {
+            throw new ValidationException("Некорректный тип организации");
+        }
+        
         try {
-            if (organizationDTOfrom.getType() == OrganizationType.BLOOD_BANK ||
-                organizationDTOfrom.getType() == OrganizationType.MEDICAL_INSTITUTION) {
-                var org = organizationRepository.save(organizationDTOfrom.convert());
-                createBloodReservesForBank(org);
-                return "Организация успешно добавлена";
-            } else {
-                return "Некорректный тип организации";
-            }
+            Organization org = organizationRepository.save(organizationDTOfrom.convert());
+            createBloodReservesForBank(org);
+            log.info("Organization created id={}", org.getId());
+            return org;
         } catch (DataIntegrityViolationException e) {
-            throw new CustomDuplicateException("Заведение с таким именем уже существует");
+            throw new ConflictException("Заведение с таким именем уже существует");
         }
     }
 
@@ -94,26 +99,25 @@ public class OrganizationService {
     }
 
     @Transactional
-    public String update(OrganizationDTOfrom organizationDTOfrom) {
+    public Organization update(OrganizationDTOfrom organizationDTOfrom) {
         if (organizationDTOfrom.getId() == null) {
-            throw new IllegalArgumentException("Для обновления организации не предоставлен id");
+            throw new ValidationException("Для обновления организации не предоставлен id");
         }
-        Optional<Organization> orgOpt = organizationRepository.findById(organizationDTOfrom.getId());
-        if (orgOpt.isEmpty()) {
-            throw new IllegalArgumentException("Организация с таким id не существует");
-        }
-        save(organizationDTOfrom);
-        return "Информация о заведении обновлена";
+        
+        Organization existing = organizationRepository.findById(organizationDTOfrom.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Организация не найдена: " + organizationDTOfrom.getId()));
+        
+        log.info("Updating organization id={}", organizationDTOfrom.getId());
+        return save(organizationDTOfrom);
     }
 
     @Transactional
-    public String delete(Long id) {
-        Optional<Organization> orgOpt = organizationRepository.findById(id);
-        if (orgOpt.isEmpty()) {
-            throw new IllegalArgumentException("Организация с таким id уже существует");
-        }
-        organizationRepository.delete(orgOpt.get());
-        return "Организация успешно удалена";
+    public void delete(Long id) {
+        Organization org = organizationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Организация не найдена: " + id));
+        
+        log.info("Deleting organization id={}", id);
+        organizationRepository.delete(org);
     }
 
     public Organization get(Long id) {

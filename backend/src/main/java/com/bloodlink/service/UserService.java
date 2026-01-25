@@ -4,7 +4,7 @@ import com.bloodlink.entities.DTOs.UserDTOto;
 import com.bloodlink.entities.User;
 import com.bloodlink.entities.specifications.UserSpecs;
 import com.bloodlink.exceptions.AccessDeniedException;
-import com.bloodlink.exceptions.CallerIsNotAUserException;
+import com.bloodlink.exceptions.AuthenticationRequiredException;
 import com.bloodlink.exceptions.ResourceNotFoundException;
 import com.bloodlink.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,9 +41,9 @@ public class UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             return userRepository.findByEmailAndIsDeletedFalse(userDetails.getUsername())
-                    .orElseThrow(() -> new CallerIsNotAUserException("Не могу распознать текущего пользователя"));
+                    .orElseThrow(() -> new AuthenticationRequiredException("Не могу распознать текущего пользователя"));
         }
-        throw new CallerIsNotAUserException("Пользователь не аутентифицирован");
+        throw new AuthenticationRequiredException("Пользователь не аутентифицирован");
     }
 
     public Optional<User> getCurrentUserOptional() {
