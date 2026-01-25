@@ -1,5 +1,5 @@
 # Build stage
-FROM gradle:8.11-jdk23-alpine AS builder
+FROM gradle:8.10-jdk21-alpine AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY src src
 RUN gradle bootJar --no-daemon -x test
 
 # Runtime stage
-FROM eclipse-temurin:23-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 

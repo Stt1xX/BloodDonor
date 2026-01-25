@@ -2,6 +2,7 @@ package com.bloodlink.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -21,11 +22,24 @@ import static org.springframework.web.servlet.function.RouterFunctions.route;
 @EnableRetry
 public class WebConfig implements WebMvcConfigurer {
 
+    /**
+     * SPA router for local development only.
+     * In Docker, nginx serves static files directly.
+     */
     @Bean
+    @Profile("!docker")
     RouterFunction<ServerResponse> spaRouter() {
         ClassPathResource index = new ClassPathResource("static/index.html");
-        List<String> extensions = Arrays.asList("js", "css", "ico", "png", "jpg", "gif", "svg");
-        RequestPredicate spaPredicate = path("/api/**").or(path("/error")).or(pathExtension(extensions::contains))
+        List<String> extensions = Arrays.asList("js", "css", "ico", "png", "jpg", "gif", "svg", "html");
+        RequestPredicate spaPredicate = path("/api/**")
+                .or(path("/error"))
+                .or(path("/swagger-ui/**"))
+                .or(path("/swagger-ui.html"))
+                .or(path("/v3/**"))
+                .or(path("/api-docs"))
+                .or(path("/api-docs/**"))
+                .or(path("/actuator/**"))
+                .or(pathExtension(extensions::contains))
                 .negate();
         return route().resource(spaPredicate, index).build();
     }

@@ -39,11 +39,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/api/**")
+                .securityMatcher("/api/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**")
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/auth/login", "/api/register/**", "/api/organizations/**")
+                        .ignoringRequestMatchers("/api/auth/login", "/api/logout", "/api/register/**", "/api/organizations/**")
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**").permitAll()
                         .requestMatchers("/api/register/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/organizations/**").permitAll()
                         .anyRequest().authenticated()
