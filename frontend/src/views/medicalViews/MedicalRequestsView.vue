@@ -131,7 +131,6 @@ import {HeaderGroups} from "@/js/utils.js";
 import Header from "@/components/shared/Header.vue";
 import {showAlert} from "@/js/custom-alert.js";
 import axios from "axios";
-import {get_token} from "@/js/csrf-token.js";
 import Footer from "@/components/shared/Footer.vue";
 import CreateBloodReqWindow from "@/components/CreateBloodReqWindow.vue";
 import RequestDetailsModal from "@/components/RequestDetailsModal.vue";
@@ -216,7 +215,6 @@ let polling
 onMounted(() => {
   updateManagedEntities()
   polling = setInterval(updateManagedEntities, 7000);
-  get_token()
 })
 
 onBeforeUnmount(() => {

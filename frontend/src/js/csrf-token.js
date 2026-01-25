@@ -1,15 +1,21 @@
-import {ref} from "vue";
-import axios from "axios";
+/**
+ * Получает CSRF токен из meta-тега страницы
+ * @returns {string|null} CSRF токен или null
+ */
+export function getCsrfToken() {
+  const metaTag = document.querySelector('meta[name="csrf-token"]')
+  return metaTag ? metaTag.content : null
+}
 
-
-export const token = ref();
-
-export const get_token = async () => {
-    const response = await axios.get('/api/csrf');
-    token.value = response.data.csrfToken;
-
-    axios.interceptors.request.use((config) => {
-        config.headers['X-CSRF-Token'] = token.value;
-        return config;
-    });
+/**
+ * Добавляет CSRF токен в заголовки запроса
+ * @param {Object} headers - Объект заголовков
+ * @returns {Object} Заголовки с CSRF токеном
+ */
+export function addCsrfHeader(headers = {}) {
+  const token = getCsrfToken()
+  if (token) {
+    headers['X-CSRF-TOKEN'] = token
+  }
+  return headers
 }

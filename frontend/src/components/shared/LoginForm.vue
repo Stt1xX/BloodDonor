@@ -72,7 +72,6 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
-import {get_token} from "@/js/csrf-token.js"
 import router from "@/routes/routes.js"
 import {showAlert} from "@/js/custom-alert.js";
 
@@ -108,7 +107,6 @@ const handleLogin = async () => {
         }
       });
       if (response.status === 200) {
-        await get_token();
         redirect_user(response.data.role)
         showAlert(response.data.responseText)
       } else {

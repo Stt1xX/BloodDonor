@@ -79,7 +79,6 @@ import {abstractFetching, convertUserRole, formatTimestamp, HeaderGroups} from "
 import debounce from "lodash.debounce";
 import axios from "axios";
 import {showAlert} from "@/js/custom-alert.js";
-import {get_token} from "@/js/csrf-token.js";
 
 
 const searchQuery = ref('')
@@ -106,7 +105,6 @@ let polling;
 onMounted(() => {
   updateManagedEntities()
   polling = setInterval(updateManagedEntities, 7000);
-  get_token()
 })
 
 onBeforeUnmount(() => {

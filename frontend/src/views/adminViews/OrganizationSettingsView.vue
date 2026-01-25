@@ -93,7 +93,6 @@ import {
 import axios from "axios";
 import {showAlert} from "@/js/custom-alert.js";
 import debounce from "lodash.debounce";
-import {get_token} from "@/js/csrf-token.js";
 
 const showForm = ref(false)
 const formTitle = ref('Создание организации')
@@ -158,7 +157,6 @@ let polling
 onMounted(() => {
   updateManagedEntities()
   polling = setInterval(updateManagedEntities, 7000);
-  get_token()
 })
 
 onBeforeUnmount(() => {
