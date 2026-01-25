@@ -1,53 +1,194 @@
-# BloodLink 
-Система автоматизации взаимодействия между банками крови и медицинскими учреждениями
+# BloodLink - Система управления донорством крови
 
-## Навигация по проекту
-* [Задание](Task.md)
-* [Документация](documentation)
-    * [Source requirements](documentation/Srs.docx)
-    * [Database organization](documentation/databaseDocs)
-* [Backend](backend)
-* [Frontend](frontend)
+## Описание
 
-## Краткое описание
+BloodLink — веб-приложение для управления запросами и резервами донорской крови между медицинскими учреждениями и банками крови.
 
-Это мой второй более менее крупный проект. Для подробного ознакомления с проектом предлагается прочитать [Source requirements](documentation/Srs.docx).
-Система включет в себя три вида пользователей: *Администраторы*, *Работники медецинских учрежедений*, *Сотрудники банков крови*. Пройдемся по каждому из видов и ознакомся с их основными возможностями.
+### Основные возможности
 
-* **Регистрация и Авторизация**
-    
-    Здесь особо расссказывать нечего. Вот [так](images/authorizationPage.png) выглядит страница с авторизацией. А вот [так](/images/registrationPage.png) страница регистрации. 
-Процесс регистрации выглядит следующим образом: Сперва есть возможность полностью зарегистрироваться только у админа. 
-После того как в систетме появляется администратор, все остальные пользователи нажимая кнопку зарегистрироваться 
-отправляют запрос к администратору(-ам), который уже зарегистрирован в системе. Администратор может принять или отклонить 
-запрос.
+- **Медицинские учреждения**: создание запросов на кровь, отслеживание статуса
+- **Банки крови**: управление запасами, обработка запросов
+- **Администраторы**: управление организациями, пользователями и заявками на регистрацию
 
+## Архитектура
 
-* **Администратор**
+### Технологии
 
-    У администратора есть три интерфейста:
-    * [Интерфейс с заявками на регистрацию.](images/registrationRequestsPage.png) Администратор может принимать и отклонять их.
-    * [Интерфейс с организациями](images/allOrganizationPage.png), зарегистрированными в системе. Здесь админ может удалить организацию, создать новую или 
-[отредактировать](images/editOrganizationWindow.png) уже существующую.
-    * [Интерфейс с уже зарегестрированными пользователями](images/allUsersPage.png). Здесь админ может удалять пользователей.
+**Backend:**
+- Java 21
+- Spring Boot 3.3.5
+- Spring Security (session-based authentication)
+- Spring Data JPA
+- PostgreSQL 16
+- Flyway (миграции БД)
+- MapStruct (маппинг DTO)
 
-    На всех трех страницах есть возможность динамического поиска. 
+**Frontend:**
+- Vue.js 3
+- Vite
+- Tailwind CSS
+- Axios
 
+**Инфраструктура:**
+- Docker & Docker Compose
+- Nginx (reverse proxy)
 
-* **Работник медицинского учреждения**
-    
-    * Работники медицинских учреждений имеют всего 1 интерфейс, который позволяет им [создавать](images/createBloodRequestWindow1.png) и [просматривать](images/allBloodRequestPage.png) заявки на 
-новую кровь. Заявку можно подать [сразу нескольким банкам](images/createBloodRequestWindow2.png).
-    * Также врачи могут [просматривать подробную информацию о каждой заявке](images/additionalInformationBloodRequest.png) 
-и сортировать заявки по их статусу (В ожидании, Отклонено, Принято).
+### Структура проекта
 
+```
+BloodDonor/
+├── backend/
+│   ├── src/main/java/com/bloodlink/
+│   │   ├── controllers/    # REST контроллеры
+│   │   ├── service/        # Бизнес-логика
+│   │   ├── repositories/   # Доступ к данным (JPA)
+│   │   ├── entities/       # JPA сущности
+│   │   ├── dto/
+│   │   │   ├── request/    # Входящие DTO
+│   │   │   ├── response/   # Исходящие DTO
+│   │   │   └── mapper/     # MapStruct маперы
+│   │   ├── configs/        # Конфигурация Spring
+│   │   ├── security/       # Конфигурация безопасности
+│   │   ├── exceptions/     # Кастомные исключения
+│   │   └── validators/     # Валидаторы
+│   └── src/main/resources/
+│       ├── db/migration/   # Flyway миграции
+│       └── application.properties
+├── frontend/
+│   ├── src/
+│   │   ├── api/            # Централизованные API клиенты
+│   │   ├── components/     # Vue компоненты
+│   │   ├── views/          # Страницы (views)
+│   │   ├── routes/         # Vue Router (lazy loading)
+│   │   ├── js/             # Утилиты
+│   │   └── assets/         # Стили (Tailwind)
+│   └── vite.config.js
+├── documentation/          # Документация проекта
+└── docker-compose.yml
+```
 
-* **Сотрудник банка крови**
-    
-    У сотрудников банков крови есть 2 интерфейса:
-  *  [Интерфейс с партиями крови](images/BloodUnitsPage.png). Страница содержит все партии крови, которые есть в банке сотрудника. Есть удобные селекторы
-для быстрого поиска нужной партии, а также [возможность добавить новую партию крови](images/createNewBloodUnitWindow.png).
-Также сотрудники могут редактировать и удалять партии крови. В верхней строке над запасами, представлено общее количество крови, выбранной группы и фактора.
+## Запуск
+
+### Docker (рекомендуется)
+
+1. Создать файл `.env`:
+```env
+DB_USERNAME=admin
+DB_PASSWORD=your_secure_password
+DB_NAME=BloodLink
+```
+
+2. Запустить:
+```bash
+docker compose up --build
+```
+
+3. Открыть http://localhost
+
+### Локальная разработка
+
+**Требования:**
+- Java 21
+- Node.js 18+
+- PostgreSQL 16
+
+**Backend:**
+```bash
+cd backend
+./gradlew bootRun --args='--spring.profiles.active=dev'
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## API Документация
+
+### Swagger UI
+
+После запуска доступен по адресу: http://localhost:8080/swagger-ui.html
+
+### Основные endpoints
+
+| Метод | URL | Описание | Роль |
+|-------|-----|----------|------|
+| POST | /api/auth/login | Авторизация | - |
+| POST | /api/logout | Выход | * |
+| GET | /api/users/me | Текущий пользователь | * |
+| GET | /api/blood-requests/bank | Запросы для банка | BANK_EMPLOYEE |
+| GET | /api/blood-requests/medical | Запросы медучреждения | MEDICAL_EMPLOYEE |
+| POST | /api/blood-requests | Создать запрос | MEDICAL_EMPLOYEE |
+| PATCH | /api/blood-requests/{id}/accept | Принять запрос | BANK_EMPLOYEE |
+| GET | /api/blood-units | Партии крови | BANK_EMPLOYEE |
+| POST | /api/blood-units | Добавить партию | BANK_EMPLOYEE |
+| GET | /api/organizations | Список организаций | * |
+| GET | /api/users | Список пользователей | ADMIN |
+| GET | /api/registration-requests | Заявки на регистрацию | ADMIN |
+
+## Роли пользователей
+
+| Роль | Описание |
+|------|----------|
+| `ADMIN` | Администратор организации — управление пользователями, организациями, заявками на регистрацию |
+| `BANK_EMPLOYEE` | Сотрудник банка крови — управление запасами крови, обработка запросов |
+| `MEDICAL_EMPLOYEE` | Сотрудник медучреждения — создание запросов на кровь |
+
+## База данных
+
+### ER-диаграмма
+
+См. `documentation/databaseDocs/diagrams/`
+
+### Основные таблицы
+
+| Таблица | Описание |
+|---------|----------|
+| `users` | Пользователи системы |
+| `organizations` | Организации (банки крови, медучреждения) |
+| `blood_units` | Партии крови в банках |
+| `blood_requests` | Запросы на кровь |
+| `blood_reserves` | Связь запросов с банками крови |
+| `notifications` | Уведомления пользователей |
+| `registration_requests` | Заявки на регистрацию |
+
+## Тестовые данные
+
+После запуска доступны тестовые пользователи:
+
+| Email | Пароль | Роль | Организация |
+|-------|--------|------|-------------|
+| admin@hospital.com | admin | ADMIN | Городская больница №1 |
+| medic@hospital.com | medic | MEDICAL_EMPLOYEE | Городская больница №1 |
+| banker@bloodbank.com | banker | BANK_EMPLOYEE | Центральный банк крови |
+
+## Разработка
+
+### Структура коммитов
+
+Используется [Conventional Commits](https://www.conventionalcommits.org/):
+- `feat:` — новая функциональность
+- `fix:` — исправление бага
+- `refactor:` — рефакторинг
+- `docs:` — документация
+
+### Сборка
+
+```bash
+# Backend
+cd backend && ./gradlew build
+
+# Frontend
+cd frontend && npm run build
+```
+
+## Дополнительная документация
+
+- [Техническое задание](Task.md)
+- [Source Requirements Specification](documentation/Srs.docx)
+- [Документация БД](documentation/databaseDocs)
   * [Интерфейс с входящими заявками от банков крови](images/bloodRequestsBankPage.png). Страница содержит все запросы, 
 которые когда-либо поступали в банк сотрудника. Есть удобные селекторы для быстрого поиска нужного запроса. 
 Также есть возможность принять или отклонить заявку, с указанием причины отклонения. Есть возможность просмотра подробной информации о заявке.
