@@ -1,16 +1,14 @@
 package com.bloodlink.service;
 
-import com.bloodlink.entities.DTOs.OrganizationDTOto;
 import com.bloodlink.entities.DTOs.UserDTOto;
-import com.bloodlink.entities.Organization;
 import com.bloodlink.entities.User;
-import com.bloodlink.entities.enums.OrganizationType;
-import com.bloodlink.entities.enums.Role;
-import com.bloodlink.entities.specifications.OrganizationSpecs;
 import com.bloodlink.entities.specifications.UserSpecs;
-import com.bloodlink.exceptions.CustomDuplicateException;
+import com.bloodlink.exceptions.AccessDeniedException;
+import com.bloodlink.exceptions.CallerIsNotAUserException;
+import com.bloodlink.exceptions.ResourceNotFoundException;
 import com.bloodlink.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,21 +23,33 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
 
     public User getByEmail(String email) {
-        return userRepository.findByEmailAndIsDeletedFalse(email).orElse(null);
+        return userRepository.findByEmailAndIsDeletedFalse(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден: " + email));
     }
 
-    public Optional<User> getCurrentUser() {
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmailAndIsDeletedFalse(email);
+    }
+
+    public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            Object var3 = authentication.getPrincipal();
-            if (var3 instanceof UserDetails userDetails) {
-                return this.userRepository.findByEmailAndIsDeletedFalse(userDetails.getUsername());
-            }
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            return userRepository.findByEmailAndIsDeletedFalse(userDetails.getUsername())
+                    .orElseThrow(() -> new CallerIsNotAUserException("Не могу распознать текущего пользователя"));
+        }
+        throw new CallerIsNotAUserException("Пользователь не аутентифицирован");
+    }
+
+    public Optional<User> getCurrentUserOptional() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            return userRepository.findByEmailAndIsDeletedFalse(userDetails.getUsername());
         }
         return Optional.empty();
     }
@@ -56,16 +66,17 @@ public class UserService {
     }
 
     @Transactional
-    public String delete(Long id) throws CustomDuplicateException {
-        if (getCurrentUser().isPresent() && getCurrentUser().get().getId().equals(id)) {
-            return "Вы не можете удалить сами себя!";
+    public void delete(Long id) {
+        User currentUser = getCurrentUser();
+        if (currentUser.getId().equals(id)) {
+            throw new AccessDeniedException("Вы не можете удалить сами себя!");
         }
-        Optional<User> user = userRepository.findById(id);
-        if (user.isEmpty()) {
-            throw new IllegalArgumentException("Пользователь с таким id уже существует");
-        }
-        user.get().setIsDeleted(true);
-        userRepository.save(user.get());
-        return "Пользователь успешно удален!";
+        
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден: " + id));
+        
+        log.info("Deleting user id={}, email={}", id, user.getEmail());
+        user.setIsDeleted(true);
+        userRepository.save(user);
     }
 }

@@ -58,6 +58,18 @@ public class GlobalExceptionHandler {
         return e.getMessage();
     }
 
+    @ExceptionHandler(BusinessException.class)
+    @ResponseStatus(code = HttpStatus.UNPROCESSABLE_ENTITY)
+    public @ResponseBody String handleBusinessException(BusinessException e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(code = HttpStatus.FORBIDDEN)
+    public @ResponseBody String handleAccessDeniedException(AccessDeniedException e) {
+        return e.getMessage();
+    }
+
     @ExceptionHandler(InternalAuthenticationServiceException.class)
     @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
     public @ResponseBody String handleInternalAuthenticationServiceException(InternalAuthenticationServiceException e) {

@@ -9,9 +9,13 @@ import com.bloodlink.entities.enums.BloodGroup;
 import com.bloodlink.entities.enums.RhFactor;
 import com.bloodlink.entities.specifications.BloodReserveSpecs;
 import com.bloodlink.entities.specifications.BloodUnitsSpecs;
+import com.bloodlink.exceptions.AccessDeniedException;
+import com.bloodlink.exceptions.BusinessException;
+import com.bloodlink.exceptions.ResourceNotFoundException;
 import com.bloodlink.repositories.BloodReserveRepository;
 import com.bloodlink.repositories.BloodUnitRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,10 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class BloodUnitsService {
 
     private final UserService userService;
@@ -37,103 +41,115 @@ public class BloodUnitsService {
     private final BloodReserveRepository bloodReserveRepository;
 
     public Page<BloodUnitDTOto> getOrganizationBloodUnits(BloodGroup group, RhFactor rhesus, Boolean reverse, Pageable page) {
-
+        User user = userService.getCurrentUser();
+        
         Specification<BloodUnit> filters = Specification.where(
                         group == null ? null : BloodUnitsSpecs.hasBloodType(group))
-                .and(rhesus == null ? null : BloodUnitsSpecs.hasRhFactor(rhesus));
+                .and(rhesus == null ? null : BloodUnitsSpecs.hasRhFactor(rhesus))
+                .and(BloodUnitsSpecs.hasOrganization(user.getOrganization()));
 
-        Optional<User> opt = userService.getCurrentUser();
-        User user;
-        if (opt.isPresent()) {
-            user = opt.get();
-            filters = filters.and(BloodUnitsSpecs.hasOrganization(user.getOrganization()));
-            Sort sort = reverse != null && reverse ? page.getSort().descending() : page.getSort();
-            var units = bloodUnitRepository.findAll(filters,
-                    PageRequest.of(page.getPageNumber(), page.getPageSize(), sort));
-            return units.map(BloodUnitDTOto::convert);
-        } else {
-            return Page.empty();
-        }
+        Sort sort = reverse != null && reverse ? page.getSort().descending() : page.getSort();
+        var units = bloodUnitRepository.findAll(filters,
+                PageRequest.of(page.getPageNumber(), page.getPageSize(), sort));
+        return units.map(BloodUnitDTOto::convert);
     }
 
     public Double getSummaryVolume(BloodGroup group, RhFactor rhesus) {
+        User user = userService.getCurrentUser();
+        
         Specification<BloodReserve> filters = Specification.where(
                         group == null ? null : BloodReserveSpecs.hasBloodType(group))
-                .and(rhesus == null ? null : BloodReserveSpecs.hasRhFactor(rhesus));
-
-        Optional<User> opt = userService.getCurrentUser();
-        User user;
-        if (opt.isPresent()) {
-            user = opt.get();
-            filters = filters.and(BloodReserveSpecs.hasBank(user.getOrganization()));
-            return bloodReserveRepository.findAll(filters)
-                    .stream().map(BloodReserve::getTotalQuantity).reduce(0.0, Double::sum);
-        }
-        return 0.0;
+                .and(rhesus == null ? null : BloodReserveSpecs.hasRhFactor(rhesus))
+                .and(BloodReserveSpecs.hasBank(user.getOrganization()));
+        
+        return bloodReserveRepository.findAll(filters)
+                .stream()
+                .map(BloodReserve::getTotalQuantity)
+                .reduce(0.0, Double::sum);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = IllegalArgumentException.class)
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = Exception.class)
     @Retryable(include = {SQLException.class})
     public void fillBloodRequest(BloodGroup group, RhFactor rhesus, Double volume) {
-        var org = userService.getCurrentUser().get().getOrganization();
-        var filters =
-                BloodUnitsSpecs.hasBloodType(group).and(BloodUnitsSpecs.hasRhFactor(rhesus))
-                        .and(BloodUnitsSpecs.hasOrganization(org))
-                        .and(BloodUnitsSpecs.isFresherThan(LocalDateTime.now()));
+        User user = userService.getCurrentUser();
+        log.info("Filling blood request: group={}, rh={}, volume={}, bank={}", 
+                group, rhesus, volume, user.getOrganization().getName());
+        
+        var filters = BloodUnitsSpecs.hasBloodType(group)
+                .and(BloodUnitsSpecs.hasRhFactor(rhesus))
+                .and(BloodUnitsSpecs.hasOrganization(user.getOrganization()))
+                .and(BloodUnitsSpecs.isFresherThan(LocalDateTime.now()));
+        
         var units = bloodUnitRepository.findAll(filters, Sort.by("expirationDate").and(Sort.by("volume")));
+        
         for (var unit : units) {
             if (unit.getVolume() > volume) {
                 unit.setVolume(unit.getVolume() - volume);
                 bloodUnitRepository.save(unit);
+                log.info("Blood request filled successfully");
                 return;
             }
             volume -= unit.getVolume();
             bloodUnitRepository.delete(unit);
         }
-        if (volume > 0) throw new IllegalArgumentException("Не хватает крови для выполнения запроса");
-    }
-
-    @Transactional
-    public String save(BloodUnitDTOfrom dto) {
-        BloodUnit unit = dto.convert();
-        return userService.getCurrentUser().map(user -> {
-            unit.setBloodBank(user.getOrganization());
-            bloodUnitRepository.save(unit);
-            return "Партия крови успешно добавлена!";
-        }).orElse("Не могу распознать вас");
-    }
-
-    @Transactional
-    public String delete(Long id) {
-        return userService.getCurrentUser().map(user -> {
-            return bloodUnitRepository.findById(id).map(
-                    bloodUnit -> {
-                        if (Objects.equals(user.getOrganization().getId(), bloodUnit.getBloodBank().getId())) {
-                            bloodUnitRepository.delete(bloodUnit);
-                            return "Партия крови успешно удалена!";
-                        } else {
-                            return "Похоже эта партия принадлежит другому банку";
-                        }
-                    }
-            ).orElse("Не могу найти данную партию крови");
-        }).orElse("Не могу распознать вас");
-    }
-
-
-    @Transactional
-    public String update(BloodUnitDTOfrom dto) {
-        BloodUnit unit = dto.convert();
-        if (unit.getId() == null) {
-            throw new IllegalArgumentException("Для обновления организации не предоставлен id");
+        
+        if (volume > 0) {
+            throw new BusinessException("Не хватает крови для выполнения запроса");
         }
-        return bloodUnitRepository.findById(unit.getId()).map(un -> {
-            return userService.getCurrentUser().map(user -> {
-                unit.setBloodBank(user.getOrganization());
-                bloodUnitRepository.save(unit);
-                return "Партия крови успешно изменена!";
-            }).orElse("Не могу распознать вас");
-        }).orElse("Не могу найти данную партию крови");
     }
 
+    @Transactional
+    public BloodUnit save(BloodUnitDTOfrom dto) {
+        User user = userService.getCurrentUser();
+        log.info("Creating blood unit: group={}, rh={}, volume={}", 
+                dto.getBloodGroup(), dto.getRhesusFactor(), dto.getVolume());
+        
+        BloodUnit unit = dto.convert();
+        unit.setBloodBank(user.getOrganization());
+        return bloodUnitRepository.save(unit);
+    }
 
+    @Transactional
+    public void delete(Long id) {
+        User user = userService.getCurrentUser();
+        
+        BloodUnit bloodUnit = bloodUnitRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Партия крови не найдена: " + id));
+        
+        if (!Objects.equals(user.getOrganization().getId(), bloodUnit.getBloodBank().getId())) {
+            throw new AccessDeniedException("Эта партия принадлежит другому банку");
+        }
+        
+        log.info("Deleting blood unit id={}", id);
+        bloodUnitRepository.delete(bloodUnit);
+    }
+
+    @Transactional
+    public BloodUnit update(BloodUnitDTOfrom dto) {
+        if (dto.getId() == null) {
+            throw new BusinessException("Для обновления партии крови не предоставлен id");
+        }
+        
+        User user = userService.getCurrentUser();
+        
+        BloodUnit existingUnit = bloodUnitRepository.findById(dto.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Партия крови не найдена: " + dto.getId()));
+        
+        if (!Objects.equals(user.getOrganization().getId(), existingUnit.getBloodBank().getId())) {
+            throw new AccessDeniedException("Эта партия принадлежит другому банку");
+        }
+        
+        log.info("Updating blood unit id={}", dto.getId());
+        BloodUnit unit = dto.convert();
+        unit.setBloodBank(user.getOrganization());
+        return bloodUnitRepository.save(unit);
+    }
+
+    @Transactional
+    public int deleteExpiredUnits() {
+        log.info("Deleting expired blood units");
+        int deleted = bloodUnitRepository.deleteExpiredUnits();
+        log.info("Deleted {} expired blood units", deleted);
+        return deleted;
+    }
 }

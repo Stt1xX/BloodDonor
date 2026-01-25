@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,7 +14,6 @@ public interface BloodUnitRepository extends JpaRepository<BloodUnit, Long>, Jpa
     List<BloodUnit> findExpiredUnits();
 
     @Modifying
-    @Transactional
     @Query("DELETE FROM BloodUnit b WHERE b.expirationDate < CURRENT_DATE")
     int deleteExpiredUnits();
 }
