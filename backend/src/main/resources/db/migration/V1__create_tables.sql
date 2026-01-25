@@ -3,7 +3,7 @@
 
 -- Organizations table (blood banks and medical institutions)
 CREATE TABLE IF NOT EXISTS organizations (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     address VARCHAR(255),
     phone VARCHAR(255),
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS organizations (
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Blood requests table
 CREATE TABLE IF NOT EXISTS blood_requests (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     blood_group VARCHAR(10) CHECK (blood_group IN ('A', 'B', 'AB', 'O')),
     rh_factor VARCHAR(20) CHECK (rh_factor IN ('POSITIVE', 'NEGATIVE')),
     volume_needed DOUBLE PRECISION,
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS blood_requests (
 
 -- Blood units table
 CREATE TABLE IF NOT EXISTS blood_units (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     blood_group VARCHAR(10),
     rh_factor VARCHAR(20),
     volume DOUBLE PRECISION,
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS blood_reserves (
 
 -- Requests to bank (junction table for blood request distribution)
 CREATE TABLE IF NOT EXISTS requests_to_bank (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     request_id BIGINT REFERENCES blood_requests(id) ON DELETE CASCADE,
     blood_bank_id BIGINT REFERENCES organizations(id) ON DELETE CASCADE,
     banker_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS requests_to_bank (
 
 -- Registration requests table
 CREATE TABLE IF NOT EXISTS registration_requests (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS registration_requests (
 
 -- Notifications table
 CREATE TABLE IF NOT EXISTS notifications (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
     notification TEXT NOT NULL,
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
